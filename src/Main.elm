@@ -4,15 +4,22 @@ import Browser
 import Browser.Navigation as Nav
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (..)
-import Http
-import Json.Decode as Decode
-import Json.Decode.Field as Field
-import Json.Encode as Encode
+-- import Html.Events exposing (..)
+-- import Http
+-- import Json.Decode as Decode
+-- import Json.Decode.Field as Field
+-- import Json.Encode as Encode
 import Url
-import Url.Parser as UrlP
 
-main : Program () Model RootMsg
+import Api exposing (..)
+import CommonHtml exposing (..)
+import Session exposing (..)
+-- import User exposing (..)
+import Page.Login as Login
+import Route exposing (Route)
+
+
+main : Program () Model Msg
 main =
   Browser.application
     { init = init
@@ -23,308 +30,197 @@ main =
     , onUrlRequest = LinkClicked
     }
 
-type alias User =
-  { id : String
-  , username : String
-  , email : String
-  , token : String
-  }
+type Model
+  = Home Session
+  | NotFound Session
+  | Login Login.Model
 
-type alias Model =
-  { key : Nav.Key
-  , url : Url.Url
-  , route : Route
-  , user : Maybe User
-  , error : Maybe String
-  }
-
-type Route
-  = Home
-  | NotFound
-  | Login LoginModel
-
-type RootMsg
+type Msg
   = LinkClicked Browser.UrlRequest
   | UrlChanged Url.Url
-  | UserLogin (Result ApiError User)
-  | LoginMsg LoginMsg
+  | GotLoginMsg Login.Msg
+  -- | UserLogin (Result ApiError User)
+  -- | LoginMsg LoginMsg
 
-backendUrl : String
-backendUrl = "https://localhost:5001/api"
-
-init : () -> Url.Url -> Nav.Key -> (Model, Cmd RootMsg)
-init _ url key =
-  ( Model key url Home Nothing Nothing
+init : () -> Url.Url -> Nav.Key -> (Model, Cmd Msg)
+init _ _ key =
+  ( Home (Anonymus key)
   , Cmd.none
   )
 
-routeParser : UrlP.Parser (Route -> c) c
-routeParser =
-  UrlP.oneOf
-    [ UrlP.map Home UrlP.top
-    , UrlP.map (Login (LoginModel "" "")) (UrlP.s "login")
-    ]
+changeRouteTo : Maybe Route -> Model -> (Model, Cmd msg)
+changeRouteTo maybeRoute model =
+  let
+    session = toSession model
+  in
+    case maybeRoute of
+      Nothing ->
+        (NotFound session, Cmd.none)
 
-toRoute : Url.Url -> Route
-toRoute url =
-  Maybe.withDefault NotFound (UrlP.parse routeParser url)
+      Just Route.Home ->
+        (model, Route.replaceUrl (Session.navKey session) Route.Home)
 
-update : RootMsg -> Model -> (Model, Cmd RootMsg)
+      Just Route.Login ->
+        (model, Route.replaceUrl (Session.navKey session) Route.Login)
+
+
+
+toSession : Model -> Session
+toSession model =
+  case model of
+    Home session ->
+      session
+
+    NotFound session ->
+      session
+
+    Login login ->
+      Login.toSession login
+
+update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
-  case (msg, model.route) of
-    (LinkClicked urlRequest, _) ->
+  case (msg, model) of
+    ( LinkClicked urlRequest, _ ) ->
       case urlRequest of
         Browser.Internal url ->
-          ( model, Nav.pushUrl model.key (Url.toString url) )
+          case url.fragment of
+            Nothing ->
+              ( model, Cmd.none)
+
+            Just _ ->
+              ( model, Nav.pushUrl (Session.navKey (toSession model)) (Url.toString url))
 
         Browser.External href ->
           ( model, Nav.load href )
 
-    (UrlChanged url, _) ->
-      ( { model | url = url, route = toRoute url }
-      , Cmd.none
-      )
+    ( UrlChanged url, _ ) ->
+      changeRouteTo (Route.fromUrl url) model
 
-    -- TODO move --
-    (UserLogin result, _) ->
-      case result of
-        Ok user ->
-          ({ model | user = Just user, error = Nothing }, Cmd.none)
+    ( GotLoginMsg subMsg, Login login) ->
+      Login.update subMsg login
+        |> updateWith Login GotLoginMsg
 
-        Err error ->
-          case error of
-            BadUrl url ->
-              ({ model | error = Just ("Url inválida: " ++ url) }, Cmd.none)
+    ( _, _) ->
+      ( model, Cmd.none )
 
-            Timeout ->
-              ({ model | error = Just "Erro de timeout, tente novamente" }, Cmd.none)
-
-            NetworkError ->
-              ({ model | error = Just "Erro de rede, verifique a sua conexão e tente novamente" }, Cmd.none)
-
-            BadStatus _ body ->
-              ({ model | error = Just body }, Cmd.none)
-
-            BadBody body ->
-              ({ model | error = Just ("Falha interna: " ++ body) }, Cmd.none)
-
-    (LoginMsg loginMsg, Login loginModel) ->
-      updateLoginPage loginMsg model loginModel
-
-    (_, _) ->
-      (model, Cmd.none)
-
-updateLoginPage : LoginMsg -> Model -> LoginModel -> (Model, Cmd RootMsg)
-updateLoginPage msg model loginModel =
-  case msg of
-    LoginRequest ->
-      case validateLogin loginModel of
-        Ok _ ->
-          (model, (requestLogin loginModel))
-
-        Err err ->
-          ({ model | error = Just err}, Cmd.none)
-
-    LoginInputEmail val ->
-      ({ model | route = Login { loginModel | email = val}}, Cmd.none)
-
-    LoginInputPassword val ->
-      ({ model | route = Login { loginModel | password = val}}, Cmd.none)
-
--- Login Stuff --
-
-type alias LoginModel =
-  { email : String
-  , password : String
-  }
-
-type LoginMsg
-  = LoginRequest
-  | LoginInputEmail String
-  | LoginInputPassword String
-
-validateLogin : LoginModel -> Result String ()
-validateLogin model =
-  if String.isEmpty model.email then
-    Err "Preencha o Email"
-  else if String.isEmpty model.password then
-    Err "Preencha a Senha"
-  else
-    Ok ()
+updateWith : (subModel -> Model) -> (subMsg -> Msg) -> ( subModel, Cmd subMsg ) -> ( Model, Cmd Msg)
+updateWith toModel toMsg ( subModel, subCmd ) =
+  ( toModel subModel
+  , Cmd.map toMsg subCmd
+  )
 
 
-requestLogin model =
-  Http.post
-    { url = backendUrl ++ "/users/login"
-    , body = Http.jsonBody (loginEncoder model)
-    , expect = expectJson UserLogin loginDecoder
-    }
-
-type ApiError
-  = BadUrl String
-  | Timeout
-  | NetworkError
-  | BadStatus Int String
-  | BadBody String
-
-expectJson : (Result ApiError a -> msg) -> Decode.Decoder a -> Http.Expect msg
-expectJson toMsg decoder =
-  Http.expectStringResponse toMsg <| \response ->
-    case response of
-      Http.BadUrl_ url ->
-        Err (BadUrl url)
-
-      Http.Timeout_ ->
-        Err Timeout
-
-      Http.NetworkError_ ->
-        Err NetworkError
-
-      Http.BadStatus_ metadata body ->
-        Err (BadStatus metadata.statusCode body)
-
-      Http.GoodStatus_ _ body ->
-        case Decode.decodeString decoder body of
-          Ok value ->
-            Ok value
-
-          Err err ->
-            Err (BadBody (Decode.errorToString err))
-
-loginEncoder : LoginModel -> Encode.Value
-loginEncoder model =
-  Encode.object
-    [ ("email", Encode.string model.email)
-    , ("password", Encode.string model.password)
-    ]
+-- -- view --
 
 
-
-loginDecoder =
-  Field.requireAt ["user", "id"] Decode.string <| \id ->
-  Field.requireAt ["user", "username"] Decode.string <| \username ->
-  Field.requireAt ["user", "email"] Decode.string <| \email ->
-  Field.require "token" Decode.string <| \token ->
-
-  Decode.succeed
-    { id = id
-    , username = username
-    , email = email
-    , token = token
-    }
-
-
-
--- Sign In Stuff --
-
--- type alias SignInModel =
---   { email : String
---   , username : String
---   , password : String
---   , passwordAgain : String
---   }
-
--- validateSignIn : SignInModel -> Result String ()
--- validateSignIn model =
---   if String.isEmpty model.email then
---     Err "Preencha o Email"
---   else if String.isEmpty model.username then
---     Err "Preencha o Nome de Usuário"
---   else if String.isEmpty model.password then
---     Err "Preencha a Senha"
---   else if String.isEmpty model.passwordAgain then
---     Err "Repita a Senha"
---   else if model.password /= model.passwordAgain then
---     Err "Repita a Senha"
---   else
---     Ok ()
-
--- view --
-
-view : Model -> Browser.Document RootMsg
+view : Model -> Browser.Document Msg
 view model =
+  case model of
+    Home session ->
+      viewHome session
+
+    NotFound session ->
+      viewNotFound session
+
+    Login subModel ->
+      let
+        page = Login.view subModel
+      in
+      { title = page.title
+      , body = List.map (Html.map GotLoginMsg) page.body
+      }
+
+
+viewHome : Session -> Browser.Document Msg
+viewHome session =
   { title = "Riichi Gang"
   , body =
-    [ viewNav model
-
-    , case model.error of
-      Just error ->
-        viewError error
-      Nothing ->
-        text ""
-
-    , case model.route of
-      Home ->
-        viewWelcomeCard
-      NotFound ->
-        p [] [ text "Not Found"]
-      Login _ ->
-        Html.map LoginMsg viewLoginCard
-
+    [ viewNav session
+    , viewWelcomeCard
     ]
   }
 
-viewNav : Model -> Html RootMsg
-viewNav model =
-  nav [ class "bg-indigo-700 flex flex-wrap items-center p-3" ]
-    [ div [ class "flex items-center flex-shrink-0 mr-2" ]
-      [ img [ src "img/Nan2.svg", class "h-12 w-12" ] []
-      , span [ class "text-white text-xl font-bold" ] [ text "Riichi Gang" ]
-      ]
-
-    , div [ class "flex-grow inline-flex justify-end mr-4"]
-      [ a [ href "/clubes", class "link-white" ] [ text "Clubes" ]
-      , a [ href "/torneios", class "link-white" ] [ text "Torneios" ]
-      ]
-
-    , case model.user of
-        Just _ ->
-          div [ class "inline-flex" ]
-            [ a [ href "/perfil", class "btn btn-indigo-800" ] [ text "Perfil" ]
-            ]
-
-        Nothing ->
-          div [ class "inline-flex" ]
-            [ a [ href "/login", class "btn btn-indigo-800" ] [ text "Login" ]
-            , a [ href "/sign-up", class "btn btn-indigo-800" ] [ text "Sign Up" ]
-            ]
+viewNotFound : Session -> Browser.Document Msg
+viewNotFound session =
+  { title = "Não Encontrado"
+  , body =
+    [ viewNav session
+    , p [] [ text "Not Found"]
     ]
+  }
 
-viewError : String -> Html RootMsg
-viewError msg =
-  div [ class "container rounded-lg bg-red-100 border-2 border-red-400 text-red-700 px-4 py-3 rounded my-5 max-w-lg text-center" ]
-    [ strong [ class "font-bold" ] [ text "Erro! " ]
-    , span [ class "block sm:inline" ] [ text msg ]
-    ]
 
-viewWelcomeCard : Html RootMsg
+
+  -- { title = "Riichi Gang"
+  -- , body =
+  --   [ viewNav model
+
+  --   , case model.error of
+  --     Just error ->
+  --       viewError error
+  --     Nothing ->
+  --       text ""
+
+  --   , case model.route of
+  --     Home ->
+  --       viewWelcomeCard
+  --     NotFound ->
+  --       p [] [ text "Not Found"]
+  --     Login _ ->
+  --       Html.map LoginMsg viewLoginCard
+
+  --   ]
+  -- }
+
+-- viewNav : Model -> Html RootMsg
+-- viewNav model =
+--   nav [ class "bg-indigo-700 flex flex-wrap items-center p-3" ]
+--     [ div [ class "flex items-center flex-shrink-0 mr-2" ]
+--       [ img [ src "img/Nan2.svg", class "h-12 w-12" ] []
+--       , span [ class "text-white text-xl font-bold" ] [ text "Riichi Gang" ]
+--       ]
+
+--     , div [ class "flex-grow inline-flex justify-end mr-4"]
+--       [ a [ href "/clubes", class "link-white" ] [ text "Clubes" ]
+--       , a [ href "/torneios", class "link-white" ] [ text "Torneios" ]
+--       ]
+
+--     , case model.user of
+--         Just _ ->
+--           div [ class "inline-flex" ]
+--             [ a [ href "/perfil", class "btn btn-indigo-800" ] [ text "Perfil" ]
+--             ]
+
+--         Nothing ->
+--           div [ class "inline-flex" ]
+--             [ a [ href "/login", class "btn btn-indigo-800" ] [ text "Login" ]
+--             , a [ href "/sign-up", class "btn btn-indigo-800" ] [ text "Sign Up" ]
+--             ]
+--     ]
+
+-- viewError : String -> Html RootMsg
+-- viewError msg =
+--   div [ class "container rounded-lg bg-red-100 border-2 border-red-400 text-red-700 px-4 py-3 rounded my-5 max-w-lg text-center" ]
+--     [ strong [ class "font-bold" ] [ text "Erro! " ]
+--     , span [ class "block sm:inline" ] [ text msg ]
+--     ]
+
+viewWelcomeCard : Html Msg
 viewWelcomeCard  =
   div [ class "card card-indigo-900" ]
     [ h1 [ class "card-heading" ] [ text "Bem Vindo à Riichi Gang" ]
     , p [] [ text "Introdução completa as ser elaborada posteriormente" ]
     ]
 
-viewLoginCard : Html LoginMsg
-viewLoginCard =
-  div [ class "login-card" ]
-    [ h1 [ class "card-heading" ] [ text "Login" ]
-    , input [ type_ "email", placeholder "Email", class "login-input", onInput LoginInputEmail ] []
-    , input [ type_ "password", placeholder "Senha", class "login-input", onInput LoginInputPassword ] []
-    , button [ class "btn btn-indigo-500", onClick LoginRequest ] [ text "Login" ]
-    ]
-
--- viewSingInCard : Html msg
--- viewSingInCard =
+-- viewLoginCard : Html LoginMsg
+-- viewLoginCard =
 --   div [ class "login-card" ]
---     [ h1 [ class "card-heading" ] [ text "Sign Up" ]
---     , input [ type_ "email", placeholder "Email", class "login-input" ] []
---     , input [ type_ "email", placeholder "Nome de Usuário", class"login-input" ] []
---     , input [ type_ "password", placeholder "Senha", class "login-input" ] []
---     , input [ type_ "password", placeholder "Confirmação da Senha", class "login-input" ] []
---     , button [ class "btn btn-indigo-500" ] [ text "Login" ]
+--     [ h1 [ class "card-heading" ] [ text "Login" ]
+--     , input [ type_ "email", placeholder "Email", class "login-input", onInput LoginInputEmail ] []
+--     , input [ type_ "password", placeholder "Senha", class "login-input", onInput LoginInputPassword ] []
+--     , button [ class "btn btn-indigo-500", onClick LoginRequest ] [ text "Login" ]
 --     ]
 
-
-subscriptions : Model -> Sub RootMsg
+subscriptions : Model -> Sub Msg
 subscriptions _ =
   Sub.none

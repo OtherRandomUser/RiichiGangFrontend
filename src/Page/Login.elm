@@ -1,5 +1,6 @@
 module Page.Login exposing (..)
 
+import Browser
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
@@ -8,25 +9,19 @@ import Json.Decode as Decode
 import Json.Decode.Field as Field
 import Json.Encode as Encode
 
-
--- TODO move --
-backendUrl : String
-backendUrl = "https://localhost:5001/api"
-
-
--- TODO move --
-type alias User =
-  { id : String
-  , username : String
-  , email : String
-  , token : String
-  }
-
-
-
+import Api exposing (..)
+import CommonHtml exposing (viewNav, errorCard)
+import Session exposing (..)
+import User exposing (..)
 
 -- data modeling --
 type alias Model =
+  { session : Session
+  , form : Form
+  , error : Maybe String
+  }
+
+type alias Form =
   { email : String
   , password : String
   }
@@ -39,157 +34,76 @@ type Msg
 
 
 -- update --
+
 update msg model =
   case msg of
     RequestLogin ->
-      case validateLogin model of
+      case validateLogin model.form of
         Ok _ ->
-          Ok (model, requestlogin)
+          (model, (requestLogin model.form))
 
         Err err ->
-          Err err
+          ({ model | error = Just err}, Cmd.none)
 
-    UserLogin res ->
-      case res of
+    UserLogin result ->
+      case result of
         Ok user ->
-          Ok (user, Cmd.none)
+          case model.session of
+            LoggedIn key _ ->
+              ({ model | session = LoggedIn key user, error = Nothing }, Cmd.none)
 
-        Err err ->
-          case err of
+            Anonymus key ->
+              ({ model | session = LoggedIn key user, error = Nothing }, Cmd.none)
+
+        Err error ->
+          case error of
             BadUrl url ->
-              Err ("Url inválida: " ++ url)
+              ({ model | error = Just ("Url inválida: " ++ url) }, Cmd.none)
 
             Timeout ->
-              Err "Erro de timeout, tente novamente"
+              ({ model | error = Just "Erro de timeout, tente novamente" }, Cmd.none)
 
             NetworkError ->
-              Err "Erro de rede, verifique a sua conexão e tente novamente"
+              ({ model | error = Just "Erro de rede, verifique a sua conexão e tente novamente" }, Cmd.none)
 
             BadStatus _ body ->
-              Err body
+              ({ model | error = Just body }, Cmd.none)
 
             BadBody body ->
-              Err ("Falha interna: " ++ body)
+              ({ model | error = Just ("Falha interna: " ++ body) }, Cmd.none)
 
-    InputEmail String ->
-      Ok ({ model | })
+    InputEmail email ->
+      updateForm (\form -> { form | email = email}) model
 
-    InputPassword String ->
+    InputPassword password ->
+      updateForm (\form -> { form | password = password}) model
 
+updateForm transform model =
+    ( { model | form = transform model.form }, Cmd.none )
 
---     UserLogin result ->
---       case result of
---         Ok user ->
---           ({ model | user = Just user, error = Nothing }, Cmd.none)
-
---         Err error ->
---           case error of
---             BadUrl url ->
---               ({ model | error = Just ("Url inválida: " ++ url) }, Cmd.none)
-
---             Timeout ->
---               ({ model | error = Just "Erro de timeout, tente novamente" }, Cmd.none)
-
---             NetworkError ->
---               ({ model | error = Just "Erro de rede, verifique a sua conexão e tente novamente" }, Cmd.none)
-
---             BadStatus _ body ->
---               ({ model | error = Just body }, Cmd.none)
-
---             BadBody body ->
---               ({ model | error = Just ("Falha interna: " ++ body) }, Cmd.none)
-
---     LoginMsg loginMsg ->
---       updateLoginPage loginMsg model
-
--- updateLoginPage : LoginMsg -> Model -> (Model, Cmd msg)
--- updateLoginPage msg model =
---   case msg of
---     LoginRequest ->
---       (model, Cmd.none)
-
---     LoginInputEmail val ->
-
---       (model, Cmd.none)
-
---     LoginInputPassword val ->
---       (model, Cmd.none)
-
-
-
-
-
-
-
-
-
-validateLogin : Model -> Result String ()
-validateLogin model =
-  if String.isEmpty model.email then
+validateLogin : Form -> Result String ()
+validateLogin form =
+  if String.isEmpty form.email then
     Err "Preencha o Email"
-  else if String.isEmpty model.password then
+  else if String.isEmpty form.password then
     Err "Preencha a Senha"
   else
     Ok ()
 
 
-requestlogin : Model -> Cmd Msg
-requestlogin model =
+requestLogin : Form -> Cmd Msg
+requestLogin form =
   Http.post
     { url = backendUrl ++ "/users/login"
-    , body = Http.jsonBody (loginEncoder model)
+    , body = Http.jsonBody (loginEncoder form)
     , expect = expectJson UserLogin loginDecoder
     }
 
-
-
-
-
--- TODO move --
-type ApiError
-  = BadUrl String
-  | Timeout
-  | NetworkError
-  | BadStatus Int String
-  | BadBody String
-
-
-
-
--- TODO move --
-expectJson : (Result ApiError a -> msg) -> Decode.Decoder a -> Http.Expect msg
-expectJson toMsg decoder =
-  Http.expectStringResponse toMsg <| \response ->
-    case response of
-      Http.BadUrl_ url ->
-        Err (BadUrl url)
-
-      Http.Timeout_ ->
-        Err Timeout
-
-      Http.NetworkError_ ->
-        Err NetworkError
-
-      Http.BadStatus_ metadata body ->
-        Err (BadStatus metadata.statusCode body)
-
-      Http.GoodStatus_ _ body ->
-        case Decode.decodeString decoder body of
-          Ok value ->
-            Ok value
-
-          Err err ->
-            Err (BadBody (Decode.errorToString err))
-
-
-
-
-
-loginEncoder : Model -> Encode.Value
-loginEncoder model =
+loginEncoder : Form -> Encode.Value
+loginEncoder form =
   Encode.object
-    [ ("email", Encode.string model.email)
-    , ("password", Encode.string model.password)
+    [ ("email", Encode.string form.email)
+    , ("password", Encode.string form.password)
     ]
 
 loginDecoder : Decode.Decoder User
@@ -209,6 +123,23 @@ loginDecoder =
 
 -- view --
 
+view : Model -> Browser.Document Msg
+view model =
+  { title = "Riichi Gang"
+  , body =
+    [ viewNav model.session
+
+    , case model.error of
+      Just error ->
+        errorCard error
+      Nothing ->
+        text ""
+
+    , viewLoginCard
+
+    ]
+  }
+
 viewLoginCard : Html Msg
 viewLoginCard =
   div [ class "login-card" ]
@@ -217,3 +148,7 @@ viewLoginCard =
     , input [ type_ "password", placeholder "Senha", class "login-input", onInput InputPassword ] []
     , button [ class "btn btn-indigo-500", onClick RequestLogin ] [ text "Login" ]
     ]
+
+toSession : Model -> Session
+toSession model =
+  model.session
