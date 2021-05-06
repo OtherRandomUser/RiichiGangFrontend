@@ -2,10 +2,10 @@ module Session exposing (..)
 
 import Browser.Navigation as Nav
 
-import User exposing (..)
+import Viewer exposing (..)
 
 type Session
-  = LoggedIn Nav.Key User
+  = LoggedIn Nav.Key Viewer
   | Anonymus Nav.Key
 
 navKey : Session -> Nav.Key

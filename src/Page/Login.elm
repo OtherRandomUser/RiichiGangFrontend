@@ -10,10 +10,12 @@ import Browser.Navigation as Nav
 import Api exposing (..)
 import CommonHtml exposing (viewNav, errorCard)
 import Session exposing (..)
-import User exposing (..)
+import Viewer exposing (..)
 import Url.Builder
 
+
 -- data modeling --
+
 type alias Model =
   { session : Session
   , form : Form
@@ -27,7 +29,7 @@ type alias Form =
 
 type Msg
   = RequestLogin
-  | UserLogin (Result ApiError User)
+  | UserLogin (Result ApiError Viewer)
   | InputEmail String
   | InputPassword String
 
@@ -42,6 +44,7 @@ init session =
     }
   , Cmd.none
   )
+
 
 -- update --
 
@@ -98,7 +101,7 @@ requestLogin form =
   Http.post
     { url = backendUrl ++ "/users/login"
     , body = Http.jsonBody (loginEncoder form)
-    , expect = expectJson UserLogin userDecoder
+    , expect = expectJson UserLogin viewerDecoder
     }
 
 

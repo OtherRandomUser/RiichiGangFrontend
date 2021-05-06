@@ -11,7 +11,7 @@ import Url.Builder
 import Api exposing (..)
 import CommonHtml exposing (viewNav, errorCard)
 import Session exposing (..)
-import User exposing (..)
+import Viewer exposing (..)
 
 
 -- Data Modeling --
@@ -31,7 +31,7 @@ type alias Form =
 
 type Msg
   = RequestSignUp
-  | UserSignUp (Result ApiError User)
+  | UserSignUp (Result ApiError Viewer)
   | InputUsername String
   | InputEmail String
   | InputPassword String
@@ -118,7 +118,7 @@ requestSignUp form =
   Http.post
     { url = backendUrl ++ "/users/signup"
     , body = Http.jsonBody (signUpEncoder form)
-    , expect = expectJson UserSignUp userDecoder
+    , expect = expectJson UserSignUp viewerDecoder
     }
 
 

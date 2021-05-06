@@ -1,10 +1,10 @@
-module User exposing (..)
+module Viewer exposing (..)
 
 import Json.Decode as Decode
 import Json.Decode.Field as Field
 import Json.Encode as Encode
 
-type alias User =
+type alias Viewer =
   { id : Int
   , username : String
   , email : String
@@ -27,8 +27,8 @@ signUpEncoder form =
     , ("passwordconfirmation", Encode.string form.passwordAgain) -- might be wrong
     ]
 
-userDecoder : Decode.Decoder User
-userDecoder =
+viewerDecoder : Decode.Decoder Viewer
+viewerDecoder =
   Field.requireAt ["user", "id"] Decode.int <| \id ->
   Field.requireAt ["user", "username"] Decode.string <| \username ->
   Field.requireAt ["user", "email"] Decode.string <| \email ->
