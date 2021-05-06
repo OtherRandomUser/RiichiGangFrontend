@@ -27,7 +27,7 @@ viewNav session =
         Anonymus _ ->
           div [ class "inline-flex" ]
             [ a [ href "/login", class "btn btn-indigo-800" ] [ text "Login" ]
-            , a [ href "/sign-up", class "btn btn-indigo-800" ] [ text "Sign Up" ]
+            , a [ href "/signup", class "btn btn-indigo-800" ] [ text "Sign Up" ]
             ]
     ]
 

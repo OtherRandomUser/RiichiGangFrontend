@@ -36,3 +36,21 @@ expectJson toMsg decoder =
 
           Err err ->
             Err (BadBody (Decode.errorToString err))
+
+errorToString : ApiError -> String
+errorToString error =
+  case error of
+    BadUrl url ->
+      "Url inválida: " ++ url
+
+    Timeout ->
+      "Erro de timeout, tente novamente"
+
+    NetworkError ->
+      "Erro de rede, verifique a sua conexão e tente novamente"
+
+    BadStatus _ body ->
+      body
+
+    BadBody body ->
+      "Falha interna: " ++ body

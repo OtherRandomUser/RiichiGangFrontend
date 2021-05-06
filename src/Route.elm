@@ -9,12 +9,14 @@ import Url.Parser as Parser exposing ((</>), Parser, oneOf, s, string)
 type Route
   = Home
   | Login
+  | SignUp
 
 parser : Parser (Route -> c) c
 parser =
   oneOf
     [ Parser.map Home Parser.top
     , Parser.map Login (s "login")
+    , Parser.map SignUp (s "signup")
     ]
 
 href : Route -> Attribute msg
@@ -27,15 +29,16 @@ replaceUrl key route =
 
 fromUrl : Url -> Maybe Route
 fromUrl url =
-  { url | path = Maybe.withDefault "" url.fragment, fragment = Nothing }
-    |> Parser.parse parser
+  -- { url | path = Maybe.withDefault "" url.fragment, fragment = Nothing }
+  --   |> Parser.parse parser
+  Parser.parse parser url
 
 -- Internal --
 
 
 routeToString : Route -> String
 routeToString route =
-  "#/" ++ String.join "/" (routeToPieces route)
+  String.join "/" (routeToPieces route)
 
 routeToPieces : Route -> List String
 routeToPieces route =
@@ -45,3 +48,6 @@ routeToPieces route =
 
     Login ->
       [ "login" ]
+
+    SignUp ->
+      [ "signup" ]

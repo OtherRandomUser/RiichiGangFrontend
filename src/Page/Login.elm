@@ -5,14 +5,13 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Http
-import Json.Decode as Decode
-import Json.Decode.Field as Field
-import Json.Encode as Encode
+import Browser.Navigation as Nav
 
 import Api exposing (..)
 import CommonHtml exposing (viewNav, errorCard)
 import Session exposing (..)
 import User exposing (..)
+import Url.Builder
 
 -- data modeling --
 type alias Model =
@@ -32,9 +31,21 @@ type Msg
   | InputEmail String
   | InputPassword String
 
+init : Session -> (Model, Cmd Msg)
+init session =
+  ( { session = session
+    , form =
+      { email = ""
+      , password = ""
+      }
+    , error = Nothing
+    }
+  , Cmd.none
+  )
 
 -- update --
 
+update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
     RequestLogin ->
@@ -50,27 +61,13 @@ update msg model =
         Ok user ->
           case model.session of
             LoggedIn key _ ->
-              ({ model | session = LoggedIn key user, error = Nothing }, Cmd.none)
+              ({ model | session = LoggedIn key user, error = Nothing }, redirectHome (toSession model))
 
             Anonymus key ->
-              ({ model | session = LoggedIn key user, error = Nothing }, Cmd.none)
+              ({ model | session = LoggedIn key user, error = Nothing }, redirectHome (toSession model))
 
         Err error ->
-          case error of
-            BadUrl url ->
-              ({ model | error = Just ("Url inválida: " ++ url) }, Cmd.none)
-
-            Timeout ->
-              ({ model | error = Just "Erro de timeout, tente novamente" }, Cmd.none)
-
-            NetworkError ->
-              ({ model | error = Just "Erro de rede, verifique a sua conexão e tente novamente" }, Cmd.none)
-
-            BadStatus _ body ->
-              ({ model | error = Just body }, Cmd.none)
-
-            BadBody body ->
-              ({ model | error = Just ("Falha interna: " ++ body) }, Cmd.none)
+          ({ model | error = Just (errorToString error) }, Cmd.none)
 
     InputEmail email ->
       updateForm (\form -> { form | email = email}) model
@@ -78,8 +75,13 @@ update msg model =
     InputPassword password ->
       updateForm (\form -> { form | password = password}) model
 
+redirectHome : Session -> Cmd Msg
+redirectHome session =
+  Nav.pushUrl (Session.navKey session) (Url.Builder.absolute [] [])
+
+updateForm : (Form -> Form) -> Model -> (Model, Cmd msg)
 updateForm transform model =
-    ( { model | form = transform model.form }, Cmd.none )
+  ( { model | form = transform model.form }, Cmd.none )
 
 validateLogin : Form -> Result String ()
 validateLogin form =
@@ -96,28 +98,7 @@ requestLogin form =
   Http.post
     { url = backendUrl ++ "/users/login"
     , body = Http.jsonBody (loginEncoder form)
-    , expect = expectJson UserLogin loginDecoder
-    }
-
-loginEncoder : Form -> Encode.Value
-loginEncoder form =
-  Encode.object
-    [ ("email", Encode.string form.email)
-    , ("password", Encode.string form.password)
-    ]
-
-loginDecoder : Decode.Decoder User
-loginDecoder =
-  Field.requireAt ["user", "id"] Decode.string <| \id ->
-  Field.requireAt ["user", "username"] Decode.string <| \username ->
-  Field.requireAt ["user", "email"] Decode.string <| \email ->
-  Field.require "token" Decode.string <| \token ->
-
-  Decode.succeed
-    { id = id
-    , username = username
-    , email = email
-    , token = token
+    , expect = expectJson UserLogin userDecoder
     }
 
 
@@ -125,7 +106,7 @@ loginDecoder =
 
 view : Model -> Browser.Document Msg
 view model =
-  { title = "Riichi Gang"
+  { title = "Login"
   , body =
     [ viewNav model.session
 
