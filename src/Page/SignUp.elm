@@ -109,7 +109,7 @@ validateSignUp form =
   else if String.isEmpty form.passwordAgain then
     Err "Repita a Senha"
   else if form.password /= form.passwordAgain then
-    Err "Repita a Senha"
+    Err "As senhas não são iguais"
   else
     Ok ()
 

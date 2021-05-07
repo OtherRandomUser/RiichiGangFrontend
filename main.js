@@ -4940,23 +4940,6 @@ function _Browser_load(url)
 }
 
 
-function _Url_percentEncode(string)
-{
-	return encodeURIComponent(string);
-}
-
-function _Url_percentDecode(string)
-{
-	try
-	{
-		return $elm$core$Maybe$Just(decodeURIComponent(string));
-	}
-	catch (e)
-	{
-		return $elm$core$Maybe$Nothing;
-	}
-}
-
 
 // SEND REQUEST
 
@@ -5130,6 +5113,23 @@ function _Http_track(router, xhr, tracker)
 			size: event.lengthComputable ? $elm$core$Maybe$Just(event.total) : $elm$core$Maybe$Nothing
 		}))));
 	});
+}
+
+function _Url_percentEncode(string)
+{
+	return encodeURIComponent(string);
+}
+
+function _Url_percentDecode(string)
+{
+	try
+	{
+		return $elm$core$Maybe$Just(decodeURIComponent(string));
+	}
+	catch (e)
+	{
+		return $elm$core$Maybe$Nothing;
+	}
 }var $author$project$Main$LinkClicked = function (a) {
 	return {$: 'LinkClicked', a: a};
 };
@@ -10740,6 +10740,18 @@ var $author$project$Session$Anonymus = function (a) {
 var $author$project$Main$Home = function (a) {
 	return {$: 'Home', a: a};
 };
+var $author$project$Main$Club = function (a) {
+	return {$: 'Club', a: a};
+};
+var $author$project$Main$Clubs = function (a) {
+	return {$: 'Clubs', a: a};
+};
+var $author$project$Main$GotClubMsg = function (a) {
+	return {$: 'GotClubMsg', a: a};
+};
+var $author$project$Main$GotClubsMsg = function (a) {
+	return {$: 'GotClubsMsg', a: a};
+};
 var $author$project$Main$GotLoginMsg = function (a) {
 	return {$: 'GotLoginMsg', a: a};
 };
@@ -10755,421 +10767,95 @@ var $author$project$Main$NotFound = function (a) {
 var $author$project$Main$SignUp = function (a) {
 	return {$: 'SignUp', a: a};
 };
-var $author$project$Page$Login$init = function (session) {
-	return _Utils_Tuple2(
-		{
-			error: $elm$core$Maybe$Nothing,
-			form: {email: '', password: ''},
-			session: session
-		},
-		$elm$core$Platform$Cmd$none);
-};
-var $author$project$Page$SignUp$init = function (session) {
-	return _Utils_Tuple2(
-		{
-			error: $elm$core$Maybe$Nothing,
-			form: {email: '', password: '', passwordAgain: '', username: ''},
-			session: session
-		},
-		$elm$core$Platform$Cmd$none);
-};
-var $elm$core$Debug$log = _Debug_log;
-var $author$project$Page$Login$toSession = function (model) {
-	return model.session;
-};
-var $author$project$Page$SignUp$toSession = function (model) {
-	return model.session;
-};
-var $author$project$Main$toSession = function (model) {
-	switch (model.$) {
-		case 'Home':
-			var session = model.a;
-			return session;
-		case 'NotFound':
-			var session = model.a;
-			return session;
-		case 'Login':
-			var login = model.a;
-			return $author$project$Page$Login$toSession(login);
-		default:
-			var signup = model.a;
-			return $author$project$Page$SignUp$toSession(signup);
-	}
-};
-var $author$project$Main$updateWith = F3(
-	function (toModel, toMsg, _v0) {
-		var subModel = _v0.a;
-		var subCmd = _v0.b;
-		return _Utils_Tuple2(
-			toModel(subModel),
-			A2($elm$core$Platform$Cmd$map, toMsg, subCmd));
+var $author$project$Page$Club$Model = F3(
+	function (session, error, club) {
+		return {club: club, error: error, session: session};
 	});
-var $author$project$Main$changeRouteTo = F2(
-	function (maybeRoute, model) {
-		var session = $author$project$Main$toSession(model);
-		var _v0 = A2($elm$core$Debug$log, 'route', maybeRoute);
-		if (maybeRoute.$ === 'Nothing') {
-			return _Utils_Tuple2(
-				$author$project$Main$NotFound(session),
-				$elm$core$Platform$Cmd$none);
-		} else {
-			switch (maybeRoute.a.$) {
-				case 'Home':
-					var _v2 = maybeRoute.a;
-					return _Utils_Tuple2(
-						$author$project$Main$Home(session),
-						$elm$core$Platform$Cmd$none);
-				case 'Login':
-					var _v3 = maybeRoute.a;
-					return A3(
-						$author$project$Main$updateWith,
-						$author$project$Main$Login,
-						$author$project$Main$GotLoginMsg,
-						$author$project$Page$Login$init(session));
-				default:
-					var _v4 = maybeRoute.a;
-					return A3(
-						$author$project$Main$updateWith,
-						$author$project$Main$SignUp,
-						$author$project$Main$GotSignUpMsg,
-						$author$project$Page$SignUp$init(session));
-			}
-		}
-	});
-var $elm$url$Url$Parser$State = F5(
-	function (visited, unvisited, params, frag, value) {
-		return {frag: frag, params: params, unvisited: unvisited, value: value, visited: visited};
-	});
-var $elm$url$Url$Parser$getFirstMatch = function (states) {
-	getFirstMatch:
-	while (true) {
-		if (!states.b) {
-			return $elm$core$Maybe$Nothing;
-		} else {
-			var state = states.a;
-			var rest = states.b;
-			var _v1 = state.unvisited;
-			if (!_v1.b) {
-				return $elm$core$Maybe$Just(state.value);
-			} else {
-				if ((_v1.a === '') && (!_v1.b.b)) {
-					return $elm$core$Maybe$Just(state.value);
-				} else {
-					var $temp$states = rest;
-					states = $temp$states;
-					continue getFirstMatch;
-				}
-			}
-		}
-	}
-};
-var $elm$url$Url$Parser$removeFinalEmpty = function (segments) {
-	if (!segments.b) {
-		return _List_Nil;
-	} else {
-		if ((segments.a === '') && (!segments.b.b)) {
-			return _List_Nil;
-		} else {
-			var segment = segments.a;
-			var rest = segments.b;
-			return A2(
-				$elm$core$List$cons,
-				segment,
-				$elm$url$Url$Parser$removeFinalEmpty(rest));
-		}
-	}
-};
-var $elm$url$Url$Parser$preparePath = function (path) {
-	var _v0 = A2($elm$core$String$split, '/', path);
-	if (_v0.b && (_v0.a === '')) {
-		var segments = _v0.b;
-		return $elm$url$Url$Parser$removeFinalEmpty(segments);
-	} else {
-		var segments = _v0;
-		return $elm$url$Url$Parser$removeFinalEmpty(segments);
-	}
-};
-var $elm$url$Url$Parser$addToParametersHelp = F2(
-	function (value, maybeList) {
-		if (maybeList.$ === 'Nothing') {
-			return $elm$core$Maybe$Just(
-				_List_fromArray(
-					[value]));
-		} else {
-			var list = maybeList.a;
-			return $elm$core$Maybe$Just(
-				A2($elm$core$List$cons, value, list));
-		}
-	});
-var $elm$url$Url$percentDecode = _Url_percentDecode;
-var $elm$url$Url$Parser$addParam = F2(
-	function (segment, dict) {
-		var _v0 = A2($elm$core$String$split, '=', segment);
-		if ((_v0.b && _v0.b.b) && (!_v0.b.b.b)) {
-			var rawKey = _v0.a;
-			var _v1 = _v0.b;
-			var rawValue = _v1.a;
-			var _v2 = $elm$url$Url$percentDecode(rawKey);
-			if (_v2.$ === 'Nothing') {
-				return dict;
-			} else {
-				var key = _v2.a;
-				var _v3 = $elm$url$Url$percentDecode(rawValue);
-				if (_v3.$ === 'Nothing') {
-					return dict;
-				} else {
-					var value = _v3.a;
-					return A3(
-						$elm$core$Dict$update,
-						key,
-						$elm$url$Url$Parser$addToParametersHelp(value),
-						dict);
-				}
-			}
-		} else {
-			return dict;
-		}
-	});
-var $elm$url$Url$Parser$prepareQuery = function (maybeQuery) {
-	if (maybeQuery.$ === 'Nothing') {
-		return $elm$core$Dict$empty;
-	} else {
-		var qry = maybeQuery.a;
-		return A3(
-			$elm$core$List$foldr,
-			$elm$url$Url$Parser$addParam,
-			$elm$core$Dict$empty,
-			A2($elm$core$String$split, '&', qry));
-	}
-};
-var $elm$url$Url$Parser$parse = F2(
-	function (_v0, url) {
-		var parser = _v0.a;
-		return $elm$url$Url$Parser$getFirstMatch(
-			parser(
-				A5(
-					$elm$url$Url$Parser$State,
-					_List_Nil,
-					$elm$url$Url$Parser$preparePath(url.path),
-					$elm$url$Url$Parser$prepareQuery(url.query),
-					url.fragment,
-					$elm$core$Basics$identity)));
-	});
-var $author$project$Route$Home = {$: 'Home'};
-var $author$project$Route$Login = {$: 'Login'};
-var $author$project$Route$SignUp = {$: 'SignUp'};
-var $elm$url$Url$Parser$Parser = function (a) {
-	return {$: 'Parser', a: a};
-};
-var $elm$url$Url$Parser$mapState = F2(
-	function (func, _v0) {
-		var visited = _v0.visited;
-		var unvisited = _v0.unvisited;
-		var params = _v0.params;
-		var frag = _v0.frag;
-		var value = _v0.value;
-		return A5(
-			$elm$url$Url$Parser$State,
-			visited,
-			unvisited,
-			params,
-			frag,
-			func(value));
-	});
-var $elm$url$Url$Parser$map = F2(
-	function (subValue, _v0) {
-		var parseArg = _v0.a;
-		return $elm$url$Url$Parser$Parser(
-			function (_v1) {
-				var visited = _v1.visited;
-				var unvisited = _v1.unvisited;
-				var params = _v1.params;
-				var frag = _v1.frag;
-				var value = _v1.value;
-				return A2(
-					$elm$core$List$map,
-					$elm$url$Url$Parser$mapState(value),
-					parseArg(
-						A5($elm$url$Url$Parser$State, visited, unvisited, params, frag, subValue)));
-			});
-	});
-var $elm$url$Url$Parser$oneOf = function (parsers) {
-	return $elm$url$Url$Parser$Parser(
-		function (state) {
-			return A2(
-				$elm$core$List$concatMap,
-				function (_v0) {
-					var parser = _v0.a;
-					return parser(state);
-				},
-				parsers);
-		});
-};
-var $elm$url$Url$Parser$s = function (str) {
-	return $elm$url$Url$Parser$Parser(
-		function (_v0) {
-			var visited = _v0.visited;
-			var unvisited = _v0.unvisited;
-			var params = _v0.params;
-			var frag = _v0.frag;
-			var value = _v0.value;
-			if (!unvisited.b) {
-				return _List_Nil;
-			} else {
-				var next = unvisited.a;
-				var rest = unvisited.b;
-				return _Utils_eq(next, str) ? _List_fromArray(
-					[
-						A5(
-						$elm$url$Url$Parser$State,
-						A2($elm$core$List$cons, next, visited),
-						rest,
-						params,
-						frag,
-						value)
-					]) : _List_Nil;
-			}
-		});
-};
-var $elm$url$Url$Parser$top = $elm$url$Url$Parser$Parser(
-	function (state) {
-		return _List_fromArray(
-			[state]);
-	});
-var $author$project$Route$parser = $elm$url$Url$Parser$oneOf(
-	_List_fromArray(
-		[
-			A2($elm$url$Url$Parser$map, $author$project$Route$Home, $elm$url$Url$Parser$top),
-			A2(
-			$elm$url$Url$Parser$map,
-			$author$project$Route$Login,
-			$elm$url$Url$Parser$s('login')),
-			A2(
-			$elm$url$Url$Parser$map,
-			$author$project$Route$SignUp,
-			$elm$url$Url$Parser$s('signup'))
-		]));
-var $author$project$Route$fromUrl = function (url) {
-	return A2($elm$url$Url$Parser$parse, $author$project$Route$parser, url);
-};
-var $author$project$Main$init = F3(
-	function (_v0, url, key) {
-		return A2(
-			$author$project$Main$changeRouteTo,
-			$author$project$Route$fromUrl(url),
-			$author$project$Main$Home(
-				$author$project$Session$Anonymus(key)));
-	});
-var $elm$core$Platform$Sub$batch = _Platform_batch;
-var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
-var $author$project$Main$subscriptions = function (_v0) {
-	return $elm$core$Platform$Sub$none;
-};
-var $elm$browser$Browser$Navigation$load = _Browser_load;
-var $author$project$Session$navKey = function (session) {
-	if (session.$ === 'LoggedIn') {
-		var key = session.a;
-		return key;
-	} else {
-		var key = session.a;
-		return key;
-	}
-};
-var $elm$browser$Browser$Navigation$pushUrl = _Browser_pushUrl;
-var $elm$url$Url$addPort = F2(
-	function (maybePort, starter) {
-		if (maybePort.$ === 'Nothing') {
-			return starter;
-		} else {
-			var port_ = maybePort.a;
-			return starter + (':' + $elm$core$String$fromInt(port_));
-		}
-	});
-var $elm$url$Url$addPrefixed = F3(
-	function (prefix, maybeSegment, starter) {
-		if (maybeSegment.$ === 'Nothing') {
-			return starter;
-		} else {
-			var segment = maybeSegment.a;
-			return _Utils_ap(
-				starter,
-				_Utils_ap(prefix, segment));
-		}
-	});
-var $elm$url$Url$toString = function (url) {
-	var http = function () {
-		var _v0 = url.protocol;
-		if (_v0.$ === 'Http') {
-			return 'http://';
-		} else {
-			return 'https://';
-		}
-	}();
-	return A3(
-		$elm$url$Url$addPrefixed,
-		'#',
-		url.fragment,
-		A3(
-			$elm$url$Url$addPrefixed,
-			'?',
-			url.query,
-			_Utils_ap(
-				A2(
-					$elm$url$Url$addPort,
-					url.port_,
-					_Utils_ap(http, url.host)),
-				url.path)));
-};
-var $author$project$Session$LoggedIn = F2(
-	function (a, b) {
-		return {$: 'LoggedIn', a: a, b: b};
-	});
-var $author$project$Api$errorToString = function (error) {
-	switch (error.$) {
-		case 'BadUrl':
-			var url = error.a;
-			return 'Url inválida: ' + url;
-		case 'Timeout':
-			return 'Erro de timeout, tente novamente';
-		case 'NetworkError':
-			return 'Erro de rede, verifique a sua conexão e tente novamente';
-		case 'BadStatus':
-			var body = error.b;
-			return body;
-		default:
-			var body = error.a;
-			return 'Falha interna: ' + body;
-	}
-};
-var $elm$url$Url$Builder$toQueryPair = function (_v0) {
-	var key = _v0.a;
-	var value = _v0.b;
-	return key + ('=' + value);
-};
-var $elm$url$Url$Builder$toQuery = function (parameters) {
-	if (!parameters.b) {
-		return '';
-	} else {
-		return '?' + A2(
-			$elm$core$String$join,
-			'&',
-			A2($elm$core$List$map, $elm$url$Url$Builder$toQueryPair, parameters));
-	}
-};
-var $elm$url$Url$Builder$absolute = F2(
-	function (pathSegments, parameters) {
-		return '/' + (A2($elm$core$String$join, '/', pathSegments) + $elm$url$Url$Builder$toQuery(parameters));
-	});
-var $author$project$Page$Login$redirectHome = function (session) {
-	return A2(
-		$elm$browser$Browser$Navigation$pushUrl,
-		$author$project$Session$navKey(session),
-		A2($elm$url$Url$Builder$absolute, _List_Nil, _List_Nil));
-};
-var $author$project$Page$Login$UserLogin = function (a) {
-	return {$: 'UserLogin', a: a};
+var $author$project$Page$Club$GotClubs = function (a) {
+	return {$: 'GotClubs', a: a};
 };
 var $author$project$Api$backendUrl = 'https://localhost:5001/api';
+var $author$project$Api$club = function (id) {
+	return $author$project$Api$backendUrl + ('/clubs/' + $elm$core$String$fromInt(id));
+};
+var $elm$json$Json$Decode$andThen = _Json_andThen;
+var $webbhuset$elm_json_decode$Json$Decode$Field$require = F3(
+	function (fieldName, valueDecoder, continuation) {
+		return A2(
+			$elm$json$Json$Decode$andThen,
+			continuation,
+			A2($elm$json$Json$Decode$field, fieldName, valueDecoder));
+	});
+var $author$project$UserShort$userShortDecoder = A3(
+	$webbhuset$elm_json_decode$Json$Decode$Field$require,
+	'id',
+	$elm$json$Json$Decode$int,
+	function (id) {
+		return A3(
+			$webbhuset$elm_json_decode$Json$Decode$Field$require,
+			'createdAt',
+			$elm$json$Json$Decode$string,
+			function (createdAt) {
+				return A3(
+					$webbhuset$elm_json_decode$Json$Decode$Field$require,
+					'username',
+					$elm$json$Json$Decode$string,
+					function (username) {
+						return A3(
+							$webbhuset$elm_json_decode$Json$Decode$Field$require,
+							'totalTournaments',
+							$elm$json$Json$Decode$int,
+							function (totalTournaments) {
+								return $elm$json$Json$Decode$succeed(
+									{createdAt: createdAt, id: id, totalTournaments: totalTournaments, username: username});
+							});
+					});
+			});
+	});
+var $author$project$Club$clubDecoder = A3(
+	$webbhuset$elm_json_decode$Json$Decode$Field$require,
+	'id',
+	$elm$json$Json$Decode$int,
+	function (id) {
+		return A3(
+			$webbhuset$elm_json_decode$Json$Decode$Field$require,
+			'createdAt',
+			$elm$json$Json$Decode$string,
+			function (createdAt) {
+				return A3(
+					$webbhuset$elm_json_decode$Json$Decode$Field$require,
+					'name',
+					$elm$json$Json$Decode$string,
+					function (name) {
+						return A3(
+							$webbhuset$elm_json_decode$Json$Decode$Field$require,
+							'website',
+							$elm$json$Json$Decode$string,
+							function (website) {
+								return A3(
+									$webbhuset$elm_json_decode$Json$Decode$Field$require,
+									'contact',
+									$elm$json$Json$Decode$string,
+									function (contact) {
+										return A3(
+											$webbhuset$elm_json_decode$Json$Decode$Field$require,
+											'localization',
+											$elm$json$Json$Decode$string,
+											function (localization) {
+												return A3(
+													$webbhuset$elm_json_decode$Json$Decode$Field$require,
+													'owner',
+													$author$project$UserShort$userShortDecoder,
+													function (owner) {
+														return $elm$json$Json$Decode$succeed(
+															{contact: contact, createdAt: createdAt, id: id, localization: localization, name: name, owner: owner, website: website});
+													});
+											});
+									});
+							});
+					});
+			});
+	});
 var $author$project$Api$BadBody = function (a) {
 	return {$: 'BadBody', a: a};
 };
@@ -11252,24 +10938,7 @@ var $author$project$Api$expectJson = F2(
 				}
 			});
 	});
-var $elm$http$Http$jsonBody = function (value) {
-	return A2(
-		_Http_pair,
-		'application/json',
-		A2($elm$json$Json$Encode$encode, 0, value));
-};
-var $author$project$User$loginEncoder = function (form) {
-	return $elm$json$Json$Encode$object(
-		_List_fromArray(
-			[
-				_Utils_Tuple2(
-				'email',
-				$elm$json$Json$Encode$string(form.email)),
-				_Utils_Tuple2(
-				'password',
-				$elm$json$Json$Encode$string(form.password))
-			]));
-};
+var $elm$http$Http$emptyBody = _Http_emptyBody;
 var $elm$http$Http$Request = function (a) {
 	return {$: 'Request', a: a};
 };
@@ -11420,18 +11089,660 @@ var $elm$http$Http$request = function (r) {
 		$elm$http$Http$Request(
 			{allowCookiesFromOtherDomains: false, body: r.body, expect: r.expect, headers: r.headers, method: r.method, timeout: r.timeout, tracker: r.tracker, url: r.url}));
 };
+var $elm$http$Http$get = function (r) {
+	return $elm$http$Http$request(
+		{body: $elm$http$Http$emptyBody, expect: r.expect, headers: _List_Nil, method: 'GET', timeout: $elm$core$Maybe$Nothing, tracker: $elm$core$Maybe$Nothing, url: r.url});
+};
+var $author$project$Page$Club$get = function (id) {
+	return $elm$http$Http$get(
+		{
+			expect: A2($author$project$Api$expectJson, $author$project$Page$Club$GotClubs, $author$project$Club$clubDecoder),
+			url: $author$project$Api$club(id)
+		});
+};
+var $author$project$Page$Club$init = F2(
+	function (session, clubId) {
+		return _Utils_Tuple2(
+			A3($author$project$Page$Club$Model, session, $elm$core$Maybe$Nothing, $elm$core$Maybe$Nothing),
+			$author$project$Page$Club$get(clubId));
+	});
+var $author$project$Page$Clubs$Model = F3(
+	function (session, error, clubs) {
+		return {clubs: clubs, error: error, session: session};
+	});
+var $author$project$Page$Clubs$GotClubs = function (a) {
+	return {$: 'GotClubs', a: a};
+};
+var $author$project$ClubShort$clubShortDecoder = A3(
+	$webbhuset$elm_json_decode$Json$Decode$Field$require,
+	'id',
+	$elm$json$Json$Decode$int,
+	function (id) {
+		return A3(
+			$webbhuset$elm_json_decode$Json$Decode$Field$require,
+			'createdAt',
+			$elm$json$Json$Decode$string,
+			function (createdAt) {
+				return A3(
+					$webbhuset$elm_json_decode$Json$Decode$Field$require,
+					'name',
+					$elm$json$Json$Decode$string,
+					function (name) {
+						return A3(
+							$webbhuset$elm_json_decode$Json$Decode$Field$require,
+							'website',
+							$elm$json$Json$Decode$string,
+							function (website) {
+								return A3(
+									$webbhuset$elm_json_decode$Json$Decode$Field$require,
+									'contact',
+									$elm$json$Json$Decode$string,
+									function (contact) {
+										return A3(
+											$webbhuset$elm_json_decode$Json$Decode$Field$require,
+											'localization',
+											$elm$json$Json$Decode$string,
+											function (localization) {
+												return A3(
+													$webbhuset$elm_json_decode$Json$Decode$Field$require,
+													'totalPlayers',
+													$elm$json$Json$Decode$int,
+													function (totalPlayers) {
+														return A3(
+															$webbhuset$elm_json_decode$Json$Decode$Field$require,
+															'totalTournaments',
+															$elm$json$Json$Decode$int,
+															function (totalTournaments) {
+																return $elm$json$Json$Decode$succeed(
+																	{contact: contact, createdAt: createdAt, id: id, localization: localization, name: name, totalPlayers: totalPlayers, totalTournaments: totalTournaments, website: website});
+															});
+													});
+											});
+									});
+							});
+					});
+			});
+	});
+var $author$project$ClubShort$clubShortListDecoder = $elm$json$Json$Decode$list($author$project$ClubShort$clubShortDecoder);
+var $author$project$Api$clubs = $author$project$Api$backendUrl + '/clubs';
+var $author$project$Page$Clubs$get = $elm$http$Http$get(
+	{
+		expect: A2($author$project$Api$expectJson, $author$project$Page$Clubs$GotClubs, $author$project$ClubShort$clubShortListDecoder),
+		url: $author$project$Api$clubs
+	});
+var $author$project$Page$Clubs$init = function (session) {
+	return _Utils_Tuple2(
+		A3($author$project$Page$Clubs$Model, session, $elm$core$Maybe$Nothing, _List_Nil),
+		$author$project$Page$Clubs$get);
+};
+var $author$project$Page$Login$init = function (session) {
+	return _Utils_Tuple2(
+		{
+			error: $elm$core$Maybe$Nothing,
+			form: {email: '', password: ''},
+			session: session
+		},
+		$elm$core$Platform$Cmd$none);
+};
+var $author$project$Page$SignUp$init = function (session) {
+	return _Utils_Tuple2(
+		{
+			error: $elm$core$Maybe$Nothing,
+			form: {email: '', password: '', passwordAgain: '', username: ''},
+			session: session
+		},
+		$elm$core$Platform$Cmd$none);
+};
+var $author$project$Page$Club$toSession = function (model) {
+	return model.session;
+};
+var $author$project$Page$Clubs$toSession = function (model) {
+	return model.session;
+};
+var $author$project$Page$Login$toSession = function (model) {
+	return model.session;
+};
+var $author$project$Page$SignUp$toSession = function (model) {
+	return model.session;
+};
+var $author$project$Main$toSession = function (model) {
+	switch (model.$) {
+		case 'Home':
+			var session = model.a;
+			return session;
+		case 'NotFound':
+			var session = model.a;
+			return session;
+		case 'Login':
+			var login = model.a;
+			return $author$project$Page$Login$toSession(login);
+		case 'SignUp':
+			var signup = model.a;
+			return $author$project$Page$SignUp$toSession(signup);
+		case 'Clubs':
+			var clubs = model.a;
+			return $author$project$Page$Clubs$toSession(clubs);
+		default:
+			var club = model.a;
+			return $author$project$Page$Club$toSession(club);
+	}
+};
+var $author$project$Main$updateWith = F3(
+	function (toModel, toMsg, _v0) {
+		var subModel = _v0.a;
+		var subCmd = _v0.b;
+		return _Utils_Tuple2(
+			toModel(subModel),
+			A2($elm$core$Platform$Cmd$map, toMsg, subCmd));
+	});
+var $author$project$Main$changeRouteTo = F2(
+	function (maybeRoute, model) {
+		var session = $author$project$Main$toSession(model);
+		if (maybeRoute.$ === 'Nothing') {
+			return _Utils_Tuple2(
+				$author$project$Main$NotFound(session),
+				$elm$core$Platform$Cmd$none);
+		} else {
+			switch (maybeRoute.a.$) {
+				case 'Home':
+					var _v1 = maybeRoute.a;
+					return _Utils_Tuple2(
+						$author$project$Main$Home(session),
+						$elm$core$Platform$Cmd$none);
+				case 'Login':
+					var _v2 = maybeRoute.a;
+					return A3(
+						$author$project$Main$updateWith,
+						$author$project$Main$Login,
+						$author$project$Main$GotLoginMsg,
+						$author$project$Page$Login$init(session));
+				case 'SignUp':
+					var _v3 = maybeRoute.a;
+					return A3(
+						$author$project$Main$updateWith,
+						$author$project$Main$SignUp,
+						$author$project$Main$GotSignUpMsg,
+						$author$project$Page$SignUp$init(session));
+				case 'Clubs':
+					var _v4 = maybeRoute.a;
+					return A3(
+						$author$project$Main$updateWith,
+						$author$project$Main$Clubs,
+						$author$project$Main$GotClubsMsg,
+						$author$project$Page$Clubs$init(session));
+				default:
+					var clubId = maybeRoute.a.a;
+					return A3(
+						$author$project$Main$updateWith,
+						$author$project$Main$Club,
+						$author$project$Main$GotClubMsg,
+						A2($author$project$Page$Club$init, session, clubId));
+			}
+		}
+	});
+var $elm$url$Url$Parser$State = F5(
+	function (visited, unvisited, params, frag, value) {
+		return {frag: frag, params: params, unvisited: unvisited, value: value, visited: visited};
+	});
+var $elm$url$Url$Parser$getFirstMatch = function (states) {
+	getFirstMatch:
+	while (true) {
+		if (!states.b) {
+			return $elm$core$Maybe$Nothing;
+		} else {
+			var state = states.a;
+			var rest = states.b;
+			var _v1 = state.unvisited;
+			if (!_v1.b) {
+				return $elm$core$Maybe$Just(state.value);
+			} else {
+				if ((_v1.a === '') && (!_v1.b.b)) {
+					return $elm$core$Maybe$Just(state.value);
+				} else {
+					var $temp$states = rest;
+					states = $temp$states;
+					continue getFirstMatch;
+				}
+			}
+		}
+	}
+};
+var $elm$url$Url$Parser$removeFinalEmpty = function (segments) {
+	if (!segments.b) {
+		return _List_Nil;
+	} else {
+		if ((segments.a === '') && (!segments.b.b)) {
+			return _List_Nil;
+		} else {
+			var segment = segments.a;
+			var rest = segments.b;
+			return A2(
+				$elm$core$List$cons,
+				segment,
+				$elm$url$Url$Parser$removeFinalEmpty(rest));
+		}
+	}
+};
+var $elm$url$Url$Parser$preparePath = function (path) {
+	var _v0 = A2($elm$core$String$split, '/', path);
+	if (_v0.b && (_v0.a === '')) {
+		var segments = _v0.b;
+		return $elm$url$Url$Parser$removeFinalEmpty(segments);
+	} else {
+		var segments = _v0;
+		return $elm$url$Url$Parser$removeFinalEmpty(segments);
+	}
+};
+var $elm$url$Url$Parser$addToParametersHelp = F2(
+	function (value, maybeList) {
+		if (maybeList.$ === 'Nothing') {
+			return $elm$core$Maybe$Just(
+				_List_fromArray(
+					[value]));
+		} else {
+			var list = maybeList.a;
+			return $elm$core$Maybe$Just(
+				A2($elm$core$List$cons, value, list));
+		}
+	});
+var $elm$url$Url$percentDecode = _Url_percentDecode;
+var $elm$url$Url$Parser$addParam = F2(
+	function (segment, dict) {
+		var _v0 = A2($elm$core$String$split, '=', segment);
+		if ((_v0.b && _v0.b.b) && (!_v0.b.b.b)) {
+			var rawKey = _v0.a;
+			var _v1 = _v0.b;
+			var rawValue = _v1.a;
+			var _v2 = $elm$url$Url$percentDecode(rawKey);
+			if (_v2.$ === 'Nothing') {
+				return dict;
+			} else {
+				var key = _v2.a;
+				var _v3 = $elm$url$Url$percentDecode(rawValue);
+				if (_v3.$ === 'Nothing') {
+					return dict;
+				} else {
+					var value = _v3.a;
+					return A3(
+						$elm$core$Dict$update,
+						key,
+						$elm$url$Url$Parser$addToParametersHelp(value),
+						dict);
+				}
+			}
+		} else {
+			return dict;
+		}
+	});
+var $elm$url$Url$Parser$prepareQuery = function (maybeQuery) {
+	if (maybeQuery.$ === 'Nothing') {
+		return $elm$core$Dict$empty;
+	} else {
+		var qry = maybeQuery.a;
+		return A3(
+			$elm$core$List$foldr,
+			$elm$url$Url$Parser$addParam,
+			$elm$core$Dict$empty,
+			A2($elm$core$String$split, '&', qry));
+	}
+};
+var $elm$url$Url$Parser$parse = F2(
+	function (_v0, url) {
+		var parser = _v0.a;
+		return $elm$url$Url$Parser$getFirstMatch(
+			parser(
+				A5(
+					$elm$url$Url$Parser$State,
+					_List_Nil,
+					$elm$url$Url$Parser$preparePath(url.path),
+					$elm$url$Url$Parser$prepareQuery(url.query),
+					url.fragment,
+					$elm$core$Basics$identity)));
+	});
+var $author$project$Route$Club = function (a) {
+	return {$: 'Club', a: a};
+};
+var $author$project$Route$Clubs = {$: 'Clubs'};
+var $author$project$Route$Home = {$: 'Home'};
+var $author$project$Route$Login = {$: 'Login'};
+var $author$project$Route$SignUp = {$: 'SignUp'};
+var $elm$url$Url$Parser$Parser = function (a) {
+	return {$: 'Parser', a: a};
+};
+var $elm$url$Url$Parser$custom = F2(
+	function (tipe, stringToSomething) {
+		return $elm$url$Url$Parser$Parser(
+			function (_v0) {
+				var visited = _v0.visited;
+				var unvisited = _v0.unvisited;
+				var params = _v0.params;
+				var frag = _v0.frag;
+				var value = _v0.value;
+				if (!unvisited.b) {
+					return _List_Nil;
+				} else {
+					var next = unvisited.a;
+					var rest = unvisited.b;
+					var _v2 = stringToSomething(next);
+					if (_v2.$ === 'Just') {
+						var nextValue = _v2.a;
+						return _List_fromArray(
+							[
+								A5(
+								$elm$url$Url$Parser$State,
+								A2($elm$core$List$cons, next, visited),
+								rest,
+								params,
+								frag,
+								value(nextValue))
+							]);
+					} else {
+						return _List_Nil;
+					}
+				}
+			});
+	});
+var $elm$url$Url$Parser$int = A2($elm$url$Url$Parser$custom, 'NUMBER', $elm$core$String$toInt);
+var $elm$url$Url$Parser$mapState = F2(
+	function (func, _v0) {
+		var visited = _v0.visited;
+		var unvisited = _v0.unvisited;
+		var params = _v0.params;
+		var frag = _v0.frag;
+		var value = _v0.value;
+		return A5(
+			$elm$url$Url$Parser$State,
+			visited,
+			unvisited,
+			params,
+			frag,
+			func(value));
+	});
+var $elm$url$Url$Parser$map = F2(
+	function (subValue, _v0) {
+		var parseArg = _v0.a;
+		return $elm$url$Url$Parser$Parser(
+			function (_v1) {
+				var visited = _v1.visited;
+				var unvisited = _v1.unvisited;
+				var params = _v1.params;
+				var frag = _v1.frag;
+				var value = _v1.value;
+				return A2(
+					$elm$core$List$map,
+					$elm$url$Url$Parser$mapState(value),
+					parseArg(
+						A5($elm$url$Url$Parser$State, visited, unvisited, params, frag, subValue)));
+			});
+	});
+var $elm$url$Url$Parser$oneOf = function (parsers) {
+	return $elm$url$Url$Parser$Parser(
+		function (state) {
+			return A2(
+				$elm$core$List$concatMap,
+				function (_v0) {
+					var parser = _v0.a;
+					return parser(state);
+				},
+				parsers);
+		});
+};
+var $elm$url$Url$Parser$s = function (str) {
+	return $elm$url$Url$Parser$Parser(
+		function (_v0) {
+			var visited = _v0.visited;
+			var unvisited = _v0.unvisited;
+			var params = _v0.params;
+			var frag = _v0.frag;
+			var value = _v0.value;
+			if (!unvisited.b) {
+				return _List_Nil;
+			} else {
+				var next = unvisited.a;
+				var rest = unvisited.b;
+				return _Utils_eq(next, str) ? _List_fromArray(
+					[
+						A5(
+						$elm$url$Url$Parser$State,
+						A2($elm$core$List$cons, next, visited),
+						rest,
+						params,
+						frag,
+						value)
+					]) : _List_Nil;
+			}
+		});
+};
+var $elm$url$Url$Parser$slash = F2(
+	function (_v0, _v1) {
+		var parseBefore = _v0.a;
+		var parseAfter = _v1.a;
+		return $elm$url$Url$Parser$Parser(
+			function (state) {
+				return A2(
+					$elm$core$List$concatMap,
+					parseAfter,
+					parseBefore(state));
+			});
+	});
+var $elm$url$Url$Parser$top = $elm$url$Url$Parser$Parser(
+	function (state) {
+		return _List_fromArray(
+			[state]);
+	});
+var $author$project$Route$parser = $elm$url$Url$Parser$oneOf(
+	_List_fromArray(
+		[
+			A2($elm$url$Url$Parser$map, $author$project$Route$Home, $elm$url$Url$Parser$top),
+			A2(
+			$elm$url$Url$Parser$map,
+			$author$project$Route$Login,
+			$elm$url$Url$Parser$s('login')),
+			A2(
+			$elm$url$Url$Parser$map,
+			$author$project$Route$SignUp,
+			$elm$url$Url$Parser$s('signup')),
+			A2(
+			$elm$url$Url$Parser$map,
+			$author$project$Route$Clubs,
+			$elm$url$Url$Parser$s('clubs')),
+			A2(
+			$elm$url$Url$Parser$map,
+			$author$project$Route$Club,
+			A2(
+				$elm$url$Url$Parser$slash,
+				$elm$url$Url$Parser$s('clubs'),
+				$elm$url$Url$Parser$int))
+		]));
+var $author$project$Route$fromUrl = function (url) {
+	return A2($elm$url$Url$Parser$parse, $author$project$Route$parser, url);
+};
+var $author$project$Main$init = F3(
+	function (_v0, url, key) {
+		return A2(
+			$author$project$Main$changeRouteTo,
+			$author$project$Route$fromUrl(url),
+			$author$project$Main$Home(
+				$author$project$Session$Anonymus(key)));
+	});
+var $elm$core$Platform$Sub$batch = _Platform_batch;
+var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
+var $author$project$Main$subscriptions = function (_v0) {
+	return $elm$core$Platform$Sub$none;
+};
+var $elm$browser$Browser$Navigation$load = _Browser_load;
+var $author$project$Session$navKey = function (session) {
+	if (session.$ === 'LoggedIn') {
+		var key = session.a;
+		return key;
+	} else {
+		var key = session.a;
+		return key;
+	}
+};
+var $elm$browser$Browser$Navigation$pushUrl = _Browser_pushUrl;
+var $elm$url$Url$addPort = F2(
+	function (maybePort, starter) {
+		if (maybePort.$ === 'Nothing') {
+			return starter;
+		} else {
+			var port_ = maybePort.a;
+			return starter + (':' + $elm$core$String$fromInt(port_));
+		}
+	});
+var $elm$url$Url$addPrefixed = F3(
+	function (prefix, maybeSegment, starter) {
+		if (maybeSegment.$ === 'Nothing') {
+			return starter;
+		} else {
+			var segment = maybeSegment.a;
+			return _Utils_ap(
+				starter,
+				_Utils_ap(prefix, segment));
+		}
+	});
+var $elm$url$Url$toString = function (url) {
+	var http = function () {
+		var _v0 = url.protocol;
+		if (_v0.$ === 'Http') {
+			return 'http://';
+		} else {
+			return 'https://';
+		}
+	}();
+	return A3(
+		$elm$url$Url$addPrefixed,
+		'#',
+		url.fragment,
+		A3(
+			$elm$url$Url$addPrefixed,
+			'?',
+			url.query,
+			_Utils_ap(
+				A2(
+					$elm$url$Url$addPort,
+					url.port_,
+					_Utils_ap(http, url.host)),
+				url.path)));
+};
+var $author$project$Api$errorToString = function (error) {
+	switch (error.$) {
+		case 'BadUrl':
+			var url = error.a;
+			return 'Url inválida: ' + url;
+		case 'Timeout':
+			return 'Erro de timeout, tente novamente';
+		case 'NetworkError':
+			return 'Erro de rede, verifique a sua conexão e tente novamente';
+		case 'BadStatus':
+			var body = error.b;
+			return body;
+		default:
+			var body = error.a;
+			return 'Falha interna: ' + body;
+	}
+};
+var $author$project$Page$Club$update = F2(
+	function (msg, model) {
+		var result = msg.a;
+		if (result.$ === 'Ok') {
+			var club = result.a;
+			return _Utils_Tuple2(
+				_Utils_update(
+					model,
+					{
+						club: $elm$core$Maybe$Just(club),
+						error: $elm$core$Maybe$Nothing
+					}),
+				$elm$core$Platform$Cmd$none);
+		} else {
+			var error = result.a;
+			return _Utils_Tuple2(
+				_Utils_update(
+					model,
+					{
+						error: $elm$core$Maybe$Just(
+							$author$project$Api$errorToString(error))
+					}),
+				$elm$core$Platform$Cmd$none);
+		}
+	});
+var $author$project$Page$Clubs$update = F2(
+	function (msg, model) {
+		var result = msg.a;
+		if (result.$ === 'Ok') {
+			var clubs = result.a;
+			return _Utils_Tuple2(
+				_Utils_update(
+					model,
+					{clubs: clubs, error: $elm$core$Maybe$Nothing}),
+				$elm$core$Platform$Cmd$none);
+		} else {
+			var error = result.a;
+			return _Utils_Tuple2(
+				_Utils_update(
+					model,
+					{
+						error: $elm$core$Maybe$Just(
+							$author$project$Api$errorToString(error))
+					}),
+				$elm$core$Platform$Cmd$none);
+		}
+	});
+var $author$project$Session$LoggedIn = F2(
+	function (a, b) {
+		return {$: 'LoggedIn', a: a, b: b};
+	});
+var $elm$url$Url$Builder$toQueryPair = function (_v0) {
+	var key = _v0.a;
+	var value = _v0.b;
+	return key + ('=' + value);
+};
+var $elm$url$Url$Builder$toQuery = function (parameters) {
+	if (!parameters.b) {
+		return '';
+	} else {
+		return '?' + A2(
+			$elm$core$String$join,
+			'&',
+			A2($elm$core$List$map, $elm$url$Url$Builder$toQueryPair, parameters));
+	}
+};
+var $elm$url$Url$Builder$absolute = F2(
+	function (pathSegments, parameters) {
+		return '/' + (A2($elm$core$String$join, '/', pathSegments) + $elm$url$Url$Builder$toQuery(parameters));
+	});
+var $author$project$Page$Login$redirectHome = function (session) {
+	return A2(
+		$elm$browser$Browser$Navigation$pushUrl,
+		$author$project$Session$navKey(session),
+		A2($elm$url$Url$Builder$absolute, _List_Nil, _List_Nil));
+};
+var $author$project$Page$Login$UserLogin = function (a) {
+	return {$: 'UserLogin', a: a};
+};
+var $elm$http$Http$jsonBody = function (value) {
+	return A2(
+		_Http_pair,
+		'application/json',
+		A2($elm$json$Json$Encode$encode, 0, value));
+};
+var $author$project$Viewer$loginEncoder = function (form) {
+	return $elm$json$Json$Encode$object(
+		_List_fromArray(
+			[
+				_Utils_Tuple2(
+				'email',
+				$elm$json$Json$Encode$string(form.email)),
+				_Utils_Tuple2(
+				'password',
+				$elm$json$Json$Encode$string(form.password))
+			]));
+};
 var $elm$http$Http$post = function (r) {
 	return $elm$http$Http$request(
 		{body: r.body, expect: r.expect, headers: _List_Nil, method: 'POST', timeout: $elm$core$Maybe$Nothing, tracker: $elm$core$Maybe$Nothing, url: r.url});
 };
-var $elm$json$Json$Decode$andThen = _Json_andThen;
-var $webbhuset$elm_json_decode$Json$Decode$Field$require = F3(
-	function (fieldName, valueDecoder, continuation) {
-		return A2(
-			$elm$json$Json$Decode$andThen,
-			continuation,
-			A2($elm$json$Json$Decode$field, fieldName, valueDecoder));
-	});
 var $webbhuset$elm_json_decode$Json$Decode$Field$requireAt = F3(
 	function (path, valueDecoder, continuation) {
 		return A2(
@@ -11439,7 +11750,7 @@ var $webbhuset$elm_json_decode$Json$Decode$Field$requireAt = F3(
 			continuation,
 			A2($elm$json$Json$Decode$at, path, valueDecoder));
 	});
-var $author$project$User$userDecoder = A3(
+var $author$project$Viewer$viewerDecoder = A3(
 	$webbhuset$elm_json_decode$Json$Decode$Field$requireAt,
 	_List_fromArray(
 		['user', 'id']),
@@ -11472,8 +11783,8 @@ var $author$project$Page$Login$requestLogin = function (form) {
 	return $elm$http$Http$post(
 		{
 			body: $elm$http$Http$jsonBody(
-				$author$project$User$loginEncoder(form)),
-			expect: A2($author$project$Api$expectJson, $author$project$Page$Login$UserLogin, $author$project$User$userDecoder),
+				$author$project$Viewer$loginEncoder(form)),
+			expect: A2($author$project$Api$expectJson, $author$project$Page$Login$UserLogin, $author$project$Viewer$viewerDecoder),
 			url: $author$project$Api$backendUrl + '/users/login'
 		});
 };
@@ -11570,10 +11881,16 @@ var $author$project$Page$Login$update = F2(
 					model);
 		}
 	});
+var $author$project$Page$SignUp$redirectHome = function (session) {
+	return A2(
+		$elm$browser$Browser$Navigation$pushUrl,
+		$author$project$Session$navKey(session),
+		A2($elm$url$Url$Builder$absolute, _List_Nil, _List_Nil));
+};
 var $author$project$Page$SignUp$UserSignUp = function (a) {
 	return {$: 'UserSignUp', a: a};
 };
-var $author$project$User$signUpEncoder = function (form) {
+var $author$project$Viewer$signUpEncoder = function (form) {
 	return $elm$json$Json$Encode$object(
 		_List_fromArray(
 			[
@@ -11592,12 +11909,11 @@ var $author$project$User$signUpEncoder = function (form) {
 			]));
 };
 var $author$project$Page$SignUp$requestSignUp = function (form) {
-	var _v0 = A2($elm$core$Debug$log, 'request sign up', form);
 	return $elm$http$Http$post(
 		{
 			body: $elm$http$Http$jsonBody(
-				$author$project$User$signUpEncoder(form)),
-			expect: A2($author$project$Api$expectJson, $author$project$Page$SignUp$UserSignUp, $author$project$User$userDecoder),
+				$author$project$Viewer$signUpEncoder(form)),
+			expect: A2($author$project$Api$expectJson, $author$project$Page$SignUp$UserSignUp, $author$project$Viewer$viewerDecoder),
 			url: $author$project$Api$backendUrl + '/users/signup'
 		});
 };
@@ -11612,20 +11928,19 @@ var $author$project$Page$SignUp$updateForm = F2(
 			$elm$core$Platform$Cmd$none);
 	});
 var $author$project$Page$SignUp$validateSignUp = function (form) {
-	return $elm$core$String$isEmpty(form.email) ? $elm$core$Result$Err('Preencha o Email') : ($elm$core$String$isEmpty(form.username) ? $elm$core$Result$Err('Preencha o Nome de Usuário') : ($elm$core$String$isEmpty(form.password) ? $elm$core$Result$Err('Preencha a Senha') : ($elm$core$String$isEmpty(form.passwordAgain) ? $elm$core$Result$Err('Repita a Senha') : ((!_Utils_eq(form.password, form.passwordAgain)) ? $elm$core$Result$Err('Repita a Senha') : $elm$core$Result$Ok(_Utils_Tuple0)))));
+	return $elm$core$String$isEmpty(form.email) ? $elm$core$Result$Err('Preencha o Email') : ($elm$core$String$isEmpty(form.username) ? $elm$core$Result$Err('Preencha o Nome de Usuário') : ($elm$core$String$isEmpty(form.password) ? $elm$core$Result$Err('Preencha a Senha') : ($elm$core$String$isEmpty(form.passwordAgain) ? $elm$core$Result$Err('Repita a Senha') : ((!_Utils_eq(form.password, form.passwordAgain)) ? $elm$core$Result$Err('As senhas não são iguais') : $elm$core$Result$Ok(_Utils_Tuple0)))));
 };
 var $author$project$Page$SignUp$update = F2(
 	function (msg, model) {
-		var _v0 = A2($elm$core$Debug$log, 'update sign up', 'AAA');
 		switch (msg.$) {
 			case 'RequestSignUp':
-				var _v2 = $author$project$Page$SignUp$validateSignUp(model.form);
-				if (_v2.$ === 'Ok') {
+				var _v1 = $author$project$Page$SignUp$validateSignUp(model.form);
+				if (_v1.$ === 'Ok') {
 					return _Utils_Tuple2(
 						model,
 						$author$project$Page$SignUp$requestSignUp(model.form));
 				} else {
-					var err = _v2.a;
+					var err = _v1.a;
 					return _Utils_Tuple2(
 						_Utils_update(
 							model,
@@ -11638,9 +11953,9 @@ var $author$project$Page$SignUp$update = F2(
 				var result = msg.a;
 				if (result.$ === 'Ok') {
 					var user = result.a;
-					var _v4 = model.session;
-					if (_v4.$ === 'LoggedIn') {
-						var key = _v4.a;
+					var _v3 = model.session;
+					if (_v3.$ === 'LoggedIn') {
+						var key = _v3.a;
 						return _Utils_Tuple2(
 							_Utils_update(
 								model,
@@ -11648,9 +11963,10 @@ var $author$project$Page$SignUp$update = F2(
 									error: $elm$core$Maybe$Nothing,
 									session: A2($author$project$Session$LoggedIn, key, user)
 								}),
-							$elm$core$Platform$Cmd$none);
+							$author$project$Page$SignUp$redirectHome(
+								$author$project$Page$SignUp$toSession(model)));
 					} else {
-						var key = _v4.a;
+						var key = _v3.a;
 						return _Utils_Tuple2(
 							_Utils_update(
 								model,
@@ -11658,7 +11974,8 @@ var $author$project$Page$SignUp$update = F2(
 									error: $elm$core$Maybe$Nothing,
 									session: A2($author$project$Session$LoggedIn, key, user)
 								}),
-							$elm$core$Platform$Cmd$none);
+							$author$project$Page$SignUp$redirectHome(
+								$author$project$Page$SignUp$toSession(model)));
 					}
 				} else {
 					var error = result.a;
@@ -11715,13 +12032,12 @@ var $author$project$Page$SignUp$update = F2(
 	});
 var $author$project$Main$update = F2(
 	function (msg, model) {
-		var _v0 = A2($elm$core$Debug$log, 'update', 'update');
-		var _v1 = _Utils_Tuple2(msg, model);
-		_v1$4:
+		var _v0 = _Utils_Tuple2(msg, model);
+		_v0$6:
 		while (true) {
-			switch (_v1.a.$) {
+			switch (_v0.a.$) {
 				case 'LinkClicked':
-					var urlRequest = _v1.a.a;
+					var urlRequest = _v0.a.a;
 					if (urlRequest.$ === 'Internal') {
 						var url = urlRequest.a;
 						return _Utils_Tuple2(
@@ -11738,34 +12054,58 @@ var $author$project$Main$update = F2(
 							$elm$browser$Browser$Navigation$load(href));
 					}
 				case 'UrlChanged':
-					var url = _v1.a.a;
+					var url = _v0.a.a;
 					return A2(
 						$author$project$Main$changeRouteTo,
 						$author$project$Route$fromUrl(url),
 						model);
 				case 'GotLoginMsg':
-					if (_v1.b.$ === 'Login') {
-						var subMsg = _v1.a.a;
-						var login = _v1.b.a;
+					if (_v0.b.$ === 'Login') {
+						var subMsg = _v0.a.a;
+						var login = _v0.b.a;
 						return A3(
 							$author$project$Main$updateWith,
 							$author$project$Main$Login,
 							$author$project$Main$GotLoginMsg,
 							A2($author$project$Page$Login$update, subMsg, login));
 					} else {
-						break _v1$4;
+						break _v0$6;
 					}
-				default:
-					if (_v1.b.$ === 'SignUp') {
-						var subMsg = _v1.a.a;
-						var signUp = _v1.b.a;
+				case 'GotSignUpMsg':
+					if (_v0.b.$ === 'SignUp') {
+						var subMsg = _v0.a.a;
+						var signUp = _v0.b.a;
 						return A3(
 							$author$project$Main$updateWith,
 							$author$project$Main$SignUp,
 							$author$project$Main$GotSignUpMsg,
 							A2($author$project$Page$SignUp$update, subMsg, signUp));
 					} else {
-						break _v1$4;
+						break _v0$6;
+					}
+				case 'GotClubsMsg':
+					if (_v0.b.$ === 'Clubs') {
+						var subMsg = _v0.a.a;
+						var clubs = _v0.b.a;
+						return A3(
+							$author$project$Main$updateWith,
+							$author$project$Main$Clubs,
+							$author$project$Main$GotClubsMsg,
+							A2($author$project$Page$Clubs$update, subMsg, clubs));
+					} else {
+						break _v0$6;
+					}
+				default:
+					if (_v0.b.$ === 'Club') {
+						var subMsg = _v0.a.a;
+						var club = _v0.b.a;
+						return A3(
+							$author$project$Main$updateWith,
+							$author$project$Main$Club,
+							$author$project$Main$GotClubMsg,
+							A2($author$project$Page$Club$update, subMsg, club));
+					} else {
+						break _v0$6;
 					}
 			}
 		}
@@ -11803,65 +12143,111 @@ var $author$project$CommonHtml$errorCard = function (msg) {
 					]))
 			]));
 };
-var $author$project$Page$Login$InputEmail = function (a) {
-	return {$: 'InputEmail', a: a};
-};
-var $author$project$Page$Login$InputPassword = function (a) {
-	return {$: 'InputPassword', a: a};
-};
-var $author$project$Page$Login$RequestLogin = {$: 'RequestLogin'};
+var $author$project$Page$Club$clubCardElement = F2(
+	function (title, value) {
+		return A2(
+			$elm$html$Html$div,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class('block')
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$elm$html$Html$strong,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('inline-block font-bold')
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text(title)
+						])),
+					A2(
+					$elm$html$Html$span,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('inline-block')
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text(value)
+						]))
+				]));
+	});
 var $elm$html$Html$h1 = _VirtualDom_node('h1');
-var $elm$html$Html$Attributes$placeholder = $elm$html$Html$Attributes$stringProperty('placeholder');
-var $author$project$Page$Login$viewLoginCard = A2(
-	$elm$html$Html$div,
-	_List_fromArray(
-		[
-			$elm$html$Html$Attributes$class('login-card')
-		]),
-	_List_fromArray(
-		[
-			A2(
-			$elm$html$Html$h1,
-			_List_fromArray(
-				[
-					$elm$html$Html$Attributes$class('card-heading')
-				]),
-			_List_fromArray(
-				[
-					$elm$html$Html$text('Login')
-				])),
-			A2(
-			$elm$html$Html$input,
-			_List_fromArray(
-				[
-					$elm$html$Html$Attributes$type_('email'),
-					$elm$html$Html$Attributes$placeholder('Email'),
-					$elm$html$Html$Attributes$class('login-input'),
-					$elm$html$Html$Events$onInput($author$project$Page$Login$InputEmail)
-				]),
-			_List_Nil),
-			A2(
-			$elm$html$Html$input,
-			_List_fromArray(
-				[
-					$elm$html$Html$Attributes$type_('password'),
-					$elm$html$Html$Attributes$placeholder('Senha'),
-					$elm$html$Html$Attributes$class('login-input'),
-					$elm$html$Html$Events$onInput($author$project$Page$Login$InputPassword)
-				]),
-			_List_Nil),
-			A2(
-			$elm$html$Html$button,
-			_List_fromArray(
-				[
-					$elm$html$Html$Attributes$class('btn btn-indigo-500'),
-					$elm$html$Html$Events$onClick($author$project$Page$Login$RequestLogin)
-				]),
-			_List_fromArray(
-				[
-					$elm$html$Html$text('Login')
-				]))
-		]));
+var $author$project$Page$Club$viewClubCard = function (club) {
+	var divClass = 'container bg-indigo-500 rounded-lg text-white p-6 my-4 max-w-lg';
+	return A2(
+		$elm$html$Html$div,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class(divClass)
+			]),
+		_List_fromArray(
+			[
+				A2(
+				$elm$html$Html$h1,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text(club.name)
+					])),
+				A2($author$project$Page$Club$clubCardElement, 'Localização', club.localization),
+				A2($author$project$Page$Club$clubCardElement, 'Fundação', club.createdAt),
+				A2($author$project$Page$Club$clubCardElement, 'Site', club.website),
+				A2($author$project$Page$Club$clubCardElement, 'Contato', club.contact)
+			]));
+};
+var $author$project$Page$Club$viewMembers = function (maybeClub) {
+	return A2(
+		$elm$html$Html$div,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('m-2')
+			]),
+		_List_fromArray(
+			[
+				A2(
+				$elm$html$Html$h1,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('list-heading')
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('Membros')
+					])),
+				A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('space-y-4')
+					]),
+				_List_fromArray(
+					[
+						function () {
+						if (maybeClub.$ === 'Just') {
+							return A2(
+								$elm$html$Html$p,
+								_List_Nil,
+								_List_fromArray(
+									[
+										$elm$html$Html$text('TODO')
+									]));
+						} else {
+							return A2(
+								$elm$html$Html$p,
+								_List_Nil,
+								_List_fromArray(
+									[
+										$elm$html$Html$text('Nada ainda')
+									]));
+						}
+					}()
+					]))
+			]));
+};
 var $elm$html$Html$img = _VirtualDom_node('img');
 var $elm$html$Html$nav = _VirtualDom_node('nav');
 var $elm$html$Html$Attributes$src = function (url) {
@@ -11918,7 +12304,7 @@ var $author$project$CommonHtml$viewNav = function (session) {
 						$elm$html$Html$a,
 						_List_fromArray(
 							[
-								$elm$html$Html$Attributes$href('/clubes'),
+								$elm$html$Html$Attributes$href('/clubs'),
 								$elm$html$Html$Attributes$class('link-white')
 							]),
 						_List_fromArray(
@@ -11995,6 +12381,363 @@ var $author$project$CommonHtml$viewNav = function (session) {
 			}()
 			]));
 };
+var $author$project$UserShort$getUrl = function (user) {
+	return A2(
+		$elm$url$Url$Builder$absolute,
+		_List_fromArray(
+			[
+				'users',
+				$elm$core$String$fromInt(user.id)
+			]),
+		_List_Nil);
+};
+var $author$project$UserShort$view = function (user) {
+	return A2(
+		$elm$html$Html$div,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('list-item')
+			]),
+		_List_fromArray(
+			[
+				A2(
+				$elm$html$Html$a,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$href(
+						$author$project$UserShort$getUrl(user)),
+						$elm$html$Html$Attributes$class('flex-grow hover:underline')
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text(user.username)
+					])),
+				A2(
+				$elm$html$Html$span,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text(
+						$elm$core$String$fromInt(user.totalTournaments) + ' Torneios')
+					])),
+				A2(
+				$elm$html$Html$span,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text(user.createdAt)
+					]))
+			]));
+};
+var $author$project$Page$Club$viewOwner = function (maybeClub) {
+	return A2(
+		$elm$html$Html$div,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('m-2')
+			]),
+		_List_fromArray(
+			[
+				A2(
+				$elm$html$Html$h1,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('list-heading')
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('Dono do Clube')
+					])),
+				A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('space-y-4')
+					]),
+				_List_fromArray(
+					[
+						function () {
+						if (maybeClub.$ === 'Just') {
+							var club = maybeClub.a;
+							return $author$project$UserShort$view(club.owner);
+						} else {
+							return A2(
+								$elm$html$Html$p,
+								_List_Nil,
+								_List_fromArray(
+									[
+										$elm$html$Html$text('Nada ainda')
+									]));
+						}
+					}()
+					]))
+			]));
+};
+var $author$project$Page$Club$viewTournaments = function (maybeClub) {
+	return A2(
+		$elm$html$Html$div,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('m-2')
+			]),
+		_List_fromArray(
+			[
+				A2(
+				$elm$html$Html$h1,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('list-heading')
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('Torneios')
+					])),
+				A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('space-y-4')
+					]),
+				_List_fromArray(
+					[
+						function () {
+						if (maybeClub.$ === 'Just') {
+							return A2(
+								$elm$html$Html$p,
+								_List_Nil,
+								_List_fromArray(
+									[
+										$elm$html$Html$text('TODO')
+									]));
+						} else {
+							return A2(
+								$elm$html$Html$p,
+								_List_Nil,
+								_List_fromArray(
+									[
+										$elm$html$Html$text('Nada ainda')
+									]));
+						}
+					}()
+					]))
+			]));
+};
+var $author$project$Page$Club$view = function (model) {
+	var title = function () {
+		var _v2 = model.club;
+		if (_v2.$ === 'Just') {
+			var club = _v2.a;
+			return 'Clube - ' + club.name;
+		} else {
+			return 'Clube';
+		}
+	}();
+	return {
+		body: _List_fromArray(
+			[
+				$author$project$CommonHtml$viewNav(model.session),
+				function () {
+				var _v0 = model.error;
+				if (_v0.$ === 'Just') {
+					var error = _v0.a;
+					return $author$project$CommonHtml$errorCard(error);
+				} else {
+					return $elm$html$Html$text('');
+				}
+			}(),
+				function () {
+				var _v1 = model.club;
+				if (_v1.$ === 'Just') {
+					var club = _v1.a;
+					return $author$project$Page$Club$viewClubCard(club);
+				} else {
+					return A2(
+						$elm$html$Html$p,
+						_List_Nil,
+						_List_fromArray(
+							[
+								$elm$html$Html$text('Nada ainda')
+							]));
+				}
+			}(),
+				$author$project$Page$Club$viewOwner(model.club),
+				$author$project$Page$Club$viewTournaments(model.club),
+				$author$project$Page$Club$viewMembers(model.club)
+			]),
+		title: title
+	};
+};
+var $author$project$ClubShort$getUrl = function (club) {
+	return A2(
+		$elm$url$Url$Builder$absolute,
+		_List_fromArray(
+			[
+				'clubs',
+				$elm$core$String$fromInt(club.id)
+			]),
+		_List_Nil);
+};
+var $author$project$ClubShort$view = function (club) {
+	return A2(
+		$elm$html$Html$div,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('list-item')
+			]),
+		_List_fromArray(
+			[
+				A2(
+				$elm$html$Html$a,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$href(
+						$author$project$ClubShort$getUrl(club)),
+						$elm$html$Html$Attributes$class('flex-grow hover:underline')
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text(club.name)
+					])),
+				A2(
+				$elm$html$Html$span,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text(club.localization)
+					])),
+				A2(
+				$elm$html$Html$span,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text(
+						$elm$core$String$fromInt(club.totalTournaments) + ' Torneios')
+					])),
+				A2(
+				$elm$html$Html$span,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text(
+						$elm$core$String$fromInt(club.totalPlayers) + ' Jogadores')
+					])),
+				A2(
+				$elm$html$Html$span,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text(club.createdAt)
+					]))
+			]));
+};
+var $author$project$Page$Clubs$view = function (model) {
+	return {
+		body: _List_fromArray(
+			[
+				$author$project$CommonHtml$viewNav(model.session),
+				function () {
+				var _v0 = model.error;
+				if (_v0.$ === 'Just') {
+					var error = _v0.a;
+					return $author$project$CommonHtml$errorCard(error);
+				} else {
+					return $elm$html$Html$text('');
+				}
+			}(),
+				A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('m-2')
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$h1,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('list-heading')
+							]),
+						_List_fromArray(
+							[
+								$elm$html$Html$text('Clubes do Usuário')
+							])),
+						$elm$core$List$isEmpty(model.clubs) ? A2(
+						$elm$html$Html$p,
+						_List_Nil,
+						_List_fromArray(
+							[
+								$elm$html$Html$text('Nada ainda')
+							])) : A2(
+						$elm$html$Html$div,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('space-y-4')
+							]),
+						A2($elm$core$List$map, $author$project$ClubShort$view, model.clubs))
+					]))
+			]),
+		title: 'Clubes'
+	};
+};
+var $author$project$Page$Login$InputEmail = function (a) {
+	return {$: 'InputEmail', a: a};
+};
+var $author$project$Page$Login$InputPassword = function (a) {
+	return {$: 'InputPassword', a: a};
+};
+var $author$project$Page$Login$RequestLogin = {$: 'RequestLogin'};
+var $elm$html$Html$Attributes$placeholder = $elm$html$Html$Attributes$stringProperty('placeholder');
+var $author$project$Page$Login$viewLoginCard = A2(
+	$elm$html$Html$div,
+	_List_fromArray(
+		[
+			$elm$html$Html$Attributes$class('login-card')
+		]),
+	_List_fromArray(
+		[
+			A2(
+			$elm$html$Html$h1,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class('card-heading')
+				]),
+			_List_fromArray(
+				[
+					$elm$html$Html$text('Login')
+				])),
+			A2(
+			$elm$html$Html$input,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$type_('email'),
+					$elm$html$Html$Attributes$placeholder('Email'),
+					$elm$html$Html$Attributes$class('login-input'),
+					$elm$html$Html$Events$onInput($author$project$Page$Login$InputEmail)
+				]),
+			_List_Nil),
+			A2(
+			$elm$html$Html$input,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$type_('password'),
+					$elm$html$Html$Attributes$placeholder('Senha'),
+					$elm$html$Html$Attributes$class('login-input'),
+					$elm$html$Html$Events$onInput($author$project$Page$Login$InputPassword)
+				]),
+			_List_Nil),
+			A2(
+			$elm$html$Html$button,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class('btn btn-indigo-500'),
+					$elm$html$Html$Events$onClick($author$project$Page$Login$RequestLogin)
+				]),
+			_List_fromArray(
+				[
+					$elm$html$Html$text('Login')
+				]))
+		]));
 var $author$project$Page$Login$view = function (model) {
 	return {
 		body: _List_fromArray(
@@ -12186,7 +12929,7 @@ var $author$project$Main$view = function (model) {
 					page.body),
 				title: page.title
 			};
-		default:
+		case 'SignUp':
 			var subModel = model.a;
 			var page = $author$project$Page$SignUp$view(subModel);
 			return {
@@ -12196,9 +12939,29 @@ var $author$project$Main$view = function (model) {
 					page.body),
 				title: page.title
 			};
+		case 'Clubs':
+			var subModel = model.a;
+			var page = $author$project$Page$Clubs$view(subModel);
+			return {
+				body: A2(
+					$elm$core$List$map,
+					$elm$html$Html$map($author$project$Main$GotClubsMsg),
+					page.body),
+				title: page.title
+			};
+		default:
+			var subModel = model.a;
+			var page = $author$project$Page$Club$view(subModel);
+			return {
+				body: A2(
+					$elm$core$List$map,
+					$elm$html$Html$map($author$project$Main$GotClubMsg),
+					page.body),
+				title: page.title
+			};
 	}
 };
 var $author$project$Main$main = $elm$browser$Browser$application(
 	{init: $author$project$Main$init, onUrlChange: $author$project$Main$UrlChanged, onUrlRequest: $author$project$Main$LinkClicked, subscriptions: $author$project$Main$subscriptions, update: $author$project$Main$update, view: $author$project$Main$view});
 _Platform_export({'Main':{'init':$author$project$Main$main(
-	$elm$json$Json$Decode$succeed(_Utils_Tuple0))({"versions":{"elm":"0.19.1"},"types":{"message":"Main.Msg","aliases":{"Url.Url":{"args":[],"type":"{ protocol : Url.Protocol, host : String.String, port_ : Maybe.Maybe Basics.Int, path : String.String, query : Maybe.Maybe String.String, fragment : Maybe.Maybe String.String }"},"User.User":{"args":[],"type":"{ id : Basics.Int, username : String.String, email : String.String, token : String.String }"}},"unions":{"Main.Msg":{"args":[],"tags":{"LinkClicked":["Browser.UrlRequest"],"UrlChanged":["Url.Url"],"GotLoginMsg":["Page.Login.Msg"],"GotSignUpMsg":["Page.SignUp.Msg"]}},"Basics.Int":{"args":[],"tags":{"Int":[]}},"Maybe.Maybe":{"args":["a"],"tags":{"Just":["a"],"Nothing":[]}},"Page.Login.Msg":{"args":[],"tags":{"RequestLogin":[],"UserLogin":["Result.Result Api.ApiError User.User"],"InputEmail":["String.String"],"InputPassword":["String.String"]}},"Page.SignUp.Msg":{"args":[],"tags":{"RequestSignUp":[],"UserSignUp":["Result.Result Api.ApiError User.User"],"InputUsername":["String.String"],"InputEmail":["String.String"],"InputPassword":["String.String"],"InputPasswordAgain":["String.String"]}},"Url.Protocol":{"args":[],"tags":{"Http":[],"Https":[]}},"String.String":{"args":[],"tags":{"String":[]}},"Browser.UrlRequest":{"args":[],"tags":{"Internal":["Url.Url"],"External":["String.String"]}},"Api.ApiError":{"args":[],"tags":{"BadUrl":["String.String"],"Timeout":[],"NetworkError":[],"BadStatus":["Basics.Int","String.String"],"BadBody":["String.String"]}},"Result.Result":{"args":["error","value"],"tags":{"Ok":["value"],"Err":["error"]}}}}})}});}(this));
+	$elm$json$Json$Decode$succeed(_Utils_Tuple0))({"versions":{"elm":"0.19.1"},"types":{"message":"Main.Msg","aliases":{"Url.Url":{"args":[],"type":"{ protocol : Url.Protocol, host : String.String, port_ : Maybe.Maybe Basics.Int, path : String.String, query : Maybe.Maybe String.String, fragment : Maybe.Maybe String.String }"},"Club.Club":{"args":[],"type":"{ id : Basics.Int, createdAt : String.String, name : String.String, website : String.String, contact : String.String, localization : String.String, owner : UserShort.UserShort }"},"ClubShort.ClubShort":{"args":[],"type":"{ id : Basics.Int, createdAt : String.String, name : String.String, website : String.String, contact : String.String, localization : String.String, totalPlayers : Basics.Int, totalTournaments : Basics.Int }"},"UserShort.UserShort":{"args":[],"type":"{ id : Basics.Int, createdAt : String.String, username : String.String, totalTournaments : Basics.Int }"},"Viewer.Viewer":{"args":[],"type":"{ id : Basics.Int, username : String.String, email : String.String, token : String.String }"}},"unions":{"Main.Msg":{"args":[],"tags":{"LinkClicked":["Browser.UrlRequest"],"UrlChanged":["Url.Url"],"GotLoginMsg":["Page.Login.Msg"],"GotSignUpMsg":["Page.SignUp.Msg"],"GotClubsMsg":["Page.Clubs.Msg"],"GotClubMsg":["Page.Club.Msg"]}},"Basics.Int":{"args":[],"tags":{"Int":[]}},"Maybe.Maybe":{"args":["a"],"tags":{"Just":["a"],"Nothing":[]}},"Page.Club.Msg":{"args":[],"tags":{"GotClubs":["Result.Result Api.ApiError Club.Club"]}},"Page.Clubs.Msg":{"args":[],"tags":{"GotClubs":["Result.Result Api.ApiError (List.List ClubShort.ClubShort)"]}},"Page.Login.Msg":{"args":[],"tags":{"RequestLogin":[],"UserLogin":["Result.Result Api.ApiError Viewer.Viewer"],"InputEmail":["String.String"],"InputPassword":["String.String"]}},"Page.SignUp.Msg":{"args":[],"tags":{"RequestSignUp":[],"UserSignUp":["Result.Result Api.ApiError Viewer.Viewer"],"InputUsername":["String.String"],"InputEmail":["String.String"],"InputPassword":["String.String"],"InputPasswordAgain":["String.String"]}},"Url.Protocol":{"args":[],"tags":{"Http":[],"Https":[]}},"String.String":{"args":[],"tags":{"String":[]}},"Browser.UrlRequest":{"args":[],"tags":{"Internal":["Url.Url"],"External":["String.String"]}},"Api.ApiError":{"args":[],"tags":{"BadUrl":["String.String"],"Timeout":[],"NetworkError":[],"BadStatus":["Basics.Int","String.String"],"BadBody":["String.String"]}},"List.List":{"args":["a"],"tags":{}},"Result.Result":{"args":["error","value"],"tags":{"Ok":["value"],"Err":["error"]}}}}})}});}(this));

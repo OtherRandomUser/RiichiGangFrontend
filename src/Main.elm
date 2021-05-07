@@ -9,6 +9,8 @@ import Url
 import Api exposing (..)
 import CommonHtml exposing (..)
 import Session exposing (..)
+import Page.Club as ClubPage
+import Page.Clubs as ClubsPage
 import Page.Login as Login
 import Page.SignUp as SignUp
 import Route exposing (Route)
@@ -31,12 +33,16 @@ type Model
   | NotFound Session
   | Login Login.Model
   | SignUp SignUp.Model
+  | Clubs ClubsPage.Model
+  | Club ClubPage.Model
 
 type Msg
   = LinkClicked Browser.UrlRequest
   | UrlChanged Url.Url
   | GotLoginMsg Login.Msg
   | GotSignUpMsg SignUp.Msg
+  | GotClubsMsg ClubsPage.Msg
+  | GotClubMsg ClubPage.Msg
 
 init : () -> Url.Url -> Nav.Key -> (Model, Cmd Msg)
 init _ url key =
@@ -62,6 +68,14 @@ changeRouteTo maybeRoute model =
         SignUp.init session
           |> updateWith SignUp GotSignUpMsg
 
+      Just Route.Clubs ->
+        ClubsPage.init session
+          |> updateWith Clubs GotClubsMsg
+
+      Just (Route.Club clubId) ->
+        ClubPage.init session clubId
+          |> updateWith Club GotClubMsg
+
 toSession : Model -> Session
 toSession model =
   case model of
@@ -77,10 +91,16 @@ toSession model =
     SignUp signup ->
       SignUp.toSession signup
 
+    Clubs clubs ->
+      ClubsPage.toSession clubs
+
+    Club club ->
+      ClubPage.toSession club
+
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case (msg, model) of
-    ( LinkClicked urlRequest, _ ) ->
+    (LinkClicked urlRequest, _) ->
       case urlRequest of
         Browser.Internal url ->
           (model, Nav.pushUrl (Session.navKey (toSession model)) (Url.toString url))
@@ -88,10 +108,10 @@ update msg model =
         Browser.External href ->
           (model, Nav.load href)
 
-    ( UrlChanged url, _ ) ->
+    (UrlChanged url, _) ->
       changeRouteTo (Route.fromUrl url) model
 
-    ( GotLoginMsg subMsg, Login login) ->
+    (GotLoginMsg subMsg, Login login) ->
       Login.update subMsg login
         |> updateWith Login GotLoginMsg
 
@@ -99,8 +119,16 @@ update msg model =
       SignUp.update subMsg signUp
         |> updateWith SignUp GotSignUpMsg
 
-    ( _, _) ->
-      ( model, Cmd.none )
+    (GotClubsMsg subMsg, Clubs clubs) ->
+      ClubsPage.update subMsg clubs
+        |> updateWith Clubs GotClubsMsg
+
+    (GotClubMsg subMsg, Club club) ->
+      ClubPage.update subMsg club
+        |> updateWith Club GotClubMsg
+
+    (_, _) ->
+      (model, Cmd.none)
 
 updateWith : (subModel -> Model) -> (subMsg -> Msg) -> ( subModel, Cmd subMsg ) -> ( Model, Cmd Msg)
 updateWith toModel toMsg ( subModel, subCmd ) =
@@ -135,6 +163,22 @@ view model =
       in
       { title = page.title
       , body = List.map (Html.map GotSignUpMsg) page.body
+      }
+
+    Clubs subModel ->
+      let
+        page = ClubsPage.view subModel
+      in
+      { title = page.title
+      , body = List.map (Html.map GotClubsMsg) page.body
+      }
+
+    Club subModel ->
+      let
+        page = ClubPage.view subModel
+      in
+      { title = page.title
+      , body = List.map (Html.map GotClubMsg) page.body
       }
 
 

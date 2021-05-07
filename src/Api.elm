@@ -2,6 +2,7 @@ module Api exposing (..)
 
 import Http
 import Json.Decode as Decode
+import Viewer exposing (Viewer)
 
 type ApiError
   = BadUrl String
@@ -10,8 +11,26 @@ type ApiError
   | BadStatus Int String
   | BadBody String
 
+
+-- Api Routes --
+
 backendUrl : String
 backendUrl = "https://localhost:5001/api"
+
+users : String
+users = backendUrl ++ "/users"
+
+user : Int -> String
+user id = backendUrl ++ "/users/" ++ (String.fromInt id)
+
+clubs : String
+clubs = backendUrl ++ "/clubs"
+
+club : Int -> String
+club id = backendUrl ++ "/clubs/" ++ (String.fromInt id)
+
+
+-- Request Utils --
 
 expectJson : (Result ApiError a -> msg) -> Decode.Decoder a -> Http.Expect msg
 expectJson toMsg decoder =
@@ -54,3 +73,51 @@ errorToString error =
 
     BadBody body ->
       "Falha interna: " ++ body
+
+privatePost : { url : String, body : Http.Body, expect : Http.Expect msg } -> Viewer -> Cmd msg
+privatePost r viewer =
+  Http.request
+    { method = "POST"
+    , headers = [ Http.header "Bearer" viewer.token ]
+    , url = r.url
+    , body = r.body
+    , expect = r.expect
+    , timeout = Nothing
+    , tracker = Nothing
+    }
+
+privatePatch : { url : String, body : Http.Body, expect : Http.Expect msg } -> Viewer -> Cmd msg
+privatePatch r viewer =
+  Http.request
+    { method = "PATCH"
+    , headers = [ Http.header "Bearer" viewer.token ]
+    , url = r.url
+    , body = r.body
+    , expect = r.expect
+    , timeout = Nothing
+    , tracker = Nothing
+    }
+
+privateGet : { url : String, expect : Http.Expect msg } -> Viewer -> Cmd msg
+privateGet r viewer =
+  Http.request
+    { method = "GET"
+    , headers = [ Http.header "Bearer" viewer.token ]
+    , url = r.url
+    , body = Http.emptyBody
+    , expect = r.expect
+    , timeout = Nothing
+    , tracker = Nothing
+    }
+
+privateDelete : { url : String, expect : Http.Expect msg } -> Viewer -> Cmd msg
+privateDelete r viewer =
+  Http.request
+    { method = "DELETE"
+    , headers = [ Http.header "Bearer" viewer.token ]
+    , url = r.url
+    , body = Http.emptyBody
+    , expect = r.expect
+    , timeout = Nothing
+    , tracker = Nothing
+    }

@@ -3,7 +3,9 @@ module CommonHtml exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 
-import Session exposing (..)
+import Api
+import Session exposing (Session)
+
 
 viewNav : Session -> Html msg
 viewNav session =
@@ -14,17 +16,17 @@ viewNav session =
       ]
 
     , div [ class "flex-grow inline-flex justify-end mr-4"]
-      [ a [ href "/clubes", class "link-white" ] [ text "Clubes" ]
+      [ a [ href "/clubs", class "link-white" ] [ text "Clubes" ]
       , a [ href "/torneios", class "link-white" ] [ text "Torneios" ]
       ]
 
     , case session of
-        LoggedIn _ _ ->
+        Session.LoggedIn _ _ ->
           div [ class "inline-flex" ]
             [ a [ href "/perfil", class "btn btn-indigo-800" ] [ text "Perfil" ]
             ]
 
-        Anonymus _ ->
+        Session.Anonymus _ ->
           div [ class "inline-flex" ]
             [ a [ href "/login", class "btn btn-indigo-800" ] [ text "Login" ]
             , a [ href "/signup", class "btn btn-indigo-800" ] [ text "Sign Up" ]
