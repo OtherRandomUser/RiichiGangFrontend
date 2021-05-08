@@ -5,6 +5,7 @@ import Html.Attributes exposing (..)
 
 import Session exposing (Session)
 import Viewer
+import Url.Builder
 
 
 viewNav : Session -> Html msg
@@ -24,9 +25,11 @@ viewNav session =
         Session.LoggedIn _ viewer ->
           let
             userUrl = Viewer.getUrl viewer
+            logoutUrl = Url.Builder.absolute [ "logout" ] []
           in
           div [ class "inline-flex" ]
             [ a [ href userUrl, class "btn btn-indigo-800" ] [ text "Perfil" ]
+            , a [ href logoutUrl, class "btn btn-indigo-800" ] [ text "Logout" ]
             ]
 
         Session.Anonymus _ ->

@@ -10773,6 +10773,25 @@ var $author$project$Main$SignUp = function (a) {
 var $author$project$Main$User = function (a) {
 	return {$: 'User', a: a};
 };
+var $elm$url$Url$Builder$toQueryPair = function (_v0) {
+	var key = _v0.a;
+	var value = _v0.b;
+	return key + ('=' + value);
+};
+var $elm$url$Url$Builder$toQuery = function (parameters) {
+	if (!parameters.b) {
+		return '';
+	} else {
+		return '?' + A2(
+			$elm$core$String$join,
+			'&',
+			A2($elm$core$List$map, $elm$url$Url$Builder$toQueryPair, parameters));
+	}
+};
+var $elm$url$Url$Builder$absolute = F2(
+	function (pathSegments, parameters) {
+		return '/' + (A2($elm$core$String$join, '/', pathSegments) + $elm$url$Url$Builder$toQuery(parameters));
+	});
 var $author$project$Page$Club$Model = F3(
 	function (session, error, state) {
 		return {error: error, session: session, state: state};
@@ -11256,6 +11275,16 @@ var $author$project$Page$User$init = F2(
 			A3($author$project$Page$User$Model, session, $author$project$Page$User$Uninitialized, $elm$core$Maybe$Nothing),
 			$author$project$Page$User$get(id));
 	});
+var $author$project$Session$navKey = function (session) {
+	if (session.$ === 'LoggedIn') {
+		var key = session.a;
+		return key;
+	} else {
+		var key = session.a;
+		return key;
+	}
+};
+var $elm$browser$Browser$Navigation$pushUrl = _Browser_pushUrl;
 var $author$project$Page$Club$toSession = function (model) {
 	return model.session;
 };
@@ -11325,15 +11354,25 @@ var $author$project$Main$changeRouteTo = F2(
 						$author$project$Main$Login,
 						$author$project$Main$GotLoginMsg,
 						$author$project$Page$Login$init(session));
-				case 'SignUp':
+				case 'Logout':
 					var _v3 = maybeRoute.a;
+					var navKey = $author$project$Session$navKey(session);
+					return _Utils_Tuple2(
+						$author$project$Main$Home(
+							$author$project$Session$Anonymus(navKey)),
+						A2(
+							$elm$browser$Browser$Navigation$pushUrl,
+							navKey,
+							A2($elm$url$Url$Builder$absolute, _List_Nil, _List_Nil)));
+				case 'SignUp':
+					var _v4 = maybeRoute.a;
 					return A3(
 						$author$project$Main$updateWith,
 						$author$project$Main$SignUp,
 						$author$project$Main$GotSignUpMsg,
 						$author$project$Page$SignUp$init(session));
 				case 'Clubs':
-					var _v4 = maybeRoute.a;
+					var _v5 = maybeRoute.a;
 					return A3(
 						$author$project$Main$updateWith,
 						$author$project$Main$Clubs,
@@ -11481,6 +11520,7 @@ var $author$project$Route$Club = function (a) {
 var $author$project$Route$Clubs = {$: 'Clubs'};
 var $author$project$Route$Home = {$: 'Home'};
 var $author$project$Route$Login = {$: 'Login'};
+var $author$project$Route$Logout = {$: 'Logout'};
 var $author$project$Route$SignUp = {$: 'SignUp'};
 var $author$project$Route$User = function (a) {
 	return {$: 'User', a: a};
@@ -11619,6 +11659,10 @@ var $author$project$Route$parser = $elm$url$Url$Parser$oneOf(
 			$elm$url$Url$Parser$s('login')),
 			A2(
 			$elm$url$Url$Parser$map,
+			$author$project$Route$Logout,
+			$elm$url$Url$Parser$s('logout')),
+			A2(
+			$elm$url$Url$Parser$map,
 			$author$project$Route$SignUp,
 			$elm$url$Url$Parser$s('signup')),
 			A2(
@@ -11657,16 +11701,6 @@ var $author$project$Main$subscriptions = function (_v0) {
 	return $elm$core$Platform$Sub$none;
 };
 var $elm$browser$Browser$Navigation$load = _Browser_load;
-var $author$project$Session$navKey = function (session) {
-	if (session.$ === 'LoggedIn') {
-		var key = session.a;
-		return key;
-	} else {
-		var key = session.a;
-		return key;
-	}
-};
-var $elm$browser$Browser$Navigation$pushUrl = _Browser_pushUrl;
 var $elm$url$Url$addPort = F2(
 	function (maybePort, starter) {
 		if (maybePort.$ === 'Nothing') {
@@ -11722,25 +11756,6 @@ var $author$project$Page$Club$Form = F4(
 var $author$project$Page$Club$ViewOwner = function (a) {
 	return {$: 'ViewOwner', a: a};
 };
-var $elm$url$Url$Builder$toQueryPair = function (_v0) {
-	var key = _v0.a;
-	var value = _v0.b;
-	return key + ('=' + value);
-};
-var $elm$url$Url$Builder$toQuery = function (parameters) {
-	if (!parameters.b) {
-		return '';
-	} else {
-		return '?' + A2(
-			$elm$core$String$join,
-			'&',
-			A2($elm$core$List$map, $elm$url$Url$Builder$toQueryPair, parameters));
-	}
-};
-var $elm$url$Url$Builder$absolute = F2(
-	function (pathSegments, parameters) {
-		return '/' + (A2($elm$core$String$join, '/', pathSegments) + $elm$url$Url$Builder$toQuery(parameters));
-	});
 var $author$project$Api$errorToString = function (error) {
 	switch (error.$) {
 		case 'BadUrl':
@@ -13439,6 +13454,11 @@ var $author$project$CommonHtml$viewNav = function (session) {
 				if (session.$ === 'LoggedIn') {
 					var viewer = session.b;
 					var userUrl = $author$project$Viewer$getUrl(viewer);
+					var logoutUrl = A2(
+						$elm$url$Url$Builder$absolute,
+						_List_fromArray(
+							['logout']),
+						_List_Nil);
 					return A2(
 						$elm$html$Html$div,
 						_List_fromArray(
@@ -13457,6 +13477,17 @@ var $author$project$CommonHtml$viewNav = function (session) {
 								_List_fromArray(
 									[
 										$elm$html$Html$text('Perfil')
+									])),
+								A2(
+								$elm$html$Html$a,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$href(logoutUrl),
+										$elm$html$Html$Attributes$class('btn btn-indigo-800')
+									]),
+								_List_fromArray(
+									[
+										$elm$html$Html$text('Logout')
 									]))
 							]));
 				} else {

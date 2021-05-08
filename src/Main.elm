@@ -16,6 +16,7 @@ import Page.SignUp as SignUp
 import Page.User as User
 import Route exposing (Route)
 import Route exposing (Route(..))
+import Url.Builder
 
 
 main : Program () Model Msg
@@ -66,6 +67,12 @@ changeRouteTo maybeRoute model =
       Just Route.Login ->
         Login.init session
           |> updateWith Login GotLoginMsg
+
+      Just Route.Logout ->
+        let
+          navKey = Session.navKey session
+        in
+        (Home (Anonymus navKey), Nav.pushUrl navKey (Url.Builder.absolute [] []))
 
       Just Route.SignUp ->
         SignUp.init session

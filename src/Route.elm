@@ -9,6 +9,7 @@ import Url.Parser as Parser exposing ((</>), Parser, oneOf, s, int)
 type Route
   = Home
   | Login
+  | Logout
   | SignUp
   | Clubs
   | Club Int
@@ -19,6 +20,7 @@ parser =
   oneOf
     [ Parser.map Home Parser.top
     , Parser.map Login (s "login")
+    , Parser.map Logout (s "logout")
     , Parser.map SignUp (s "signup")
     , Parser.map Clubs (s "clubs")
     , Parser.map Club (s "clubs" </> int)
@@ -54,6 +56,9 @@ routeToPieces route =
 
     Login ->
       [ "login" ]
+
+    Logout ->
+      [ "logout" ]
 
     SignUp ->
       [ "signup" ]
