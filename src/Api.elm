@@ -56,6 +56,25 @@ expectJson toMsg decoder =
           Err err ->
             Err (BadBody (Decode.errorToString err))
 
+expectWhatever : (Result ApiError () -> msg) -> Http.Expect msg
+expectWhatever toMsg =
+  Http.expectStringResponse toMsg <| \response ->
+    case response of
+      Http.BadUrl_ url ->
+        Err (BadUrl url)
+
+      Http.Timeout_ ->
+        Err Timeout
+
+      Http.NetworkError_ ->
+        Err NetworkError
+
+      Http.BadStatus_ metadata body ->
+        Err (BadStatus metadata.statusCode body)
+
+      Http.GoodStatus_ _ _ ->
+        Ok ()
+
 errorToString : ApiError -> String
 errorToString error =
   case error of

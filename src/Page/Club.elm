@@ -1,11 +1,13 @@
 module Page.Club exposing (..)
 
 import Browser
+import Browser.Navigation as Nav
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Http
 import Json.Encode as Encode
+import Url.Builder
 
 import Api
 import Club exposing (Club)
@@ -45,7 +47,8 @@ type Msg
   -- confirm new club
   -- cancel new club
   -- post club
-  -- delete club
+  | ConfirmDelete
+  | DeleteClub (Result Api.ApiError ())
   | InputName String
   | InputWebsite String
   | InputContact String
@@ -100,6 +103,22 @@ update msg model =
         Err error ->
           ({ model | error = Just (Api.errorToString error) }, Cmd.none)
 
+    (ConfirmDelete, ViewOwner club) ->
+      case Session.toViewer model.session of
+        Just viewer ->
+          (model, requestDelete club viewer)
+
+        Nothing ->
+          ({ model | error = Just "You shouldn't be able to do this " }, Cmd.none)
+
+    (DeleteClub result, ViewOwner _) ->
+      case result of
+        Ok _ ->
+          (model, Nav.pushUrl (Session.navKey model.session) (Url.Builder.absolute [] []))
+
+        Err error ->
+          ({ model | error = Just (Api.errorToString error) }, Cmd.none)
+
     (InputName name, Edit club form) ->
       updateForm (\f -> { f | name = name }) club form model
 
@@ -135,6 +154,13 @@ requestPatch club form viewer =
     { url = Api.club club.id
     , body = Http.jsonBody (patchEncoder form)
     , expect = Api.expectJson PatchClub Club.clubDecoder
+    } viewer
+
+requestDelete : Club -> Viewer -> Cmd Msg
+requestDelete club viewer =
+  Api.privateDelete
+    { url = Api.club club.id
+    , expect = Api.expectWhatever DeleteClub
     } viewer
 
 patchEncoder : Form -> Encode.Value
@@ -199,7 +225,7 @@ viewClub model =
         , viewOwner club
         , viewTournaments club
         , viewMembers club
-        , button [ class "border-none btn btn-red-500" ] [ text "Excluir" ]
+        , button [ class "border-none btn btn-red-500", onClick ConfirmDelete ] [ text "Excluir" ]
         ]
 
     Edit club _ ->

@@ -11722,6 +11722,25 @@ var $author$project$Page$Club$Form = F4(
 var $author$project$Page$Club$ViewOwner = function (a) {
 	return {$: 'ViewOwner', a: a};
 };
+var $elm$url$Url$Builder$toQueryPair = function (_v0) {
+	var key = _v0.a;
+	var value = _v0.b;
+	return key + ('=' + value);
+};
+var $elm$url$Url$Builder$toQuery = function (parameters) {
+	if (!parameters.b) {
+		return '';
+	} else {
+		return '?' + A2(
+			$elm$core$String$join,
+			'&',
+			A2($elm$core$List$map, $elm$url$Url$Builder$toQueryPair, parameters));
+	}
+};
+var $elm$url$Url$Builder$absolute = F2(
+	function (pathSegments, parameters) {
+		return '/' + (A2($elm$core$String$join, '/', pathSegments) + $elm$url$Url$Builder$toQuery(parameters));
+	});
 var $author$project$Api$errorToString = function (error) {
 	switch (error.$) {
 		case 'BadUrl':
@@ -11760,6 +11779,64 @@ var $author$project$Page$Club$initState = F2(
 			return $author$project$Page$Club$ViewAnonymus(club);
 		}
 	});
+var $author$project$Page$Club$DeleteClub = function (a) {
+	return {$: 'DeleteClub', a: a};
+};
+var $author$project$Api$expectWhatever = function (toMsg) {
+	return A2(
+		$elm$http$Http$expectStringResponse,
+		toMsg,
+		function (response) {
+			switch (response.$) {
+				case 'BadUrl_':
+					var url = response.a;
+					return $elm$core$Result$Err(
+						$author$project$Api$BadUrl(url));
+				case 'Timeout_':
+					return $elm$core$Result$Err($author$project$Api$Timeout);
+				case 'NetworkError_':
+					return $elm$core$Result$Err($author$project$Api$NetworkError);
+				case 'BadStatus_':
+					var metadata = response.a;
+					var body = response.b;
+					return $elm$core$Result$Err(
+						A2($author$project$Api$BadStatus, metadata.statusCode, body));
+				default:
+					return $elm$core$Result$Ok(_Utils_Tuple0);
+			}
+		});
+};
+var $elm$http$Http$Header = F2(
+	function (a, b) {
+		return {$: 'Header', a: a, b: b};
+	});
+var $elm$http$Http$header = $elm$http$Http$Header;
+var $author$project$Api$privateDelete = F2(
+	function (r, viewer) {
+		return $elm$http$Http$request(
+			{
+				body: $elm$http$Http$emptyBody,
+				expect: r.expect,
+				headers: _List_fromArray(
+					[
+						A2($elm$http$Http$header, 'Authorization', 'bearer ' + viewer.token)
+					]),
+				method: 'DELETE',
+				timeout: $elm$core$Maybe$Nothing,
+				tracker: $elm$core$Maybe$Nothing,
+				url: r.url
+			});
+	});
+var $author$project$Page$Club$requestDelete = F2(
+	function (club, viewer) {
+		return A2(
+			$author$project$Api$privateDelete,
+			{
+				expect: $author$project$Api$expectWhatever($author$project$Page$Club$DeleteClub),
+				url: $author$project$Api$club(club.id)
+			},
+			viewer);
+	});
 var $author$project$Page$Club$PatchClub = function (a) {
 	return {$: 'PatchClub', a: a};
 };
@@ -11791,11 +11868,6 @@ var $author$project$Page$Club$patchEncoder = function (form) {
 				maybeNull(form.localization))
 			]));
 };
-var $elm$http$Http$Header = F2(
-	function (a, b) {
-		return {$: 'Header', a: a, b: b};
-	});
-var $elm$http$Http$header = $elm$http$Http$Header;
 var $author$project$Api$privatePut = F2(
 	function (r, viewer) {
 		return $elm$http$Http$request(
@@ -11843,7 +11915,7 @@ var $author$project$Page$Club$validatePatch = function (form) {
 var $author$project$Page$Club$update = F2(
 	function (msg, model) {
 		var _v0 = _Utils_Tuple2(msg, model.state);
-		_v0$9:
+		_v0$11:
 		while (true) {
 			switch (_v0.a.$) {
 				case 'GotClub':
@@ -11885,7 +11957,7 @@ var $author$project$Page$Club$update = F2(
 								}),
 							$elm$core$Platform$Cmd$none);
 					} else {
-						break _v0$9;
+						break _v0$11;
 					}
 				case 'CancelEdit':
 					if (_v0.b.$ === 'Edit') {
@@ -11901,7 +11973,7 @@ var $author$project$Page$Club$update = F2(
 								}),
 							$elm$core$Platform$Cmd$none);
 					} else {
-						break _v0$9;
+						break _v0$11;
 					}
 				case 'ConfirmEdit':
 					if (_v0.b.$ === 'Edit') {
@@ -11937,7 +12009,7 @@ var $author$project$Page$Club$update = F2(
 								$elm$core$Platform$Cmd$none);
 						}
 					} else {
-						break _v0$9;
+						break _v0$11;
 					}
 				case 'PatchClub':
 					if (_v0.b.$ === 'Edit') {
@@ -11965,14 +12037,60 @@ var $author$project$Page$Club$update = F2(
 								$elm$core$Platform$Cmd$none);
 						}
 					} else {
-						break _v0$9;
+						break _v0$11;
+					}
+				case 'ConfirmDelete':
+					if (_v0.b.$ === 'ViewOwner') {
+						var _v11 = _v0.a;
+						var club = _v0.b.a;
+						var _v12 = $author$project$Session$toViewer(model.session);
+						if (_v12.$ === 'Just') {
+							var viewer = _v12.a;
+							return _Utils_Tuple2(
+								model,
+								A2($author$project$Page$Club$requestDelete, club, viewer));
+						} else {
+							return _Utils_Tuple2(
+								_Utils_update(
+									model,
+									{
+										error: $elm$core$Maybe$Just('You shouldn\'t be able to do this ')
+									}),
+								$elm$core$Platform$Cmd$none);
+						}
+					} else {
+						break _v0$11;
+					}
+				case 'DeleteClub':
+					if (_v0.b.$ === 'ViewOwner') {
+						var result = _v0.a.a;
+						if (result.$ === 'Ok') {
+							return _Utils_Tuple2(
+								model,
+								A2(
+									$elm$browser$Browser$Navigation$pushUrl,
+									$author$project$Session$navKey(model.session),
+									A2($elm$url$Url$Builder$absolute, _List_Nil, _List_Nil)));
+						} else {
+							var error = result.a;
+							return _Utils_Tuple2(
+								_Utils_update(
+									model,
+									{
+										error: $elm$core$Maybe$Just(
+											$author$project$Api$errorToString(error))
+									}),
+								$elm$core$Platform$Cmd$none);
+						}
+					} else {
+						break _v0$11;
 					}
 				case 'InputName':
 					if (_v0.b.$ === 'Edit') {
 						var name = _v0.a.a;
-						var _v11 = _v0.b;
-						var club = _v11.a;
-						var form = _v11.b;
+						var _v14 = _v0.b;
+						var club = _v14.a;
+						var form = _v14.b;
 						return A4(
 							$author$project$Page$Club$updateForm,
 							function (f) {
@@ -11984,14 +12102,14 @@ var $author$project$Page$Club$update = F2(
 							form,
 							model);
 					} else {
-						break _v0$9;
+						break _v0$11;
 					}
 				case 'InputWebsite':
 					if (_v0.b.$ === 'Edit') {
 						var website = _v0.a.a;
-						var _v12 = _v0.b;
-						var club = _v12.a;
-						var form = _v12.b;
+						var _v15 = _v0.b;
+						var club = _v15.a;
+						var form = _v15.b;
 						return A4(
 							$author$project$Page$Club$updateForm,
 							function (f) {
@@ -12003,14 +12121,14 @@ var $author$project$Page$Club$update = F2(
 							form,
 							model);
 					} else {
-						break _v0$9;
+						break _v0$11;
 					}
 				case 'InputContact':
 					if (_v0.b.$ === 'Edit') {
 						var contact = _v0.a.a;
-						var _v13 = _v0.b;
-						var club = _v13.a;
-						var form = _v13.b;
+						var _v16 = _v0.b;
+						var club = _v16.a;
+						var form = _v16.b;
 						return A4(
 							$author$project$Page$Club$updateForm,
 							function (f) {
@@ -12022,14 +12140,14 @@ var $author$project$Page$Club$update = F2(
 							form,
 							model);
 					} else {
-						break _v0$9;
+						break _v0$11;
 					}
 				default:
 					if (_v0.b.$ === 'Edit') {
 						var localization = _v0.a.a;
-						var _v14 = _v0.b;
-						var club = _v14.a;
-						var form = _v14.b;
+						var _v17 = _v0.b;
+						var club = _v17.a;
+						var form = _v17.b;
 						return A4(
 							$author$project$Page$Club$updateForm,
 							function (f) {
@@ -12041,7 +12159,7 @@ var $author$project$Page$Club$update = F2(
 							form,
 							model);
 					} else {
-						break _v0$9;
+						break _v0$11;
 					}
 			}
 		}
@@ -12078,25 +12196,6 @@ var $author$project$Page$Clubs$update = F2(
 var $author$project$Session$LoggedIn = F2(
 	function (a, b) {
 		return {$: 'LoggedIn', a: a, b: b};
-	});
-var $elm$url$Url$Builder$toQueryPair = function (_v0) {
-	var key = _v0.a;
-	var value = _v0.b;
-	return key + ('=' + value);
-};
-var $elm$url$Url$Builder$toQuery = function (parameters) {
-	if (!parameters.b) {
-		return '';
-	} else {
-		return '?' + A2(
-			$elm$core$String$join,
-			'&',
-			A2($elm$core$List$map, $elm$url$Url$Builder$toQueryPair, parameters));
-	}
-};
-var $elm$url$Url$Builder$absolute = F2(
-	function (pathSegments, parameters) {
-		return '/' + (A2($elm$core$String$join, '/', pathSegments) + $elm$url$Url$Builder$toQuery(parameters));
 	});
 var $author$project$Page$Login$redirectHome = function (session) {
 	return A2(
@@ -12838,6 +12937,7 @@ var $author$project$Page$Club$stateToTitle = function (state) {
 			return 'Clube - Novo';
 	}
 };
+var $author$project$Page$Club$ConfirmDelete = {$: 'ConfirmDelete'};
 var $author$project$Page$Club$clubCardElement = F2(
 	function (title, value) {
 		return A2(
@@ -13222,7 +13322,8 @@ var $author$project$Page$Club$viewClub = function (model) {
 						$elm$html$Html$button,
 						_List_fromArray(
 							[
-								$elm$html$Html$Attributes$class('border-none btn btn-red-500')
+								$elm$html$Html$Attributes$class('border-none btn btn-red-500'),
+								$elm$html$Html$Events$onClick($author$project$Page$Club$ConfirmDelete)
 							]),
 						_List_fromArray(
 							[
@@ -14111,4 +14212,4 @@ var $author$project$Main$view = function (model) {
 var $author$project$Main$main = $elm$browser$Browser$application(
 	{init: $author$project$Main$init, onUrlChange: $author$project$Main$UrlChanged, onUrlRequest: $author$project$Main$LinkClicked, subscriptions: $author$project$Main$subscriptions, update: $author$project$Main$update, view: $author$project$Main$view});
 _Platform_export({'Main':{'init':$author$project$Main$main(
-	$elm$json$Json$Decode$succeed(_Utils_Tuple0))({"versions":{"elm":"0.19.1"},"types":{"message":"Main.Msg","aliases":{"Url.Url":{"args":[],"type":"{ protocol : Url.Protocol, host : String.String, port_ : Maybe.Maybe Basics.Int, path : String.String, query : Maybe.Maybe String.String, fragment : Maybe.Maybe String.String }"},"Club.Club":{"args":[],"type":"{ id : Basics.Int, createdAt : String.String, name : String.String, website : String.String, contact : String.String, localization : String.String, owner : UserShort.UserShort }"},"ClubShort.ClubShort":{"args":[],"type":"{ id : Basics.Int, createdAt : String.String, name : String.String, website : String.String, contact : String.String, localization : String.String, totalPlayers : Basics.Int, totalTournaments : Basics.Int }"},"User.User":{"args":[],"type":"{ id : Basics.Int, createdAt : String.String, username : String.String, email : String.String, ownedClubs : List.List ClubShort.ClubShort }"},"UserShort.UserShort":{"args":[],"type":"{ id : Basics.Int, createdAt : String.String, username : String.String, totalTournaments : Basics.Int }"},"Viewer.Viewer":{"args":[],"type":"{ id : Basics.Int, username : String.String, email : String.String, token : String.String }"}},"unions":{"Main.Msg":{"args":[],"tags":{"LinkClicked":["Browser.UrlRequest"],"UrlChanged":["Url.Url"],"GotLoginMsg":["Page.Login.Msg"],"GotSignUpMsg":["Page.SignUp.Msg"],"GotClubsMsg":["Page.Clubs.Msg"],"GotClubMsg":["Page.Club.Msg"],"GotUserMsg":["Page.User.Msg"]}},"Basics.Int":{"args":[],"tags":{"Int":[]}},"Maybe.Maybe":{"args":["a"],"tags":{"Just":["a"],"Nothing":[]}},"Page.Club.Msg":{"args":[],"tags":{"GotClub":["Result.Result Api.ApiError Club.Club"],"EditClub":[],"ConfirmEdit":[],"CancelEdit":[],"PatchClub":["Result.Result Api.ApiError Club.Club"],"InputName":["String.String"],"InputWebsite":["String.String"],"InputContact":["String.String"],"InputLocalization":["String.String"]}},"Page.Clubs.Msg":{"args":[],"tags":{"GotClubs":["Result.Result Api.ApiError (List.List ClubShort.ClubShort)"]}},"Page.Login.Msg":{"args":[],"tags":{"RequestLogin":[],"UserLogin":["Result.Result Api.ApiError Viewer.Viewer"],"InputEmail":["String.String"],"InputPassword":["String.String"]}},"Page.SignUp.Msg":{"args":[],"tags":{"RequestSignUp":[],"UserSignUp":["Result.Result Api.ApiError Viewer.Viewer"],"InputUsername":["String.String"],"InputEmail":["String.String"],"InputPassword":["String.String"],"InputPasswordAgain":["String.String"]}},"Page.User.Msg":{"args":[],"tags":{"GotUser":["Result.Result Api.ApiError User.User"],"EditUser":[],"CancelEdit":[],"ConfirmEdit":[],"PatchUser":["Result.Result Api.ApiError User.User"],"InputUsername":["String.String"],"InputEmail":["String.String"],"InputPassword":["String.String"],"InputPasswordAgain":["String.String"]}},"Url.Protocol":{"args":[],"tags":{"Http":[],"Https":[]}},"String.String":{"args":[],"tags":{"String":[]}},"Browser.UrlRequest":{"args":[],"tags":{"Internal":["Url.Url"],"External":["String.String"]}},"Api.ApiError":{"args":[],"tags":{"BadUrl":["String.String"],"Timeout":[],"NetworkError":[],"BadStatus":["Basics.Int","String.String"],"BadBody":["String.String"]}},"List.List":{"args":["a"],"tags":{}},"Result.Result":{"args":["error","value"],"tags":{"Ok":["value"],"Err":["error"]}}}}})}});}(this));
+	$elm$json$Json$Decode$succeed(_Utils_Tuple0))({"versions":{"elm":"0.19.1"},"types":{"message":"Main.Msg","aliases":{"Url.Url":{"args":[],"type":"{ protocol : Url.Protocol, host : String.String, port_ : Maybe.Maybe Basics.Int, path : String.String, query : Maybe.Maybe String.String, fragment : Maybe.Maybe String.String }"},"Club.Club":{"args":[],"type":"{ id : Basics.Int, createdAt : String.String, name : String.String, website : String.String, contact : String.String, localization : String.String, owner : UserShort.UserShort }"},"ClubShort.ClubShort":{"args":[],"type":"{ id : Basics.Int, createdAt : String.String, name : String.String, website : String.String, contact : String.String, localization : String.String, totalPlayers : Basics.Int, totalTournaments : Basics.Int }"},"User.User":{"args":[],"type":"{ id : Basics.Int, createdAt : String.String, username : String.String, email : String.String, ownedClubs : List.List ClubShort.ClubShort }"},"UserShort.UserShort":{"args":[],"type":"{ id : Basics.Int, createdAt : String.String, username : String.String, totalTournaments : Basics.Int }"},"Viewer.Viewer":{"args":[],"type":"{ id : Basics.Int, username : String.String, email : String.String, token : String.String }"}},"unions":{"Main.Msg":{"args":[],"tags":{"LinkClicked":["Browser.UrlRequest"],"UrlChanged":["Url.Url"],"GotLoginMsg":["Page.Login.Msg"],"GotSignUpMsg":["Page.SignUp.Msg"],"GotClubsMsg":["Page.Clubs.Msg"],"GotClubMsg":["Page.Club.Msg"],"GotUserMsg":["Page.User.Msg"]}},"Basics.Int":{"args":[],"tags":{"Int":[]}},"Maybe.Maybe":{"args":["a"],"tags":{"Just":["a"],"Nothing":[]}},"Page.Club.Msg":{"args":[],"tags":{"GotClub":["Result.Result Api.ApiError Club.Club"],"EditClub":[],"ConfirmEdit":[],"CancelEdit":[],"PatchClub":["Result.Result Api.ApiError Club.Club"],"ConfirmDelete":[],"DeleteClub":["Result.Result Api.ApiError ()"],"InputName":["String.String"],"InputWebsite":["String.String"],"InputContact":["String.String"],"InputLocalization":["String.String"]}},"Page.Clubs.Msg":{"args":[],"tags":{"GotClubs":["Result.Result Api.ApiError (List.List ClubShort.ClubShort)"]}},"Page.Login.Msg":{"args":[],"tags":{"RequestLogin":[],"UserLogin":["Result.Result Api.ApiError Viewer.Viewer"],"InputEmail":["String.String"],"InputPassword":["String.String"]}},"Page.SignUp.Msg":{"args":[],"tags":{"RequestSignUp":[],"UserSignUp":["Result.Result Api.ApiError Viewer.Viewer"],"InputUsername":["String.String"],"InputEmail":["String.String"],"InputPassword":["String.String"],"InputPasswordAgain":["String.String"]}},"Page.User.Msg":{"args":[],"tags":{"GotUser":["Result.Result Api.ApiError User.User"],"EditUser":[],"CancelEdit":[],"ConfirmEdit":[],"PatchUser":["Result.Result Api.ApiError User.User"],"InputUsername":["String.String"],"InputEmail":["String.String"],"InputPassword":["String.String"],"InputPasswordAgain":["String.String"]}},"Url.Protocol":{"args":[],"tags":{"Http":[],"Https":[]}},"String.String":{"args":[],"tags":{"String":[]}},"Browser.UrlRequest":{"args":[],"tags":{"Internal":["Url.Url"],"External":["String.String"]}},"Api.ApiError":{"args":[],"tags":{"BadUrl":["String.String"],"Timeout":[],"NetworkError":[],"BadStatus":["Basics.Int","String.String"],"BadBody":["String.String"]}},"List.List":{"args":["a"],"tags":{}},"Result.Result":{"args":["error","value"],"tags":{"Ok":["value"],"Err":["error"]}}}}})}});}(this));

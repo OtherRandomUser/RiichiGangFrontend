@@ -17,6 +17,7 @@ navKey session =
     Anonymus key ->
       key
 
+toViewer : Session -> Maybe Viewer
 toViewer session =
   case session of
     LoggedIn _ viewer ->
