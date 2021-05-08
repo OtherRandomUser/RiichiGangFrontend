@@ -16,3 +16,11 @@ navKey session =
 
     Anonymus key ->
       key
+
+toViewer session =
+  case session of
+    LoggedIn _ viewer ->
+      Just viewer
+
+    Anonymus _ ->
+      Nothing

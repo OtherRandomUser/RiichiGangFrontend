@@ -208,7 +208,7 @@ viewUserCard state =
           ]
 
       EditProfile _ _ ->
-        div [ class divClass ]
+        div [ class (divClass ++ " space-y-4") ]
           [ p [] [ text "Preencha os campos que deseja atualizar e pressione confirmar" ]
           , input [ type_ "email", placeholder "Email", class "login-input", onInput InputEmail] []
           , input [ type_ "text", placeholder "Nome de Usuário", class "login-input", onInput InputUsername] []
@@ -222,7 +222,7 @@ viewUserCard state =
 userCardElement : String -> String -> Html msg
 userCardElement title value = 
   div [ class "block" ]
-    [ strong [ class "inline-block font-bold" ] [ text title ]
+    [ strong [ class "inline-block font-bold space-x-2" ] [ text title ]
     , span [ class "inline-block" ] [ text value ]
     ]
 

@@ -60,7 +60,7 @@ view model =
         text ""
 
     , div [ class "m-2" ]
-      [ h1 [ class "list-heading" ] [ text "Clubes do Usuário" ]
+      [ h1 [ class "list-heading" ] [ text "Clubes" ]
       , if List.isEmpty model.clubs then
           p [] [ text "Nada ainda" ]
         else

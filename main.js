@@ -10774,11 +10774,12 @@ var $author$project$Main$User = function (a) {
 	return {$: 'User', a: a};
 };
 var $author$project$Page$Club$Model = F3(
-	function (session, error, club) {
-		return {club: club, error: error, session: session};
+	function (session, error, state) {
+		return {error: error, session: session, state: state};
 	});
-var $author$project$Page$Club$GotClubs = function (a) {
-	return {$: 'GotClubs', a: a};
+var $author$project$Page$Club$Uninitialized = {$: 'Uninitialized'};
+var $author$project$Page$Club$GotClub = function (a) {
+	return {$: 'GotClub', a: a};
 };
 var $author$project$Api$backendUrl = 'https://localhost:5001/api';
 var $author$project$Api$club = function (id) {
@@ -11102,14 +11103,14 @@ var $elm$http$Http$get = function (r) {
 var $author$project$Page$Club$get = function (id) {
 	return $elm$http$Http$get(
 		{
-			expect: A2($author$project$Api$expectJson, $author$project$Page$Club$GotClubs, $author$project$Club$clubDecoder),
+			expect: A2($author$project$Api$expectJson, $author$project$Page$Club$GotClub, $author$project$Club$clubDecoder),
 			url: $author$project$Api$club(id)
 		});
 };
 var $author$project$Page$Club$init = F2(
 	function (session, clubId) {
 		return _Utils_Tuple2(
-			A3($author$project$Page$Club$Model, session, $elm$core$Maybe$Nothing, $elm$core$Maybe$Nothing),
+			A3($author$project$Page$Club$Model, session, $elm$core$Maybe$Nothing, $author$project$Page$Club$Uninitialized),
 			$author$project$Page$Club$get(clubId));
 	});
 var $author$project$Page$Clubs$Model = F3(
@@ -11727,6 +11728,30 @@ var $author$project$Api$errorToString = function (error) {
 			return 'Falha interna: ' + body;
 	}
 };
+var $author$project$Page$Club$ViewAnonymus = function (a) {
+	return {$: 'ViewAnonymus', a: a};
+};
+var $author$project$Page$Club$ViewOwner = function (a) {
+	return {$: 'ViewOwner', a: a};
+};
+var $author$project$Session$toViewer = function (session) {
+	if (session.$ === 'LoggedIn') {
+		var viewer = session.b;
+		return $elm$core$Maybe$Just(viewer);
+	} else {
+		return $elm$core$Maybe$Nothing;
+	}
+};
+var $author$project$Page$Club$initState = F2(
+	function (club, session) {
+		var _v0 = $author$project$Session$toViewer(session);
+		if (_v0.$ === 'Just') {
+			var viewer = _v0.a;
+			return _Utils_eq(club.owner.id, viewer.id) ? $author$project$Page$Club$ViewOwner(club) : $author$project$Page$Club$ViewAnonymus(club);
+		} else {
+			return $author$project$Page$Club$ViewAnonymus(club);
+		}
+	});
 var $author$project$Page$Club$update = F2(
 	function (msg, model) {
 		var result = msg.a;
@@ -11736,8 +11761,8 @@ var $author$project$Page$Club$update = F2(
 				_Utils_update(
 					model,
 					{
-						club: $elm$core$Maybe$Just(club),
-						error: $elm$core$Maybe$Nothing
+						error: $elm$core$Maybe$Nothing,
+						state: A2($author$project$Page$Club$initState, club, model.session)
 					}),
 				$elm$core$Platform$Cmd$none);
 		} else {
@@ -12138,7 +12163,6 @@ var $author$project$Page$User$initState = F2(
 			return $author$project$Page$User$ViewAnonymus(user);
 		}
 	});
-var $elm$core$Debug$log = _Debug_log;
 var $author$project$Page$User$PatchUser = function (a) {
 	return {$: 'PatchUser', a: a};
 };
@@ -12185,7 +12209,6 @@ var $author$project$Api$privatePut = F2(
 var $author$project$Api$users = $author$project$Api$backendUrl + '/users';
 var $author$project$Page$User$requestPatch = F3(
 	function (_v0, form, viewer) {
-		var _v1 = A2($elm$core$Debug$log, 'users route', $author$project$Api$users);
 		return A2(
 			$author$project$Api$privatePut,
 			{
@@ -12214,13 +12237,12 @@ var $author$project$Page$User$validatePatch = function (form) {
 };
 var $author$project$Page$User$update = F2(
 	function (msg, model) {
-		var _v0 = A2($elm$core$Debug$log, 'message', msg);
-		var _v1 = _Utils_Tuple2(msg, model.state);
-		_v1$9:
+		var _v0 = _Utils_Tuple2(msg, model.state);
+		_v0$9:
 		while (true) {
-			switch (_v1.a.$) {
+			switch (_v0.a.$) {
 				case 'GotUser':
-					var result = _v1.a.a;
+					var result = _v0.a.a;
 					if (result.$ === 'Ok') {
 						var user = result.a;
 						return _Utils_Tuple2(
@@ -12243,9 +12265,9 @@ var $author$project$Page$User$update = F2(
 							$elm$core$Platform$Cmd$none);
 					}
 				case 'EditUser':
-					if (_v1.b.$ === 'ViewProfile') {
-						var _v3 = _v1.a;
-						var user = _v1.b.a;
+					if (_v0.b.$ === 'ViewProfile') {
+						var _v2 = _v0.a;
+						var user = _v0.b.a;
 						return _Utils_Tuple2(
 							_Utils_update(
 								model,
@@ -12258,13 +12280,13 @@ var $author$project$Page$User$update = F2(
 								}),
 							$elm$core$Platform$Cmd$none);
 					} else {
-						break _v1$9;
+						break _v0$9;
 					}
 				case 'CancelEdit':
-					if (_v1.b.$ === 'EditProfile') {
-						var _v4 = _v1.a;
-						var _v5 = _v1.b;
-						var user = _v5.a;
+					if (_v0.b.$ === 'EditProfile') {
+						var _v3 = _v0.a;
+						var _v4 = _v0.b;
+						var user = _v4.a;
 						return _Utils_Tuple2(
 							_Utils_update(
 								model,
@@ -12274,19 +12296,19 @@ var $author$project$Page$User$update = F2(
 								}),
 							$elm$core$Platform$Cmd$none);
 					} else {
-						break _v1$9;
+						break _v0$9;
 					}
 				case 'ConfirmEdit':
-					if (_v1.b.$ === 'EditProfile') {
-						var _v6 = _v1.a;
-						var _v7 = _v1.b;
-						var user = _v7.a;
-						var form = _v7.b;
-						var _v8 = $author$project$Page$User$validatePatch(form);
-						if (_v8.$ === 'Ok') {
-							var _v9 = model.session;
-							if (_v9.$ === 'LoggedIn') {
-								var viewer = _v9.b;
+					if (_v0.b.$ === 'EditProfile') {
+						var _v5 = _v0.a;
+						var _v6 = _v0.b;
+						var user = _v6.a;
+						var form = _v6.b;
+						var _v7 = $author$project$Page$User$validatePatch(form);
+						if (_v7.$ === 'Ok') {
+							var _v8 = model.session;
+							if (_v8.$ === 'LoggedIn') {
+								var viewer = _v8.b;
 								return _Utils_Tuple2(
 									model,
 									A3($author$project$Page$User$requestPatch, user, form, viewer));
@@ -12300,7 +12322,7 @@ var $author$project$Page$User$update = F2(
 									$elm$core$Platform$Cmd$none);
 							}
 						} else {
-							var err = _v8.a;
+							var err = _v7.a;
 							return _Utils_Tuple2(
 								_Utils_update(
 									model,
@@ -12310,12 +12332,12 @@ var $author$project$Page$User$update = F2(
 								$elm$core$Platform$Cmd$none);
 						}
 					} else {
-						break _v1$9;
+						break _v0$9;
 					}
 				case 'PatchUser':
-					if (_v1.b.$ === 'EditProfile') {
-						var result = _v1.a.a;
-						var _v10 = _v1.b;
+					if (_v0.b.$ === 'EditProfile') {
+						var result = _v0.a.a;
+						var _v9 = _v0.b;
 						if (result.$ === 'Ok') {
 							var user = result.a;
 							return _Utils_Tuple2(
@@ -12338,14 +12360,14 @@ var $author$project$Page$User$update = F2(
 								$elm$core$Platform$Cmd$none);
 						}
 					} else {
-						break _v1$9;
+						break _v0$9;
 					}
 				case 'InputUsername':
-					if (_v1.b.$ === 'EditProfile') {
-						var username = _v1.a.a;
-						var _v12 = _v1.b;
-						var user = _v12.a;
-						var form = _v12.b;
+					if (_v0.b.$ === 'EditProfile') {
+						var username = _v0.a.a;
+						var _v11 = _v0.b;
+						var user = _v11.a;
+						var form = _v11.b;
 						return A4(
 							$author$project$Page$User$updateForm,
 							function (f) {
@@ -12357,14 +12379,14 @@ var $author$project$Page$User$update = F2(
 							form,
 							model);
 					} else {
-						break _v1$9;
+						break _v0$9;
 					}
 				case 'InputEmail':
-					if (_v1.b.$ === 'EditProfile') {
-						var email = _v1.a.a;
-						var _v13 = _v1.b;
-						var user = _v13.a;
-						var form = _v13.b;
+					if (_v0.b.$ === 'EditProfile') {
+						var email = _v0.a.a;
+						var _v12 = _v0.b;
+						var user = _v12.a;
+						var form = _v12.b;
 						return A4(
 							$author$project$Page$User$updateForm,
 							function (f) {
@@ -12376,14 +12398,14 @@ var $author$project$Page$User$update = F2(
 							form,
 							model);
 					} else {
-						break _v1$9;
+						break _v0$9;
 					}
 				case 'InputPassword':
-					if (_v1.b.$ === 'EditProfile') {
-						var password = _v1.a.a;
-						var _v14 = _v1.b;
-						var user = _v14.a;
-						var form = _v14.b;
+					if (_v0.b.$ === 'EditProfile') {
+						var password = _v0.a.a;
+						var _v13 = _v0.b;
+						var user = _v13.a;
+						var form = _v13.b;
 						return A4(
 							$author$project$Page$User$updateForm,
 							function (f) {
@@ -12395,14 +12417,14 @@ var $author$project$Page$User$update = F2(
 							form,
 							model);
 					} else {
-						break _v1$9;
+						break _v0$9;
 					}
 				default:
-					if (_v1.b.$ === 'EditProfile') {
-						var passwordAgain = _v1.a.a;
-						var _v15 = _v1.b;
-						var user = _v15.a;
-						var form = _v15.b;
+					if (_v0.b.$ === 'EditProfile') {
+						var passwordAgain = _v0.a.a;
+						var _v14 = _v0.b;
+						var user = _v14.a;
+						var form = _v14.b;
 						return A4(
 							$author$project$Page$User$updateForm,
 							function (f) {
@@ -12414,7 +12436,7 @@ var $author$project$Page$User$update = F2(
 							form,
 							model);
 					} else {
-						break _v1$9;
+						break _v0$9;
 					}
 			}
 		}
@@ -12551,6 +12573,23 @@ var $author$project$CommonHtml$errorCard = function (msg) {
 					]))
 			]));
 };
+var $author$project$Page$Club$stateToTitle = function (state) {
+	switch (state.$) {
+		case 'Uninitialized':
+			return 'Clube';
+		case 'ViewAnonymus':
+			var club = state.a;
+			return 'Clube - ' + club.name;
+		case 'ViewOwner':
+			var club = state.a;
+			return 'Clube - ' + club.name;
+		case 'Edit':
+			var club = state.a;
+			return 'Clube - ' + club.name;
+		default:
+			return 'Clube - Novo';
+	}
+};
 var $author$project$Page$Club$clubCardElement = F2(
 	function (title, value) {
 		return A2(
@@ -12596,7 +12635,10 @@ var $author$project$Page$Club$viewClubCard = function (club) {
 			[
 				A2(
 				$elm$html$Html$h1,
-				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('font-bold text-xl')
+					]),
 				_List_fromArray(
 					[
 						$elm$html$Html$text(club.name)
@@ -12607,7 +12649,119 @@ var $author$project$Page$Club$viewClubCard = function (club) {
 				A2($author$project$Page$Club$clubCardElement, 'Contato', club.contact)
 			]));
 };
-var $author$project$Page$Club$viewMembers = function (maybeClub) {
+var $elm$html$Html$Attributes$placeholder = $elm$html$Html$Attributes$stringProperty('placeholder');
+var $author$project$Page$Club$viewClubCardEdit = function () {
+	var divClass = 'container bg-indigo-500 rounded-lg text-white p-6 my-4 max-w-lg space-y-4';
+	return A2(
+		$elm$html$Html$div,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class(divClass)
+			]),
+		_List_fromArray(
+			[
+				A2(
+				$elm$html$Html$p,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text('Preencha os campos que deseja atualizar e pressione confirmar')
+					])),
+				A2(
+				$elm$html$Html$input,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$type_('text'),
+						$elm$html$Html$Attributes$placeholder('Localização'),
+						$elm$html$Html$Attributes$class('login-input')
+					]),
+				_List_Nil),
+				A2(
+				$elm$html$Html$input,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$type_('text'),
+						$elm$html$Html$Attributes$placeholder('Fundação'),
+						$elm$html$Html$Attributes$class('login-input')
+					]),
+				_List_Nil),
+				A2(
+				$elm$html$Html$input,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$type_('text'),
+						$elm$html$Html$Attributes$placeholder('Site'),
+						$elm$html$Html$Attributes$class('login-input')
+					]),
+				_List_Nil),
+				A2(
+				$elm$html$Html$input,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$type_('text'),
+						$elm$html$Html$Attributes$placeholder('Contato'),
+						$elm$html$Html$Attributes$class('login-input')
+					]),
+				_List_Nil),
+				A2(
+				$elm$html$Html$button,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('border-none btn btn-green-500')
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('Confirmar')
+					])),
+				A2(
+				$elm$html$Html$button,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('border-none btn btn-red-500')
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('Cancelar')
+					]))
+			]));
+}();
+var $author$project$Page$Club$viewClubCardOwner = function (club) {
+	var divClass = 'container bg-indigo-500 rounded-lg text-white p-6 my-4 max-w-lg';
+	return A2(
+		$elm$html$Html$div,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class(divClass)
+			]),
+		_List_fromArray(
+			[
+				A2(
+				$elm$html$Html$h1,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('font-bold text-xl')
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text(club.name)
+					])),
+				A2($author$project$Page$Club$clubCardElement, 'Localização', club.localization),
+				A2($author$project$Page$Club$clubCardElement, 'Fundação', club.createdAt),
+				A2($author$project$Page$Club$clubCardElement, 'Site', club.website),
+				A2($author$project$Page$Club$clubCardElement, 'Contato', club.contact),
+				A2(
+				$elm$html$Html$button,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('btn btn-indigo-500 mt-4')
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('Editar')
+					]))
+			]));
+};
+var $author$project$Page$Club$viewMembers = function (_v0) {
 	return A2(
 		$elm$html$Html$div,
 		_List_fromArray(
@@ -12634,27 +12788,196 @@ var $author$project$Page$Club$viewMembers = function (maybeClub) {
 					]),
 				_List_fromArray(
 					[
-						function () {
-						if (maybeClub.$ === 'Just') {
-							return A2(
-								$elm$html$Html$p,
-								_List_Nil,
-								_List_fromArray(
-									[
-										$elm$html$Html$text('TODO')
-									]));
-						} else {
-							return A2(
-								$elm$html$Html$p,
-								_List_Nil,
-								_List_fromArray(
-									[
-										$elm$html$Html$text('Nada ainda')
-									]));
-						}
-					}()
+						A2(
+						$elm$html$Html$p,
+						_List_Nil,
+						_List_fromArray(
+							[
+								$elm$html$Html$text('TODO')
+							]))
 					]))
 			]));
+};
+var $author$project$UserShort$getUrl = function (user) {
+	return A2(
+		$elm$url$Url$Builder$absolute,
+		_List_fromArray(
+			[
+				'users',
+				$elm$core$String$fromInt(user.id)
+			]),
+		_List_Nil);
+};
+var $author$project$UserShort$view = function (user) {
+	return A2(
+		$elm$html$Html$div,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('list-item')
+			]),
+		_List_fromArray(
+			[
+				A2(
+				$elm$html$Html$a,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$href(
+						$author$project$UserShort$getUrl(user)),
+						$elm$html$Html$Attributes$class('flex-grow hover:underline')
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text(user.username)
+					])),
+				A2(
+				$elm$html$Html$span,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text(
+						$elm$core$String$fromInt(user.totalTournaments) + ' Torneios')
+					])),
+				A2(
+				$elm$html$Html$span,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text(user.createdAt)
+					]))
+			]));
+};
+var $author$project$Page$Club$viewOwner = function (club) {
+	return A2(
+		$elm$html$Html$div,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('m-2')
+			]),
+		_List_fromArray(
+			[
+				A2(
+				$elm$html$Html$h1,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('list-heading')
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('Dono do Clube')
+					])),
+				A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('space-y-4')
+					]),
+				_List_fromArray(
+					[
+						$author$project$UserShort$view(club.owner)
+					]))
+			]));
+};
+var $author$project$Page$Club$viewTournaments = function (_v0) {
+	return A2(
+		$elm$html$Html$div,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('m-2')
+			]),
+		_List_fromArray(
+			[
+				A2(
+				$elm$html$Html$h1,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('list-heading')
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('Torneios')
+					])),
+				A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('space-y-4')
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$p,
+						_List_Nil,
+						_List_fromArray(
+							[
+								$elm$html$Html$text('TODO')
+							]))
+					]))
+			]));
+};
+var $author$project$Page$Club$viewClub = function (model) {
+	var _v0 = model.state;
+	switch (_v0.$) {
+		case 'Uninitialized':
+			return A2(
+				$elm$html$Html$p,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text('Carregando...')
+					]));
+		case 'ViewAnonymus':
+			var club = _v0.a;
+			return A2(
+				$elm$html$Html$div,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$author$project$Page$Club$viewClubCard(club),
+						$author$project$Page$Club$viewOwner(club),
+						$author$project$Page$Club$viewTournaments(club),
+						$author$project$Page$Club$viewMembers(club)
+					]));
+		case 'ViewOwner':
+			var club = _v0.a;
+			return A2(
+				$elm$html$Html$div,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$author$project$Page$Club$viewClubCardOwner(club),
+						$author$project$Page$Club$viewOwner(club),
+						$author$project$Page$Club$viewTournaments(club),
+						$author$project$Page$Club$viewMembers(club),
+						A2(
+						$elm$html$Html$button,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('border-none btn btn-red-500')
+							]),
+						_List_fromArray(
+							[
+								$elm$html$Html$text('Excluir')
+							]))
+					]));
+		case 'Edit':
+			var club = _v0.a;
+			return A2(
+				$elm$html$Html$div,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$author$project$Page$Club$viewClubCardEdit,
+						$author$project$Page$Club$viewOwner(club),
+						$author$project$Page$Club$viewTournaments(club),
+						$author$project$Page$Club$viewMembers(club)
+					]));
+		default:
+			return A2(
+				$elm$html$Html$div,
+				_List_Nil,
+				_List_fromArray(
+					[$author$project$Page$Club$viewClubCardEdit]));
+	}
 };
 var $author$project$Viewer$getUrl = function (viewer) {
 	return A2(
@@ -12801,157 +13124,7 @@ var $author$project$CommonHtml$viewNav = function (session) {
 			}()
 			]));
 };
-var $author$project$UserShort$getUrl = function (user) {
-	return A2(
-		$elm$url$Url$Builder$absolute,
-		_List_fromArray(
-			[
-				'users',
-				$elm$core$String$fromInt(user.id)
-			]),
-		_List_Nil);
-};
-var $author$project$UserShort$view = function (user) {
-	return A2(
-		$elm$html$Html$div,
-		_List_fromArray(
-			[
-				$elm$html$Html$Attributes$class('list-item')
-			]),
-		_List_fromArray(
-			[
-				A2(
-				$elm$html$Html$a,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$href(
-						$author$project$UserShort$getUrl(user)),
-						$elm$html$Html$Attributes$class('flex-grow hover:underline')
-					]),
-				_List_fromArray(
-					[
-						$elm$html$Html$text(user.username)
-					])),
-				A2(
-				$elm$html$Html$span,
-				_List_Nil,
-				_List_fromArray(
-					[
-						$elm$html$Html$text(
-						$elm$core$String$fromInt(user.totalTournaments) + ' Torneios')
-					])),
-				A2(
-				$elm$html$Html$span,
-				_List_Nil,
-				_List_fromArray(
-					[
-						$elm$html$Html$text(user.createdAt)
-					]))
-			]));
-};
-var $author$project$Page$Club$viewOwner = function (maybeClub) {
-	return A2(
-		$elm$html$Html$div,
-		_List_fromArray(
-			[
-				$elm$html$Html$Attributes$class('m-2')
-			]),
-		_List_fromArray(
-			[
-				A2(
-				$elm$html$Html$h1,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('list-heading')
-					]),
-				_List_fromArray(
-					[
-						$elm$html$Html$text('Dono do Clube')
-					])),
-				A2(
-				$elm$html$Html$div,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('space-y-4')
-					]),
-				_List_fromArray(
-					[
-						function () {
-						if (maybeClub.$ === 'Just') {
-							var club = maybeClub.a;
-							return $author$project$UserShort$view(club.owner);
-						} else {
-							return A2(
-								$elm$html$Html$p,
-								_List_Nil,
-								_List_fromArray(
-									[
-										$elm$html$Html$text('Nada ainda')
-									]));
-						}
-					}()
-					]))
-			]));
-};
-var $author$project$Page$Club$viewTournaments = function (maybeClub) {
-	return A2(
-		$elm$html$Html$div,
-		_List_fromArray(
-			[
-				$elm$html$Html$Attributes$class('m-2')
-			]),
-		_List_fromArray(
-			[
-				A2(
-				$elm$html$Html$h1,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('list-heading')
-					]),
-				_List_fromArray(
-					[
-						$elm$html$Html$text('Torneios')
-					])),
-				A2(
-				$elm$html$Html$div,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('space-y-4')
-					]),
-				_List_fromArray(
-					[
-						function () {
-						if (maybeClub.$ === 'Just') {
-							return A2(
-								$elm$html$Html$p,
-								_List_Nil,
-								_List_fromArray(
-									[
-										$elm$html$Html$text('TODO')
-									]));
-						} else {
-							return A2(
-								$elm$html$Html$p,
-								_List_Nil,
-								_List_fromArray(
-									[
-										$elm$html$Html$text('Nada ainda')
-									]));
-						}
-					}()
-					]))
-			]));
-};
 var $author$project$Page$Club$view = function (model) {
-	var title = function () {
-		var _v2 = model.club;
-		if (_v2.$ === 'Just') {
-			var club = _v2.a;
-			return 'Clube - ' + club.name;
-		} else {
-			return 'Clube';
-		}
-	}();
 	return {
 		body: _List_fromArray(
 			[
@@ -12965,26 +13138,9 @@ var $author$project$Page$Club$view = function (model) {
 					return $elm$html$Html$text('');
 				}
 			}(),
-				function () {
-				var _v1 = model.club;
-				if (_v1.$ === 'Just') {
-					var club = _v1.a;
-					return $author$project$Page$Club$viewClubCard(club);
-				} else {
-					return A2(
-						$elm$html$Html$p,
-						_List_Nil,
-						_List_fromArray(
-							[
-								$elm$html$Html$text('Nada ainda')
-							]));
-				}
-			}(),
-				$author$project$Page$Club$viewOwner(model.club),
-				$author$project$Page$Club$viewTournaments(model.club),
-				$author$project$Page$Club$viewMembers(model.club)
+				$author$project$Page$Club$viewClub(model)
 			]),
-		title: title
+		title: $author$project$Page$Club$stateToTitle(model.state)
 	};
 };
 var $author$project$ClubShort$getUrl = function (club) {
@@ -13080,7 +13236,7 @@ var $author$project$Page$Clubs$view = function (model) {
 							]),
 						_List_fromArray(
 							[
-								$elm$html$Html$text('Clubes do Usuário')
+								$elm$html$Html$text('Clubes')
 							])),
 						$elm$core$List$isEmpty(model.clubs) ? A2(
 						$elm$html$Html$p,
@@ -13107,7 +13263,6 @@ var $author$project$Page$Login$InputPassword = function (a) {
 	return {$: 'InputPassword', a: a};
 };
 var $author$project$Page$Login$RequestLogin = {$: 'RequestLogin'};
-var $elm$html$Html$Attributes$placeholder = $elm$html$Html$Attributes$stringProperty('placeholder');
 var $author$project$Page$Login$viewLoginCard = A2(
 	$elm$html$Html$div,
 	_List_fromArray(
@@ -13374,7 +13529,7 @@ var $author$project$Page$User$userCardElement = F2(
 					$elm$html$Html$strong,
 					_List_fromArray(
 						[
-							$elm$html$Html$Attributes$class('inline-block font-bold')
+							$elm$html$Html$Attributes$class('inline-block font-bold space-x-2')
 						]),
 					_List_fromArray(
 						[
@@ -13451,7 +13606,7 @@ var $author$project$Page$User$viewUserCard = function (state) {
 							$elm$html$Html$div,
 							_List_fromArray(
 								[
-									$elm$html$Html$Attributes$class(divClass)
+									$elm$html$Html$Attributes$class(divClass + ' space-y-4')
 								]),
 							_List_fromArray(
 								[
@@ -13686,4 +13841,4 @@ var $author$project$Main$view = function (model) {
 var $author$project$Main$main = $elm$browser$Browser$application(
 	{init: $author$project$Main$init, onUrlChange: $author$project$Main$UrlChanged, onUrlRequest: $author$project$Main$LinkClicked, subscriptions: $author$project$Main$subscriptions, update: $author$project$Main$update, view: $author$project$Main$view});
 _Platform_export({'Main':{'init':$author$project$Main$main(
-	$elm$json$Json$Decode$succeed(_Utils_Tuple0))({"versions":{"elm":"0.19.1"},"types":{"message":"Main.Msg","aliases":{"Url.Url":{"args":[],"type":"{ protocol : Url.Protocol, host : String.String, port_ : Maybe.Maybe Basics.Int, path : String.String, query : Maybe.Maybe String.String, fragment : Maybe.Maybe String.String }"},"Club.Club":{"args":[],"type":"{ id : Basics.Int, createdAt : String.String, name : String.String, website : String.String, contact : String.String, localization : String.String, owner : UserShort.UserShort }"},"ClubShort.ClubShort":{"args":[],"type":"{ id : Basics.Int, createdAt : String.String, name : String.String, website : String.String, contact : String.String, localization : String.String, totalPlayers : Basics.Int, totalTournaments : Basics.Int }"},"User.User":{"args":[],"type":"{ id : Basics.Int, createdAt : String.String, username : String.String, email : String.String, ownedClubs : List.List ClubShort.ClubShort }"},"UserShort.UserShort":{"args":[],"type":"{ id : Basics.Int, createdAt : String.String, username : String.String, totalTournaments : Basics.Int }"},"Viewer.Viewer":{"args":[],"type":"{ id : Basics.Int, username : String.String, email : String.String, token : String.String }"}},"unions":{"Main.Msg":{"args":[],"tags":{"LinkClicked":["Browser.UrlRequest"],"UrlChanged":["Url.Url"],"GotLoginMsg":["Page.Login.Msg"],"GotSignUpMsg":["Page.SignUp.Msg"],"GotClubsMsg":["Page.Clubs.Msg"],"GotClubMsg":["Page.Club.Msg"],"GotUserMsg":["Page.User.Msg"]}},"Basics.Int":{"args":[],"tags":{"Int":[]}},"Maybe.Maybe":{"args":["a"],"tags":{"Just":["a"],"Nothing":[]}},"Page.Club.Msg":{"args":[],"tags":{"GotClubs":["Result.Result Api.ApiError Club.Club"]}},"Page.Clubs.Msg":{"args":[],"tags":{"GotClubs":["Result.Result Api.ApiError (List.List ClubShort.ClubShort)"]}},"Page.Login.Msg":{"args":[],"tags":{"RequestLogin":[],"UserLogin":["Result.Result Api.ApiError Viewer.Viewer"],"InputEmail":["String.String"],"InputPassword":["String.String"]}},"Page.SignUp.Msg":{"args":[],"tags":{"RequestSignUp":[],"UserSignUp":["Result.Result Api.ApiError Viewer.Viewer"],"InputUsername":["String.String"],"InputEmail":["String.String"],"InputPassword":["String.String"],"InputPasswordAgain":["String.String"]}},"Page.User.Msg":{"args":[],"tags":{"GotUser":["Result.Result Api.ApiError User.User"],"EditUser":[],"CancelEdit":[],"ConfirmEdit":[],"PatchUser":["Result.Result Api.ApiError User.User"],"InputUsername":["String.String"],"InputEmail":["String.String"],"InputPassword":["String.String"],"InputPasswordAgain":["String.String"]}},"Url.Protocol":{"args":[],"tags":{"Http":[],"Https":[]}},"String.String":{"args":[],"tags":{"String":[]}},"Browser.UrlRequest":{"args":[],"tags":{"Internal":["Url.Url"],"External":["String.String"]}},"Api.ApiError":{"args":[],"tags":{"BadUrl":["String.String"],"Timeout":[],"NetworkError":[],"BadStatus":["Basics.Int","String.String"],"BadBody":["String.String"]}},"List.List":{"args":["a"],"tags":{}},"Result.Result":{"args":["error","value"],"tags":{"Ok":["value"],"Err":["error"]}}}}})}});}(this));
+	$elm$json$Json$Decode$succeed(_Utils_Tuple0))({"versions":{"elm":"0.19.1"},"types":{"message":"Main.Msg","aliases":{"Url.Url":{"args":[],"type":"{ protocol : Url.Protocol, host : String.String, port_ : Maybe.Maybe Basics.Int, path : String.String, query : Maybe.Maybe String.String, fragment : Maybe.Maybe String.String }"},"Club.Club":{"args":[],"type":"{ id : Basics.Int, createdAt : String.String, name : String.String, website : String.String, contact : String.String, localization : String.String, owner : UserShort.UserShort }"},"ClubShort.ClubShort":{"args":[],"type":"{ id : Basics.Int, createdAt : String.String, name : String.String, website : String.String, contact : String.String, localization : String.String, totalPlayers : Basics.Int, totalTournaments : Basics.Int }"},"User.User":{"args":[],"type":"{ id : Basics.Int, createdAt : String.String, username : String.String, email : String.String, ownedClubs : List.List ClubShort.ClubShort }"},"UserShort.UserShort":{"args":[],"type":"{ id : Basics.Int, createdAt : String.String, username : String.String, totalTournaments : Basics.Int }"},"Viewer.Viewer":{"args":[],"type":"{ id : Basics.Int, username : String.String, email : String.String, token : String.String }"}},"unions":{"Main.Msg":{"args":[],"tags":{"LinkClicked":["Browser.UrlRequest"],"UrlChanged":["Url.Url"],"GotLoginMsg":["Page.Login.Msg"],"GotSignUpMsg":["Page.SignUp.Msg"],"GotClubsMsg":["Page.Clubs.Msg"],"GotClubMsg":["Page.Club.Msg"],"GotUserMsg":["Page.User.Msg"]}},"Basics.Int":{"args":[],"tags":{"Int":[]}},"Maybe.Maybe":{"args":["a"],"tags":{"Just":["a"],"Nothing":[]}},"Page.Club.Msg":{"args":[],"tags":{"GotClub":["Result.Result Api.ApiError Club.Club"]}},"Page.Clubs.Msg":{"args":[],"tags":{"GotClubs":["Result.Result Api.ApiError (List.List ClubShort.ClubShort)"]}},"Page.Login.Msg":{"args":[],"tags":{"RequestLogin":[],"UserLogin":["Result.Result Api.ApiError Viewer.Viewer"],"InputEmail":["String.String"],"InputPassword":["String.String"]}},"Page.SignUp.Msg":{"args":[],"tags":{"RequestSignUp":[],"UserSignUp":["Result.Result Api.ApiError Viewer.Viewer"],"InputUsername":["String.String"],"InputEmail":["String.String"],"InputPassword":["String.String"],"InputPasswordAgain":["String.String"]}},"Page.User.Msg":{"args":[],"tags":{"GotUser":["Result.Result Api.ApiError User.User"],"EditUser":[],"CancelEdit":[],"ConfirmEdit":[],"PatchUser":["Result.Result Api.ApiError User.User"],"InputUsername":["String.String"],"InputEmail":["String.String"],"InputPassword":["String.String"],"InputPasswordAgain":["String.String"]}},"Url.Protocol":{"args":[],"tags":{"Http":[],"Https":[]}},"String.String":{"args":[],"tags":{"String":[]}},"Browser.UrlRequest":{"args":[],"tags":{"Internal":["Url.Url"],"External":["String.String"]}},"Api.ApiError":{"args":[],"tags":{"BadUrl":["String.String"],"Timeout":[],"NetworkError":[],"BadStatus":["Basics.Int","String.String"],"BadBody":["String.String"]}},"List.List":{"args":["a"],"tags":{}},"Result.Result":{"args":["error","value"],"tags":{"Ok":["value"],"Err":["error"]}}}}})}});}(this));
