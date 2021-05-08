@@ -3,13 +3,16 @@ module Page.Club exposing (..)
 import Browser
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Html.Events exposing (..)
 import Http
+import Json.Encode as Encode
 
 import Api
 import Club exposing (Club)
 import CommonHtml exposing (..)
 import Session exposing (Session)
 import UserShort
+import Viewer exposing (Viewer)
 
 
 type alias Model =
@@ -34,6 +37,19 @@ type alias Form =
 
 type Msg
   = GotClub (Result Api.ApiError Club)
+  | EditClub
+  | ConfirmEdit
+  | CancelEdit
+  | PatchClub (Result Api.ApiError Club)
+  -- new club
+  -- confirm new club
+  -- cancel new club
+  -- post club
+  -- delete club
+  | InputName String
+  | InputWebsite String
+  | InputContact String
+  | InputLocalization String
 
 init : Session -> Int -> (Model, Cmd Msg)
 init session clubId =
@@ -48,14 +64,90 @@ get id =
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
-  case msg of
-    GotClub result ->
+  case (msg, model.state) of
+    (GotClub result, _) ->
       case result of
         Ok club ->
           ({ model | state = initState club model.session, error = Nothing }, Cmd.none)
 
         Err error ->
           ({ model | error = Just (Api.errorToString error) }, Cmd.none)
+
+    (EditClub, ViewOwner club) ->
+      ({ model | state = Edit club (Form "" "" "" ""), error = Nothing }, Cmd.none)
+
+    (CancelEdit, Edit club _) ->
+      ({ model | state = ViewOwner club, error = Nothing }, Cmd.none)
+
+    (ConfirmEdit, Edit club form) ->
+      case validatePatch form of
+        Ok _ ->
+          case model.session of
+            Session.LoggedIn _ viewer ->
+              (model, (requestPatch club form viewer))
+
+            Session.Anonymus _ ->
+              ({ model | error = Just "De alguma forma, você não está logado" }, Cmd.none)
+
+        Err err ->
+          ({ model | error = Just err}, Cmd.none)
+
+    (PatchClub result, Edit _ _) ->
+      case result of
+        Ok user ->
+          ({ model | state = ViewOwner user, error = Nothing }, Cmd.none)
+
+        Err error ->
+          ({ model | error = Just (Api.errorToString error) }, Cmd.none)
+
+    (InputName name, Edit club form) ->
+      updateForm (\f -> { f | name = name }) club form model
+
+    (InputWebsite website, Edit club form) ->
+      updateForm (\f -> { f | website = website }) club form model
+
+    (InputContact contact, Edit club form) ->
+      updateForm (\f -> { f | contact = contact }) club form model
+
+    (InputLocalization localization, Edit club form) ->
+      updateForm (\f -> { f | localization = localization }) club form model
+
+    (_, _) ->
+      ({ model | error = Just "Estado inválido" }, Cmd.none)
+
+updateForm : (Form -> Form) -> Club -> Form -> Model -> (Model, Cmd msg)
+updateForm transform user form model =
+  ({ model | state = Edit user (transform form) }, Cmd.none)
+
+validatePatch : Form -> Result String ()
+validatePatch form =
+  if String.isEmpty form.contact
+  && String.isEmpty form.localization
+  && String.isEmpty form.name
+  && String.isEmpty form.website then
+    Err "Preencha ao menos um campo para ser atualizado"
+  else
+    Ok ()
+
+requestPatch : Club -> Form -> Viewer -> Cmd Msg
+requestPatch club form viewer =
+  Api.privatePut
+    { url = Api.club club.id
+    , body = Http.jsonBody (patchEncoder form)
+    , expect = Api.expectJson PatchClub Club.clubDecoder
+    } viewer
+
+patchEncoder : Form -> Encode.Value
+patchEncoder form =
+  let
+    maybeNull val = if String.isEmpty val then Encode.null else Encode.string val
+  in
+  Encode.object
+    [ ("name", maybeNull form.name)
+    , ("website", maybeNull form.website)
+    , ("contact", maybeNull form.contact)
+    , ("localization", maybeNull form.localization)
+    ]
 
 initState : Club -> Session -> State
 initState club session =
@@ -174,7 +266,7 @@ viewClubCardOwner club =
       , clubCardElement "Fundação" club.createdAt
       , clubCardElement "Site" club.website
       , clubCardElement "Contato" club.contact
-      , button [ class "btn btn-indigo-500 mt-4" ] [ text "Editar" ]
+      , button [ class "btn btn-indigo-500 mt-4", onClick EditClub ] [ text "Editar" ]
       ]
 
 viewClubCardEdit : Html Msg
@@ -184,12 +276,12 @@ viewClubCardEdit =
   in
     div [ class divClass ]
       [ p [] [ text "Preencha os campos que deseja atualizar e pressione confirmar" ]
-      , input [ type_ "text", placeholder "Localização", class "login-input" ] []
-      , input [ type_ "text", placeholder "Fundação", class "login-input" ] []
-      , input [ type_ "text", placeholder "Site", class "login-input" ] []
-      , input [ type_ "text", placeholder "Contato", class "login-input" ] []
-      , button [ class "border-none btn btn-green-500" ] [ text "Confirmar" ]
-      , button [ class "border-none btn btn-red-500" ] [ text "Cancelar" ]
+      , input [ type_ "text", placeholder "Nome", class "login-input", onInput InputName ] []
+      , input [ type_ "text", placeholder "Localização", class "login-input", onInput InputLocalization ] []
+      , input [ type_ "text", placeholder "Site", class "login-input", onInput InputWebsite ] []
+      , input [ type_ "text", placeholder "Contato", class "login-input", onInput InputContact ] []
+      , button [ class "border-none btn btn-green-500", onClick ConfirmEdit ] [ text "Confirmar" ]
+      , button [ class "border-none btn btn-red-500", onClick CancelEdit ] [ text "Cancelar" ]
       ]
 
 clubCardElement : String -> String -> Html msg
