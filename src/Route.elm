@@ -12,6 +12,7 @@ type Route
   | SignUp
   | Clubs
   | Club Int
+  | User Int
 
 parser : Parser (Route -> c) c
 parser =
@@ -21,6 +22,7 @@ parser =
     , Parser.map SignUp (s "signup")
     , Parser.map Clubs (s "clubs")
     , Parser.map Club (s "clubs" </> int)
+    , Parser.map User (s "users" </> int)
     ]
 
 href : Route -> Attribute msg
@@ -61,3 +63,6 @@ routeToPieces route =
 
     Club id ->
       [ "clubs", String.fromInt id ]
+
+    User id ->
+      [ "users", String.fromInt id ]

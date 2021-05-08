@@ -3,8 +3,8 @@ module CommonHtml exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 
-import Api
 import Session exposing (Session)
+import Viewer
 
 
 viewNav : Session -> Html msg
@@ -21,9 +21,12 @@ viewNav session =
       ]
 
     , case session of
-        Session.LoggedIn _ _ ->
+        Session.LoggedIn _ viewer ->
+          let
+            userUrl = Viewer.getUrl viewer
+          in
           div [ class "inline-flex" ]
-            [ a [ href "/perfil", class "btn btn-indigo-800" ] [ text "Perfil" ]
+            [ a [ href userUrl, class "btn btn-indigo-800" ] [ text "Perfil" ]
             ]
 
         Session.Anonymus _ ->

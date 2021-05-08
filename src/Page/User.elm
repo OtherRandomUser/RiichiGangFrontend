@@ -13,22 +13,22 @@ import CommonHtml exposing (viewNav, errorCard)
 import Session exposing (..)
 import User exposing (User)
 import Viewer exposing (..)
-import ClubShort exposing (ClubShort)
+import ClubShort
 
 
 -- data modeling --
 
 type alias Model =
   { session : Session
-  , user : User
   , state : State
   , error : Maybe String
   }
 
 type State
-  = ViewAnonymus
-  | ViewProfile
-  | EditProfile UpdateForm
+  = Uninitialized
+  | ViewAnonymus User
+  | ViewProfile User
+  | EditProfile User UpdateForm
 
 type alias UpdateForm =
   { username : String
@@ -38,7 +38,8 @@ type alias UpdateForm =
   }
 
 type Msg
-  = EditUser
+  = GotUser (Result Api.ApiError User)
+  | EditUser
   | CancelEdit
   | ConfirmEdit
   | PatchUser (Result ApiError User)
@@ -47,45 +48,54 @@ type Msg
   | InputPassword String
   | InputPasswordAgain String
 
-init : Session -> User -> (Model, Cmd Msg)
-init session user =
-  ( { session = session
-    , user = user
-    , state = initState session user
-    , error = Nothing
+init : Session -> Int -> (Model, Cmd Msg)
+init session id =
+  (Model session Uninitialized Nothing, get id)
+
+get : Int -> Cmd Msg
+get id =
+  Http.get
+    { url = Api.user id
+    , expect = Api.expectJson GotUser User.userDecoder
     }
-  , Cmd.none
-  )
 
 initState : Session -> User -> State
 initState session user =
   case session of
     LoggedIn _ viewer ->
       if user.id == viewer.id then
-        ViewProfile
+        ViewProfile user
       else
-        ViewAnonymus
+        ViewAnonymus user
 
     Anonymus _ ->
-      ViewAnonymus
+      ViewAnonymus user
 
 -- -- update --
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case (msg, model.state) of
-    (EditUser, _) ->
-      ({ model | state = EditProfile (UpdateForm "" "" "" ""), error = Nothing }, Cmd.none)
+    (GotUser result, _) ->
+      case result of
+        Ok user ->
+          ({ model | state = initState model.session user, error = Nothing }, Cmd.none)
 
-    (CancelEdit, EditProfile _) ->
-      ({ model | state = ViewProfile, error = Nothing }, Cmd.none)
+        Err error ->
+          ({ model | error = Just (Api.errorToString error) }, Cmd.none)
 
-    (ConfirmEdit, EditProfile form) ->
+    (EditUser, ViewProfile user) ->
+      ({ model | state = EditProfile user (UpdateForm "" "" "" ""), error = Nothing }, Cmd.none)
+
+    (CancelEdit, EditProfile user _) ->
+      ({ model | state = ViewProfile user, error = Nothing }, Cmd.none)
+
+    (ConfirmEdit, EditProfile user form) ->
       case validatePatch form of
         Ok _ ->
           case model.session of
             LoggedIn _ viewer ->
-              (model, (requestPatch model.user form viewer))
+              (model, (requestPatch user form viewer))
 
             Anonymus _ ->
               ({ model | error = Just "De alguma forma, você não está logado" }, Cmd.none)
@@ -93,32 +103,32 @@ update msg model =
         Err err ->
           ({ model | error = Just err}, Cmd.none)
 
-    (PatchUser result, EditProfile _) ->
+    (PatchUser result, EditProfile _ _) ->
       case result of
         Ok user ->
-          ({ model | user = user, error = Nothing, state = ViewProfile }, Cmd.none)
+          ({ model | state = ViewProfile user, error = Nothing }, Cmd.none)
 
         Err error ->
           ({ model | error = Just (errorToString error) }, Cmd.none)
 
-    (InputUsername username, EditProfile form) ->
-      updateForm (\f -> { f | username = username }) form model
+    (InputUsername username, EditProfile user form) ->
+      updateForm (\f -> { f | username = username }) user form model
 
-    (InputEmail email, EditProfile form) ->
-      updateForm (\f -> { f | email = email }) form model
+    (InputEmail email, EditProfile user form) ->
+      updateForm (\f -> { f | email = email }) user form model
 
-    (InputPassword password, EditProfile form) ->
-      updateForm (\f -> { f | password = password }) form model
+    (InputPassword password, EditProfile user form) ->
+      updateForm (\f -> { f | password = password }) user form model
 
-    (InputPasswordAgain passwordAgain, EditProfile form) ->
-      updateForm (\f -> { f | passwordAgain = passwordAgain }) form model
+    (InputPasswordAgain passwordAgain, EditProfile user form) ->
+      updateForm (\f -> { f | passwordAgain = passwordAgain }) user form model
 
     (_, _) ->
       ({ model | error = Just "Estado inválido" }, Cmd.none)
 
-updateForm : (UpdateForm -> UpdateForm) -> UpdateForm -> Model -> (Model, Cmd msg)
-updateForm transform form model =
-  ({ model | state = EditProfile (transform form) }, Cmd.none)
+updateForm : (UpdateForm -> UpdateForm) -> User -> UpdateForm -> Model -> (Model, Cmd msg)
+updateForm transform user form model =
+  ({ model | state = EditProfile user (transform form) }, Cmd.none)
 
 validatePatch : UpdateForm -> Result String ()
 validatePatch form =
@@ -132,9 +142,9 @@ validatePatch form =
     Ok ()
 
 requestPatch : User -> UpdateForm -> Viewer -> Cmd Msg
-requestPatch user form viewer =
-  Api.privatePatch
-    { url = Api.user user.id
+requestPatch _ form viewer =
+  Api.privatePut
+    { url = Api.users
     , body = Http.jsonBody (patchEncoder form)
     , expect = expectJson PatchUser User.userDecoder
     } viewer
@@ -153,6 +163,9 @@ patchEncoder form =
 
 view : Model -> Browser.Document Msg
 view model =
+  let
+    user = stateToUser model.state
+  in
   { title = "Login"
   , body =
     [ viewNav model.session
@@ -163,43 +176,48 @@ view model =
       Nothing ->
         text ""
 
-    , viewUserCard model.user model.state
-    , viewOwnedClubs model.user.ownedClubs
+    , viewUserCard model.state
+    , viewOwnedClubs user
     , p [] [ text "TODO filiacoes" ]
     , p [] [ text "TODO torneios" ]
     , p [] [ text "TODO notificações" ]
     ]
   }
 
-viewUserCard : User -> State -> Html Msg
-viewUserCard user state =
+viewUserCard : State -> Html Msg
+viewUserCard state =
   let
     divClass = "container bg-indigo-500 rounded-lg text-white p-6 my-4 max-w-lg"
   in
-  case state of
-    ViewAnonymus ->
-      div [ class divClass ]
-        [ userCardElement "Usuário" user.username
-        , userCardElement "Email" user.email
-        ]
+  div []
+    [ case state of
+      Uninitialized ->
+        p [] [ text "Carregando..." ]
 
-    ViewProfile ->
-      div [ class divClass ]
-        [ userCardElement "Usuário" user.username
-        , userCardElement "Email" user.email
-        , button [ class "btn btn-indigo-500 mt-4", onClick EditUser ] [ text "Editar" ]
-        ]
+      ViewAnonymus user ->
+        div [ class divClass ]
+          [ userCardElement "Usuário" user.username
+          , userCardElement "Email" user.email
+          ]
 
-    EditProfile _ ->
-      div [ class divClass ]
-        [ p [] [ text "Preencha os campos que deseja atualizar e pressione confirmar" ]
-        , input [ type_ "email", placeholder "Email", class "login-input", onInput InputEmail] []
-        , input [ type_ "text", placeholder "Nome de Usuário", class "login-input", onInput InputUsername] []
-        , input [ type_ "password", placeholder "Senha", class "login-input", onInput InputPassword] []
-        , input [ type_ "password", placeholder "Confirmação da Senha", class "login-input", onInput InputPasswordAgain] []
-        , button [ class "border-none btn btn-green-500", onClick ConfirmEdit ] [ text "Confirmar" ]
-        , button [ class "border-none btn btn-red-500", onClick CancelEdit ] [ text "Cancelar" ]
-        ]
+      ViewProfile user ->
+        div [ class divClass ]
+          [ userCardElement "Usuário" user.username
+          , userCardElement "Email" user.email
+          , button [ class "btn btn-indigo-500 mt-4", onClick EditUser ] [ text "Editar" ]
+          ]
+
+      EditProfile _ _ ->
+        div [ class divClass ]
+          [ p [] [ text "Preencha os campos que deseja atualizar e pressione confirmar" ]
+          , input [ type_ "email", placeholder "Email", class "login-input", onInput InputEmail] []
+          , input [ type_ "text", placeholder "Nome de Usuário", class "login-input", onInput InputUsername] []
+          , input [ type_ "password", placeholder "Senha", class "login-input", onInput InputPassword] []
+          , input [ type_ "password", placeholder "Confirmação da Senha", class "login-input", onInput InputPasswordAgain] []
+          , button [ class "border-none btn btn-green-500", onClick ConfirmEdit ] [ text "Confirmar" ]
+          , button [ class "border-none btn btn-red-500", onClick CancelEdit ] [ text "Cancelar" ]
+          ]
+    ]
 
 userCardElement : String -> String -> Html msg
 userCardElement title value = 
@@ -208,13 +226,36 @@ userCardElement title value =
     , span [ class "inline-block" ] [ text value ]
     ]
 
-viewOwnedClubs : List ClubShort -> Html Msg
-viewOwnedClubs clubs =
+viewOwnedClubs : Maybe User -> Html Msg
+viewOwnedClubs maybeUser =
   div [ class "m-2" ]
     [ h1 [ class "list-heading" ] [ text "Clubes do Usuário" ]
-    , div [ class "space-y-4" ] (List.map ClubShort.view clubs)
+
+    , case maybeUser of
+      Nothing ->
+        p [] [ text "Nada ainda" ]
+
+      Just user ->
+        div [ class "space-y-4" ] (List.map ClubShort.view user.ownedClubs)
+
     , button [ class "border-transparent btn btn-indigo-500 mt-4" ] [ text "Novo" ] -- TODO implement after implementing the page
+
     ]
+
+stateToUser : State -> Maybe User
+stateToUser state =
+  case state of
+    Uninitialized ->
+      Nothing
+
+    ViewAnonymus user ->
+      Just user
+
+    ViewProfile user ->
+      Just user
+
+    EditProfile user _ ->
+      Just user
 
 toSession : Model -> Session
 toSession model =

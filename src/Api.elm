@@ -78,7 +78,7 @@ privatePost : { url : String, body : Http.Body, expect : Http.Expect msg } -> Vi
 privatePost r viewer =
   Http.request
     { method = "POST"
-    , headers = [ Http.header "Bearer" viewer.token ]
+    , headers = [ Http.header "bearer" viewer.token ]
     , url = r.url
     , body = r.body
     , expect = r.expect
@@ -86,11 +86,11 @@ privatePost r viewer =
     , tracker = Nothing
     }
 
-privatePatch : { url : String, body : Http.Body, expect : Http.Expect msg } -> Viewer -> Cmd msg
-privatePatch r viewer =
+privatePut : { url : String, body : Http.Body, expect : Http.Expect msg } -> Viewer -> Cmd msg
+privatePut r viewer =
   Http.request
-    { method = "PATCH"
-    , headers = [ Http.header "Bearer" viewer.token ]
+    { method = "PUT"
+    , headers = [ Http.header "Authorization" ("bearer " ++ viewer.token) ]
     , url = r.url
     , body = r.body
     , expect = r.expect
@@ -102,7 +102,7 @@ privateGet : { url : String, expect : Http.Expect msg } -> Viewer -> Cmd msg
 privateGet r viewer =
   Http.request
     { method = "GET"
-    , headers = [ Http.header "Bearer" viewer.token ]
+    , headers = [ Http.header "Authorization" ("bearer " ++ viewer.token) ]
     , url = r.url
     , body = Http.emptyBody
     , expect = r.expect
@@ -114,7 +114,7 @@ privateDelete : { url : String, expect : Http.Expect msg } -> Viewer -> Cmd msg
 privateDelete r viewer =
   Http.request
     { method = "DELETE"
-    , headers = [ Http.header "Bearer" viewer.token ]
+    , headers = [ Http.header "Authorization" ("bearer " ++ viewer.token) ]
     , url = r.url
     , body = Http.emptyBody
     , expect = r.expect

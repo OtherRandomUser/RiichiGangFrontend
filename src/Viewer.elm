@@ -3,6 +3,8 @@ module Viewer exposing (..)
 import Json.Decode as Decode
 import Json.Decode.Field as Field
 import Json.Encode as Encode
+import Url.Builder
+
 
 type alias Viewer =
   { id : Int
@@ -40,3 +42,7 @@ viewerDecoder =
     , email = email
     , token = token
     }
+
+getUrl : Viewer ->  String
+getUrl viewer =
+  Url.Builder.absolute ["users", String.fromInt viewer.id] []

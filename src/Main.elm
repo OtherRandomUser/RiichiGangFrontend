@@ -13,6 +13,7 @@ import Page.Club as ClubPage
 import Page.Clubs as ClubsPage
 import Page.Login as Login
 import Page.SignUp as SignUp
+import Page.User as User
 import Route exposing (Route)
 import Route exposing (Route(..))
 
@@ -35,6 +36,7 @@ type Model
   | SignUp SignUp.Model
   | Clubs ClubsPage.Model
   | Club ClubPage.Model
+  | User User.Model
 
 type Msg
   = LinkClicked Browser.UrlRequest
@@ -43,6 +45,7 @@ type Msg
   | GotSignUpMsg SignUp.Msg
   | GotClubsMsg ClubsPage.Msg
   | GotClubMsg ClubPage.Msg
+  | GotUserMsg User.Msg
 
 init : () -> Url.Url -> Nav.Key -> (Model, Cmd Msg)
 init _ url key =
@@ -76,6 +79,10 @@ changeRouteTo maybeRoute model =
         ClubPage.init session clubId
           |> updateWith Club GotClubMsg
 
+      Just (Route.User userId) ->
+        User.init session userId
+          |> updateWith User GotUserMsg
+
 toSession : Model -> Session
 toSession model =
   case model of
@@ -96,6 +103,9 @@ toSession model =
 
     Club club ->
       ClubPage.toSession club
+
+    User user ->
+      User.toSession user
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
@@ -127,6 +137,10 @@ update msg model =
       ClubPage.update subMsg club
         |> updateWith Club GotClubMsg
 
+    (GotUserMsg subMsg, User user) ->
+      User.update subMsg user
+        |> updateWith User GotUserMsg
+
     (_, _) ->
       (model, Cmd.none)
 
@@ -137,7 +151,7 @@ updateWith toModel toMsg ( subModel, subCmd ) =
   )
 
 
--- -- view --
+-- view --
 
 
 view : Model -> Browser.Document Msg
@@ -179,6 +193,14 @@ view model =
       in
       { title = page.title
       , body = List.map (Html.map GotClubMsg) page.body
+      }
+
+    User subModel ->
+      let
+        page = User.view subModel
+      in
+      { title = page.title
+      , body = List.map (Html.map GotUserMsg) page.body
       }
 
 

@@ -1,10 +1,10 @@
 module User exposing (..)
 
+import Html.Attributes exposing (id)
 import Json.Decode as Decode
 import Json.Decode.Field as Field
 
 import ClubShort exposing (..)
-import Html.Attributes exposing (id)
 
 
 type alias User =
