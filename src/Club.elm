@@ -4,6 +4,8 @@ import Json.Decode as Decode
 import Json.Decode.Field as Field
 import Url.Builder
 
+import Model.ClubMembership exposing (ClubMembership)
+import Model.TournamentShort exposing (TournamentShort)
 import UserShort exposing (UserShort, userShortDecoder)
 
 
@@ -15,6 +17,8 @@ type alias Club =
   , contact : String
   , localization : String
   , owner : UserShort
+  , members : List ClubMembership
+  , tournaments : List TournamentShort
   }
 
 clubDecoder : Decode.Decoder Club
@@ -26,6 +30,8 @@ clubDecoder =
   Field.require "contact" Decode.string <| \contact ->
   Field.require "localization" Decode.string <| \localization ->
   Field.require "owner" userShortDecoder <| \owner ->
+  Field.require "members" (Decode.list Model.ClubMembership.decoder) <| \members ->
+  Field.require "tournaments" (Decode.list Model.TournamentShort.decoder) <| \tournaments ->
 
   Decode.succeed
     { id = id
@@ -35,6 +41,8 @@ clubDecoder =
     , contact = contact
     , localization = localization
     , owner = owner
+    , members = members
+    , tournaments = tournaments
     }
 
 getUrl : Club -> String

@@ -193,9 +193,15 @@ patchEncoder form =
 view : Model -> Browser.Document Msg
 view model =
   let
-    user = stateToUser model.state
+    maybeUser = stateToUser model.state
   in
-  { title = "Login"
+  { title = case maybeUser of
+    Just user ->
+      "Usuário - " ++ user.username
+
+    Nothing ->
+      "Usuário"
+
   , body =
     [ viewNav model.session
 
@@ -206,11 +212,11 @@ view model =
         text ""
 
     , viewUserCard model.state
-    , viewOwnedClubs user
-    , viewMemberships user
-    , viewTournaments user
-    , viewNotifications user
-    , viewStats user
+    , viewOwnedClubs maybeUser
+    , viewMemberships maybeUser
+    , viewTournaments maybeUser
+    , viewNotifications maybeUser
+    , viewStats maybeUser
     ]
   }
 

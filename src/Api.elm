@@ -29,6 +29,15 @@ clubs = backendUrl ++ "/clubs"
 club : Int -> String
 club id = backendUrl ++ "/clubs/" ++ (String.fromInt id)
 
+clubMembers : Int -> String
+clubMembers id = (club id) ++ "/members"
+
+clubInvite : Int -> String
+clubInvite id = (clubMembers id) ++ "/invite"
+
+clubMember : Int -> Int -> String
+clubMember clubId userId = (clubMembers clubId) ++ "/" ++ (String.fromInt userId)
+
 
 -- Request Utils --
 

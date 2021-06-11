@@ -5449,7 +5449,7 @@ var $author$project$Api$backendUrl = 'https://localhost:5001/api';
 var $author$project$Api$club = function (id) {
 	return $author$project$Api$backendUrl + ('/clubs/' + $elm$core$String$fromInt(id));
 };
-var $elm$json$Json$Decode$int = _Json_decodeInt;
+var $elm$json$Json$Decode$bool = _Json_decodeBool;
 var $elm$json$Json$Decode$andThen = _Json_andThen;
 var $elm$json$Json$Decode$field = _Json_decodeField;
 var $webbhuset$elm_json_decode$Json$Decode$Field$require = F3(
@@ -5460,6 +5460,7 @@ var $webbhuset$elm_json_decode$Json$Decode$Field$require = F3(
 			A2($elm$json$Json$Decode$field, fieldName, valueDecoder));
 	});
 var $elm$json$Json$Decode$string = _Json_decodeString;
+var $elm$json$Json$Decode$int = _Json_decodeInt;
 var $author$project$UserShort$userShortDecoder = A3(
 	$webbhuset$elm_json_decode$Json$Decode$Field$require,
 	'id',
@@ -5486,6 +5487,71 @@ var $author$project$UserShort$userShortDecoder = A3(
 					});
 			});
 	});
+var $author$project$Model$ClubMembership$decoder = A3(
+	$webbhuset$elm_json_decode$Json$Decode$Field$require,
+	'user',
+	$author$project$UserShort$userShortDecoder,
+	function (user) {
+		return A3(
+			$webbhuset$elm_json_decode$Json$Decode$Field$require,
+			'createdAt',
+			$elm$json$Json$Decode$string,
+			function (createdAt) {
+				return A3(
+					$webbhuset$elm_json_decode$Json$Decode$Field$require,
+					'approved',
+					$elm$json$Json$Decode$bool,
+					function (approved) {
+						return A3(
+							$webbhuset$elm_json_decode$Json$Decode$Field$require,
+							'denied',
+							$elm$json$Json$Decode$bool,
+							function (denied) {
+								return $elm$json$Json$Decode$succeed(
+									{approved: approved, createdAt: createdAt, denied: denied, user: user});
+							});
+					});
+			});
+	});
+var $author$project$Model$TournamentShort$decoder = A3(
+	$webbhuset$elm_json_decode$Json$Decode$Field$require,
+	'id',
+	$elm$json$Json$Decode$int,
+	function (id) {
+		return A3(
+			$webbhuset$elm_json_decode$Json$Decode$Field$require,
+			'createdAt',
+			$elm$json$Json$Decode$string,
+			function (createdAt) {
+				return A3(
+					$webbhuset$elm_json_decode$Json$Decode$Field$require,
+					'name',
+					$elm$json$Json$Decode$string,
+					function (name) {
+						return A3(
+							$webbhuset$elm_json_decode$Json$Decode$Field$require,
+							'totalPlayers',
+							$elm$json$Json$Decode$int,
+							function (totalPlayers) {
+								return A3(
+									$webbhuset$elm_json_decode$Json$Decode$Field$require,
+									'startDate',
+									$elm$json$Json$Decode$string,
+									function (startDate) {
+										return A3(
+											$webbhuset$elm_json_decode$Json$Decode$Field$require,
+											'status',
+											$elm$json$Json$Decode$string,
+											function (status) {
+												return $elm$json$Json$Decode$succeed(
+													{createdAt: createdAt, id: id, name: name, startDate: startDate, status: status, totalPlayers: totalPlayers});
+											});
+									});
+							});
+					});
+			});
+	});
+var $elm$json$Json$Decode$list = _Json_decodeList;
 var $author$project$Club$clubDecoder = A3(
 	$webbhuset$elm_json_decode$Json$Decode$Field$require,
 	'id',
@@ -5521,8 +5587,20 @@ var $author$project$Club$clubDecoder = A3(
 													'owner',
 													$author$project$UserShort$userShortDecoder,
 													function (owner) {
-														return $elm$json$Json$Decode$succeed(
-															{contact: contact, createdAt: createdAt, id: id, localization: localization, name: name, owner: owner, website: website});
+														return A3(
+															$webbhuset$elm_json_decode$Json$Decode$Field$require,
+															'members',
+															$elm$json$Json$Decode$list($author$project$Model$ClubMembership$decoder),
+															function (members) {
+																return A3(
+																	$webbhuset$elm_json_decode$Json$Decode$Field$require,
+																	'tournaments',
+																	$elm$json$Json$Decode$list($author$project$Model$TournamentShort$decoder),
+																	function (tournaments) {
+																		return $elm$json$Json$Decode$succeed(
+																			{contact: contact, createdAt: createdAt, id: id, localization: localization, members: members, name: name, owner: owner, tournaments: tournaments, website: website});
+																	});
+															});
 													});
 											});
 									});
@@ -6376,7 +6454,6 @@ var $author$project$ClubShort$clubShortDecoder = A3(
 					});
 			});
 	});
-var $elm$json$Json$Decode$list = _Json_decodeList;
 var $author$project$ClubShort$clubShortListDecoder = $elm$json$Json$Decode$list($author$project$ClubShort$clubShortDecoder);
 var $author$project$Api$clubs = $author$project$Api$backendUrl + '/clubs';
 var $author$project$Page$Clubs$get = $elm$http$Http$get(
@@ -6420,7 +6497,6 @@ var $author$project$Page$User$GotUser = function (a) {
 var $author$project$Api$user = function (id) {
 	return $author$project$Api$backendUrl + ('/users/' + $elm$core$String$fromInt(id));
 };
-var $elm$json$Json$Decode$bool = _Json_decodeBool;
 var $author$project$Model$Membership$decoder = A3(
 	$webbhuset$elm_json_decode$Json$Decode$Field$require,
 	'club',
@@ -6469,44 +6545,6 @@ var $author$project$Model$Notification$decoder = A3(
 							function (message) {
 								return $elm$json$Json$Decode$succeed(
 									{createdAt: createdAt, creator: creator, id: id, message: message});
-							});
-					});
-			});
-	});
-var $author$project$Model$TournamentShort$decoder = A3(
-	$webbhuset$elm_json_decode$Json$Decode$Field$require,
-	'id',
-	$elm$json$Json$Decode$int,
-	function (id) {
-		return A3(
-			$webbhuset$elm_json_decode$Json$Decode$Field$require,
-			'createdAt',
-			$elm$json$Json$Decode$string,
-			function (createdAt) {
-				return A3(
-					$webbhuset$elm_json_decode$Json$Decode$Field$require,
-					'name',
-					$elm$json$Json$Decode$string,
-					function (name) {
-						return A3(
-							$webbhuset$elm_json_decode$Json$Decode$Field$require,
-							'totalPlayers',
-							$elm$json$Json$Decode$int,
-							function (totalPlayers) {
-								return A3(
-									$webbhuset$elm_json_decode$Json$Decode$Field$require,
-									'startDate',
-									$elm$json$Json$Decode$string,
-									function (startDate) {
-										return A3(
-											$webbhuset$elm_json_decode$Json$Decode$Field$require,
-											'status',
-											$elm$json$Json$Decode$string,
-											function (status) {
-												return $elm$json$Json$Decode$succeed(
-													{createdAt: createdAt, id: id, name: name, startDate: startDate, status: status, totalPlayers: totalPlayers});
-											});
-									});
 							});
 					});
 			});
@@ -7150,9 +7188,18 @@ var $author$project$Page$Club$Form = F4(
 	function (name, website, contact, localization) {
 		return {contact: contact, localization: localization, name: name, website: website};
 	});
-var $author$project$Page$Club$ViewOwner = function (a) {
-	return {$: 'ViewOwner', a: a};
+var $author$project$Page$Club$Owner = {$: 'Owner'};
+var $author$project$Page$Club$View = F2(
+	function (a, b) {
+		return {$: 'View', a: a, b: b};
+	});
+var $elm$core$Basics$negate = function (n) {
+	return -n;
 };
+var $elm$browser$Browser$Navigation$back = F2(
+	function (key, n) {
+		return A2(_Browser_go, key, -n);
+	});
 var $author$project$Api$errorToString = function (error) {
 	switch (error.$) {
 		case 'BadUrl':
@@ -7170,9 +7217,30 @@ var $author$project$Api$errorToString = function (error) {
 			return 'Falha interna: ' + body;
 	}
 };
-var $author$project$Page$Club$ViewAnonymus = function (a) {
-	return {$: 'ViewAnonymus', a: a};
-};
+var $author$project$Page$Club$Anonymus = {$: 'Anonymus'};
+var $author$project$Page$Club$Member = {$: 'Member'};
+var $author$project$Page$Club$NonMember = {$: 'NonMember'};
+var $elm$core$List$any = F2(
+	function (isOkay, list) {
+		any:
+		while (true) {
+			if (!list.b) {
+				return false;
+			} else {
+				var x = list.a;
+				var xs = list.b;
+				if (isOkay(x)) {
+					return true;
+				} else {
+					var $temp$isOkay = isOkay,
+						$temp$list = xs;
+					isOkay = $temp$isOkay;
+					list = $temp$list;
+					continue any;
+				}
+			}
+		}
+	});
 var $author$project$Session$toViewer = function (session) {
 	if (session.$ === 'LoggedIn') {
 		var viewer = session.b;
@@ -7186,9 +7254,12 @@ var $author$project$Page$Club$initState = F2(
 		var _v0 = $author$project$Session$toViewer(session);
 		if (_v0.$ === 'Just') {
 			var viewer = _v0.a;
-			return _Utils_eq(club.owner.id, viewer.id) ? $author$project$Page$Club$ViewOwner(club) : $author$project$Page$Club$ViewAnonymus(club);
+			var isMember = function (m) {
+				return _Utils_eq(m.user.id, viewer.id) && m.approved;
+			};
+			return _Utils_eq(club.owner.id, viewer.id) ? A2($author$project$Page$Club$View, club, $author$project$Page$Club$Owner) : (A2($elm$core$List$any, isMember, club.members) ? A2($author$project$Page$Club$View, club, $author$project$Page$Club$Member) : A2($author$project$Page$Club$View, club, $author$project$Page$Club$NonMember));
 		} else {
-			return $author$project$Page$Club$ViewAnonymus(club);
+			return A2($author$project$Page$Club$View, club, $author$project$Page$Club$Anonymus);
 		}
 	});
 var $author$project$Page$Club$DeleteClub = function (a) {
@@ -7249,9 +7320,49 @@ var $author$project$Page$Club$requestDelete = F2(
 			},
 			viewer);
 	});
-var $author$project$Page$Club$PatchClub = function (a) {
-	return {$: 'PatchClub', a: a};
+var $author$project$Api$clubMembers = function (id) {
+	return $author$project$Api$club(id) + '/members';
 };
+var $author$project$Api$clubInvite = function (id) {
+	return $author$project$Api$clubMembers(id) + '/invite';
+};
+var $author$project$Api$privatePost = F2(
+	function (r, viewer) {
+		return $elm$http$Http$request(
+			{
+				body: r.body,
+				expect: r.expect,
+				headers: _List_fromArray(
+					[
+						A2($elm$http$Http$header, 'bearer', viewer.token)
+					]),
+				method: 'POST',
+				timeout: $elm$core$Maybe$Nothing,
+				tracker: $elm$core$Maybe$Nothing,
+				url: r.url
+			});
+	});
+var $author$project$Page$Club$requestInvite = F2(
+	function (club, viewer) {
+		return A2(
+			$author$project$Api$privatePost,
+			{
+				body: $elm$http$Http$emptyBody,
+				expect: A2($author$project$Api$expectJson, $author$project$Page$Club$GotClub, $author$project$Club$clubDecoder),
+				url: $author$project$Api$clubInvite(club.id)
+			},
+			viewer);
+	});
+var $author$project$Page$Club$requestLeave = F2(
+	function (club, viewer) {
+		return A2(
+			$author$project$Api$privateDelete,
+			{
+				expect: A2($author$project$Api$expectJson, $author$project$Page$Club$GotClub, $author$project$Club$clubDecoder),
+				url: $author$project$Api$clubMembers(club.id)
+			},
+			viewer);
+	});
 var $elm$http$Http$jsonBody = function (value) {
 	return A2(
 		_Http_pair,
@@ -7317,31 +7428,109 @@ var $author$project$Page$Club$requestPatch = F3(
 			{
 				body: $elm$http$Http$jsonBody(
 					$author$project$Page$Club$patchEncoder(form)),
-				expect: A2($author$project$Api$expectJson, $author$project$Page$Club$PatchClub, $author$project$Club$clubDecoder),
+				expect: A2($author$project$Api$expectJson, $author$project$Page$Club$GotClub, $author$project$Club$clubDecoder),
 				url: $author$project$Api$club(club.id)
 			},
 			viewer);
 	});
-var $author$project$Page$Club$updateForm = F4(
-	function (transform, user, form, model) {
+var $author$project$Page$Club$postEncoder = function (form) {
+	return $elm$json$Json$Encode$object(
+		_List_fromArray(
+			[
+				_Utils_Tuple2(
+				'name',
+				$elm$json$Json$Encode$string(form.name)),
+				_Utils_Tuple2(
+				'website',
+				$elm$json$Json$Encode$string(form.website)),
+				_Utils_Tuple2(
+				'contact',
+				$elm$json$Json$Encode$string(form.contact)),
+				_Utils_Tuple2(
+				'localization',
+				$elm$json$Json$Encode$string(form.localization))
+			]));
+};
+var $author$project$Page$Club$requestPost = F2(
+	function (form, viewer) {
+		return A2(
+			$author$project$Api$privatePost,
+			{
+				body: $elm$http$Http$jsonBody(
+					$author$project$Page$Club$postEncoder(form)),
+				expect: A2($author$project$Api$expectJson, $author$project$Page$Club$GotClub, $author$project$Club$clubDecoder),
+				url: $author$project$Api$clubs
+			},
+			viewer);
+	});
+var $author$project$Api$clubMember = F2(
+	function (clubId, userId) {
+		return $author$project$Api$clubMembers(clubId) + ('/' + $elm$core$String$fromInt(userId));
+	});
+var $author$project$Page$Club$requestRemoveMember = F3(
+	function (club, membership, viewer) {
+		return A2(
+			$author$project$Api$privateDelete,
+			{
+				expect: A2($author$project$Api$expectJson, $author$project$Page$Club$GotClub, $author$project$Club$clubDecoder),
+				url: A2($author$project$Api$clubMember, club.id, membership.user.id)
+			},
+			viewer);
+	});
+var $author$project$Page$Club$updateEditForm = F4(
+	function (transform, club, form, model) {
 		return _Utils_Tuple2(
 			_Utils_update(
 				model,
 				{
 					state: A2(
 						$author$project$Page$Club$Edit,
-						user,
+						club,
 						transform(form))
 				}),
 			$elm$core$Platform$Cmd$none);
 	});
+var $author$project$Page$Club$New = function (a) {
+	return {$: 'New', a: a};
+};
+var $author$project$Page$Club$updateNewForm = F3(
+	function (transform, form, model) {
+		return _Utils_Tuple2(
+			_Utils_update(
+				model,
+				{
+					state: $author$project$Page$Club$New(
+						transform(form))
+				}),
+			$elm$core$Platform$Cmd$none);
+	});
+var $author$project$Page$Club$validateNew = function (form) {
+	return $elm$core$String$isEmpty(form.contact) ? $elm$core$Result$Err('Preencha o contato') : ($elm$core$String$isEmpty(form.localization) ? $elm$core$Result$Err('Preencha a localização') : ($elm$core$String$isEmpty(form.name) ? $elm$core$Result$Err('Preencha o nome do clube') : ($elm$core$String$isEmpty(form.website) ? $elm$core$Result$Err('Preencha o site do clube') : $elm$core$Result$Ok(_Utils_Tuple0))));
+};
 var $author$project$Page$Club$validatePatch = function (form) {
 	return ($elm$core$String$isEmpty(form.contact) && ($elm$core$String$isEmpty(form.localization) && ($elm$core$String$isEmpty(form.name) && $elm$core$String$isEmpty(form.website)))) ? $elm$core$Result$Err('Preencha ao menos um campo para ser atualizado') : $elm$core$Result$Ok(_Utils_Tuple0);
 };
 var $author$project$Page$Club$update = F2(
 	function (msg, model) {
+		var makeRequest = function (request) {
+			var _v31 = $author$project$Session$toViewer(model.session);
+			if (_v31.$ === 'Just') {
+				var viewer = _v31.a;
+				return _Utils_Tuple2(
+					model,
+					request(viewer));
+			} else {
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							error: $elm$core$Maybe$Just('De alguma forma, você não está logado')
+						}),
+					$elm$core$Platform$Cmd$none);
+			}
+		};
 		var _v0 = _Utils_Tuple2(msg, model.state);
-		_v0$11:
+		_v0$19:
 		while (true) {
 			switch (_v0.a.$) {
 				case 'GotClub':
@@ -7368,9 +7557,11 @@ var $author$project$Page$Club$update = F2(
 							$elm$core$Platform$Cmd$none);
 					}
 				case 'EditClub':
-					if (_v0.b.$ === 'ViewOwner') {
+					if ((_v0.b.$ === 'View') && (_v0.b.b.$ === 'Owner')) {
 						var _v2 = _v0.a;
-						var club = _v0.b.a;
+						var _v3 = _v0.b;
+						var club = _v3.a;
+						var _v4 = _v3.b;
 						return _Utils_Tuple2(
 							_Utils_update(
 								model,
@@ -7383,49 +7574,38 @@ var $author$project$Page$Club$update = F2(
 								}),
 							$elm$core$Platform$Cmd$none);
 					} else {
-						break _v0$11;
+						break _v0$19;
 					}
 				case 'CancelEdit':
 					if (_v0.b.$ === 'Edit') {
-						var _v3 = _v0.a;
-						var _v4 = _v0.b;
-						var club = _v4.a;
+						var _v5 = _v0.a;
+						var _v6 = _v0.b;
+						var club = _v6.a;
 						return _Utils_Tuple2(
 							_Utils_update(
 								model,
 								{
 									error: $elm$core$Maybe$Nothing,
-									state: $author$project$Page$Club$ViewOwner(club)
+									state: A2($author$project$Page$Club$View, club, $author$project$Page$Club$Owner)
 								}),
 							$elm$core$Platform$Cmd$none);
 					} else {
-						break _v0$11;
+						break _v0$19;
 					}
 				case 'ConfirmEdit':
 					if (_v0.b.$ === 'Edit') {
-						var _v5 = _v0.a;
-						var _v6 = _v0.b;
-						var club = _v6.a;
-						var form = _v6.b;
-						var _v7 = $author$project$Page$Club$validatePatch(form);
-						if (_v7.$ === 'Ok') {
-							var _v8 = model.session;
-							if (_v8.$ === 'LoggedIn') {
-								var viewer = _v8.b;
-								return _Utils_Tuple2(
-									model,
-									A3($author$project$Page$Club$requestPatch, club, form, viewer));
-							} else {
-								return _Utils_Tuple2(
-									_Utils_update(
-										model,
-										{
-											error: $elm$core$Maybe$Just('De alguma forma, você não está logado')
-										}),
-									$elm$core$Platform$Cmd$none);
-							}
+						var _v7 = _v0.a;
+						var _v8 = _v0.b;
+						var club = _v8.a;
+						var form = _v8.b;
+						var _v9 = $author$project$Page$Club$validatePatch(form);
+						if (_v9.$ === 'Ok') {
+							return makeRequest(
+								function (viewer) {
+									return A3($author$project$Page$Club$requestPatch, club, form, viewer);
+								});
 						} else {
-							var err = _v7.a;
+							var err = _v9.a;
 							return _Utils_Tuple2(
 								_Utils_update(
 									model,
@@ -7435,61 +7615,61 @@ var $author$project$Page$Club$update = F2(
 								$elm$core$Platform$Cmd$none);
 						}
 					} else {
-						break _v0$11;
+						break _v0$19;
 					}
-				case 'PatchClub':
-					if (_v0.b.$ === 'Edit') {
-						var result = _v0.a.a;
-						var _v9 = _v0.b;
-						if (result.$ === 'Ok') {
-							var user = result.a;
-							return _Utils_Tuple2(
-								_Utils_update(
-									model,
-									{
-										error: $elm$core$Maybe$Nothing,
-										state: $author$project$Page$Club$ViewOwner(user)
-									}),
-								$elm$core$Platform$Cmd$none);
+				case 'CancelNew':
+					if (_v0.b.$ === 'New') {
+						var _v10 = _v0.a;
+						return _Utils_Tuple2(
+							model,
+							A2(
+								$elm$browser$Browser$Navigation$back,
+								$author$project$Session$navKey(model.session),
+								1));
+					} else {
+						break _v0$19;
+					}
+				case 'ConfirmNew':
+					if (_v0.b.$ === 'New') {
+						var _v11 = _v0.a;
+						var form = _v0.b.a;
+						var _v12 = $author$project$Page$Club$validateNew(form);
+						if (_v12.$ === 'Ok') {
+							return makeRequest(
+								function (viewer) {
+									return A2($author$project$Page$Club$requestPost, form, viewer);
+								});
 						} else {
-							var error = result.a;
+							var err = _v12.a;
 							return _Utils_Tuple2(
 								_Utils_update(
 									model,
 									{
-										error: $elm$core$Maybe$Just(
-											$author$project$Api$errorToString(error))
+										error: $elm$core$Maybe$Just(err)
 									}),
 								$elm$core$Platform$Cmd$none);
 						}
 					} else {
-						break _v0$11;
+						break _v0$19;
 					}
 				case 'ConfirmDelete':
-					if (_v0.b.$ === 'ViewOwner') {
-						var _v11 = _v0.a;
-						var club = _v0.b.a;
-						var _v12 = $author$project$Session$toViewer(model.session);
-						if (_v12.$ === 'Just') {
-							var viewer = _v12.a;
-							return _Utils_Tuple2(
-								model,
-								A2($author$project$Page$Club$requestDelete, club, viewer));
-						} else {
-							return _Utils_Tuple2(
-								_Utils_update(
-									model,
-									{
-										error: $elm$core$Maybe$Just('You shouldn\'t be able to do this ')
-									}),
-								$elm$core$Platform$Cmd$none);
-						}
+					if ((_v0.b.$ === 'View') && (_v0.b.b.$ === 'Owner')) {
+						var _v13 = _v0.a;
+						var _v14 = _v0.b;
+						var club = _v14.a;
+						var _v15 = _v14.b;
+						return makeRequest(
+							function (viewer) {
+								return A2($author$project$Page$Club$requestDelete, club, viewer);
+							});
 					} else {
-						break _v0$11;
+						break _v0$19;
 					}
 				case 'DeleteClub':
-					if (_v0.b.$ === 'ViewOwner') {
+					if ((_v0.b.$ === 'View') && (_v0.b.b.$ === 'Owner')) {
 						var result = _v0.a.a;
+						var _v16 = _v0.b;
+						var _v17 = _v16.b;
 						if (result.$ === 'Ok') {
 							return _Utils_Tuple2(
 								model,
@@ -7509,83 +7689,174 @@ var $author$project$Page$Club$update = F2(
 								$elm$core$Platform$Cmd$none);
 						}
 					} else {
-						break _v0$11;
+						break _v0$19;
+					}
+				case 'AskInvite':
+					if ((_v0.b.$ === 'View') && (_v0.b.b.$ === 'NonMember')) {
+						var _v19 = _v0.a;
+						var _v20 = _v0.b;
+						var club = _v20.a;
+						var _v21 = _v20.b;
+						return makeRequest(
+							function (viewer) {
+								return A2($author$project$Page$Club$requestInvite, club, viewer);
+							});
+					} else {
+						break _v0$19;
+					}
+				case 'Leave':
+					if ((_v0.b.$ === 'View') && (_v0.b.b.$ === 'Member')) {
+						var _v22 = _v0.a;
+						var _v23 = _v0.b;
+						var club = _v23.a;
+						var _v24 = _v23.b;
+						return makeRequest(
+							function (viewer) {
+								return A2($author$project$Page$Club$requestLeave, club, viewer);
+							});
+					} else {
+						break _v0$19;
+					}
+				case 'RemoveMember':
+					if ((_v0.b.$ === 'View') && (_v0.b.b.$ === 'Owner')) {
+						var membership = _v0.a.a;
+						var _v25 = _v0.b;
+						var club = _v25.a;
+						var _v26 = _v25.b;
+						return makeRequest(
+							function (viewer) {
+								return A3($author$project$Page$Club$requestRemoveMember, club, membership, viewer);
+							});
+					} else {
+						break _v0$19;
 					}
 				case 'InputName':
-					if (_v0.b.$ === 'Edit') {
-						var name = _v0.a.a;
-						var _v14 = _v0.b;
-						var club = _v14.a;
-						var form = _v14.b;
-						return A4(
-							$author$project$Page$Club$updateForm,
-							function (f) {
-								return _Utils_update(
-									f,
-									{name: name});
-							},
-							club,
-							form,
-							model);
-					} else {
-						break _v0$11;
+					switch (_v0.b.$) {
+						case 'New':
+							var name = _v0.a.a;
+							var form = _v0.b.a;
+							return A3(
+								$author$project$Page$Club$updateNewForm,
+								function (f) {
+									return _Utils_update(
+										f,
+										{name: name});
+								},
+								form,
+								model);
+						case 'Edit':
+							var name = _v0.a.a;
+							var _v27 = _v0.b;
+							var club = _v27.a;
+							var form = _v27.b;
+							return A4(
+								$author$project$Page$Club$updateEditForm,
+								function (f) {
+									return _Utils_update(
+										f,
+										{name: name});
+								},
+								club,
+								form,
+								model);
+						default:
+							break _v0$19;
 					}
 				case 'InputWebsite':
-					if (_v0.b.$ === 'Edit') {
-						var website = _v0.a.a;
-						var _v15 = _v0.b;
-						var club = _v15.a;
-						var form = _v15.b;
-						return A4(
-							$author$project$Page$Club$updateForm,
-							function (f) {
-								return _Utils_update(
-									f,
-									{website: website});
-							},
-							club,
-							form,
-							model);
-					} else {
-						break _v0$11;
+					switch (_v0.b.$) {
+						case 'New':
+							var website = _v0.a.a;
+							var form = _v0.b.a;
+							return A3(
+								$author$project$Page$Club$updateNewForm,
+								function (f) {
+									return _Utils_update(
+										f,
+										{website: website});
+								},
+								form,
+								model);
+						case 'Edit':
+							var website = _v0.a.a;
+							var _v28 = _v0.b;
+							var club = _v28.a;
+							var form = _v28.b;
+							return A4(
+								$author$project$Page$Club$updateEditForm,
+								function (f) {
+									return _Utils_update(
+										f,
+										{website: website});
+								},
+								club,
+								form,
+								model);
+						default:
+							break _v0$19;
 					}
 				case 'InputContact':
-					if (_v0.b.$ === 'Edit') {
-						var contact = _v0.a.a;
-						var _v16 = _v0.b;
-						var club = _v16.a;
-						var form = _v16.b;
-						return A4(
-							$author$project$Page$Club$updateForm,
-							function (f) {
-								return _Utils_update(
-									f,
-									{contact: contact});
-							},
-							club,
-							form,
-							model);
-					} else {
-						break _v0$11;
+					switch (_v0.b.$) {
+						case 'New':
+							var contact = _v0.a.a;
+							var form = _v0.b.a;
+							return A3(
+								$author$project$Page$Club$updateNewForm,
+								function (f) {
+									return _Utils_update(
+										f,
+										{contact: contact});
+								},
+								form,
+								model);
+						case 'Edit':
+							var contact = _v0.a.a;
+							var _v29 = _v0.b;
+							var club = _v29.a;
+							var form = _v29.b;
+							return A4(
+								$author$project$Page$Club$updateEditForm,
+								function (f) {
+									return _Utils_update(
+										f,
+										{contact: contact});
+								},
+								club,
+								form,
+								model);
+						default:
+							break _v0$19;
 					}
 				default:
-					if (_v0.b.$ === 'Edit') {
-						var localization = _v0.a.a;
-						var _v17 = _v0.b;
-						var club = _v17.a;
-						var form = _v17.b;
-						return A4(
-							$author$project$Page$Club$updateForm,
-							function (f) {
-								return _Utils_update(
-									f,
-									{localization: localization});
-							},
-							club,
-							form,
-							model);
-					} else {
-						break _v0$11;
+					switch (_v0.b.$) {
+						case 'New':
+							var localization = _v0.a.a;
+							var form = _v0.b.a;
+							return A3(
+								$author$project$Page$Club$updateNewForm,
+								function (f) {
+									return _Utils_update(
+										f,
+										{localization: localization});
+								},
+								form,
+								model);
+						case 'Edit':
+							var localization = _v0.a.a;
+							var _v30 = _v0.b;
+							var club = _v30.a;
+							var form = _v30.b;
+							return A4(
+								$author$project$Page$Club$updateEditForm,
+								function (f) {
+									return _Utils_update(
+										f,
+										{localization: localization});
+								},
+								club,
+								form,
+								model);
+						default:
+							break _v0$19;
 					}
 			}
 		}
@@ -7967,22 +8238,6 @@ var $author$project$Page$User$initState = F2(
 		}
 	});
 var $author$project$Model$Notification$listDecoder = $elm$json$Json$Decode$list($author$project$Model$Notification$decoder);
-var $author$project$Api$privatePost = F2(
-	function (r, viewer) {
-		return $elm$http$Http$request(
-			{
-				body: r.body,
-				expect: r.expect,
-				headers: _List_fromArray(
-					[
-						A2($elm$http$Http$header, 'bearer', viewer.token)
-					]),
-				method: 'POST',
-				timeout: $elm$core$Maybe$Nothing,
-				tracker: $elm$core$Maybe$Nothing,
-				url: r.url
-			});
-	});
 var $author$project$Page$User$PatchUser = function (a) {
 	return {$: 'PatchUser', a: a};
 };
@@ -8448,10 +8703,7 @@ var $author$project$Page$Club$stateToTitle = function (state) {
 	switch (state.$) {
 		case 'Uninitialized':
 			return 'Clube';
-		case 'ViewAnonymus':
-			var club = state.a;
-			return 'Clube - ' + club.name;
-		case 'ViewOwner':
+		case 'View':
 			var club = state.a;
 			return 'Clube - ' + club.name;
 		case 'Edit':
@@ -8461,26 +8713,12 @@ var $author$project$Page$Club$stateToTitle = function (state) {
 			return 'Clube - Novo';
 	}
 };
-var $author$project$Page$Club$ConfirmDelete = {$: 'ConfirmDelete'};
-var $elm$html$Html$button = _VirtualDom_node('button');
-var $elm$virtual_dom$VirtualDom$Normal = function (a) {
-	return {$: 'Normal', a: a};
-};
-var $elm$virtual_dom$VirtualDom$on = _VirtualDom_on;
-var $elm$html$Html$Events$on = F2(
-	function (event, decoder) {
-		return A2(
-			$elm$virtual_dom$VirtualDom$on,
-			event,
-			$elm$virtual_dom$VirtualDom$Normal(decoder));
-	});
-var $elm$html$Html$Events$onClick = function (msg) {
-	return A2(
-		$elm$html$Html$Events$on,
-		'click',
-		$elm$json$Json$Decode$succeed(msg));
-};
 var $elm$html$Html$p = _VirtualDom_node('p');
+var $author$project$Page$Club$AskInvite = {$: 'AskInvite'};
+var $author$project$Page$Club$ConfirmDelete = {$: 'ConfirmDelete'};
+var $author$project$Page$Club$EditClub = {$: 'EditClub'};
+var $author$project$Page$Club$Leave = {$: 'Leave'};
+var $elm$html$Html$button = _VirtualDom_node('button');
 var $author$project$Page$Club$clubCardElement = F2(
 	function (title, value) {
 		return A2(
@@ -8514,34 +8752,113 @@ var $author$project$Page$Club$clubCardElement = F2(
 				]));
 	});
 var $elm$html$Html$h1 = _VirtualDom_node('h1');
-var $author$project$Page$Club$viewClubCard = function (club) {
-	var divClass = 'container bg-indigo-500 rounded-lg text-white p-6 my-4 max-w-lg';
-	return A2(
-		$elm$html$Html$div,
-		_List_fromArray(
-			[
-				$elm$html$Html$Attributes$class(divClass)
-			]),
-		_List_fromArray(
-			[
-				A2(
-				$elm$html$Html$h1,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('font-bold text-xl')
-					]),
-				_List_fromArray(
-					[
-						$elm$html$Html$text(club.name)
-					])),
-				A2($author$project$Page$Club$clubCardElement, 'Localização', club.localization),
-				A2($author$project$Page$Club$clubCardElement, 'Fundação', club.createdAt),
-				A2($author$project$Page$Club$clubCardElement, 'Site', club.website),
-				A2($author$project$Page$Club$clubCardElement, 'Contato', club.contact)
-			]));
+var $elm$virtual_dom$VirtualDom$Normal = function (a) {
+	return {$: 'Normal', a: a};
 };
+var $elm$virtual_dom$VirtualDom$on = _VirtualDom_on;
+var $elm$html$Html$Events$on = F2(
+	function (event, decoder) {
+		return A2(
+			$elm$virtual_dom$VirtualDom$on,
+			event,
+			$elm$virtual_dom$VirtualDom$Normal(decoder));
+	});
+var $elm$html$Html$Events$onClick = function (msg) {
+	return A2(
+		$elm$html$Html$Events$on,
+		'click',
+		$elm$json$Json$Decode$succeed(msg));
+};
+var $author$project$Page$Club$viewClubCard = F2(
+	function (club, _switch) {
+		var divClass = 'container bg-indigo-500 rounded-lg text-white p-6 my-4 max-w-lg';
+		return A2(
+			$elm$html$Html$div,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class(divClass)
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$elm$html$Html$h1,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('font-bold text-xl')
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text(club.name)
+						])),
+					A2($author$project$Page$Club$clubCardElement, 'Localização', club.localization),
+					A2($author$project$Page$Club$clubCardElement, 'Fundação', club.createdAt),
+					A2($author$project$Page$Club$clubCardElement, 'Site', club.website),
+					A2($author$project$Page$Club$clubCardElement, 'Contato', club.contact),
+					function () {
+					switch (_switch.$) {
+						case 'Anonymus':
+							return A2($elm$html$Html$div, _List_Nil, _List_Nil);
+						case 'Owner':
+							return A2(
+								$elm$html$Html$div,
+								_List_Nil,
+								_List_fromArray(
+									[
+										A2(
+										$elm$html$Html$button,
+										_List_fromArray(
+											[
+												$elm$html$Html$Attributes$class('btn btn-indigo-500 mt-4'),
+												$elm$html$Html$Events$onClick($author$project$Page$Club$EditClub)
+											]),
+										_List_fromArray(
+											[
+												$elm$html$Html$text('Editar')
+											])),
+										A2(
+										$elm$html$Html$button,
+										_List_fromArray(
+											[
+												$elm$html$Html$Attributes$class('border-none btn btn-red-500 mt-4'),
+												$elm$html$Html$Events$onClick($author$project$Page$Club$ConfirmDelete)
+											]),
+										_List_fromArray(
+											[
+												$elm$html$Html$text('Excluir')
+											]))
+									]));
+						case 'Member':
+							return A2(
+								$elm$html$Html$button,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$class('btn btn-indigo-500 mt-4'),
+										$elm$html$Html$Events$onClick($author$project$Page$Club$Leave)
+									]),
+								_List_fromArray(
+									[
+										$elm$html$Html$text('Sair')
+									]));
+						default:
+							return A2(
+								$elm$html$Html$button,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$class('btn btn-indigo-500 mt-4'),
+										$elm$html$Html$Events$onClick($author$project$Page$Club$AskInvite)
+									]),
+								_List_fromArray(
+									[
+										$elm$html$Html$text('Pedir Convite')
+									]));
+					}
+				}()
+				]));
+	});
 var $author$project$Page$Club$CancelEdit = {$: 'CancelEdit'};
+var $author$project$Page$Club$CancelNew = {$: 'CancelNew'};
 var $author$project$Page$Club$ConfirmEdit = {$: 'ConfirmEdit'};
+var $author$project$Page$Club$ConfirmNew = {$: 'ConfirmNew'};
 var $author$project$Page$Club$InputContact = function (a) {
 	return {$: 'InputContact', a: a};
 };
@@ -8584,8 +8901,10 @@ var $elm$html$Html$Events$onInput = function (tagger) {
 };
 var $elm$html$Html$Attributes$placeholder = $elm$html$Html$Attributes$stringProperty('placeholder');
 var $elm$html$Html$Attributes$type_ = $elm$html$Html$Attributes$stringProperty('type');
-var $author$project$Page$Club$viewClubCardEdit = function () {
+var $author$project$Page$Club$viewClubCardEdit = function (newClub) {
 	var divClass = 'container bg-indigo-500 rounded-lg text-white p-6 my-4 max-w-lg space-y-4';
+	var confirmMsg = newClub ? $author$project$Page$Club$ConfirmNew : $author$project$Page$Club$ConfirmEdit;
+	var cancelMsg = newClub ? $author$project$Page$Club$CancelNew : $author$project$Page$Club$CancelEdit;
 	return A2(
 		$elm$html$Html$div,
 		_List_fromArray(
@@ -8646,7 +8965,7 @@ var $author$project$Page$Club$viewClubCardEdit = function () {
 				_List_fromArray(
 					[
 						$elm$html$Html$Attributes$class('border-none btn btn-green-500'),
-						$elm$html$Html$Events$onClick($author$project$Page$Club$ConfirmEdit)
+						$elm$html$Html$Events$onClick(confirmMsg)
 					]),
 				_List_fromArray(
 					[
@@ -8657,89 +8976,28 @@ var $author$project$Page$Club$viewClubCardEdit = function () {
 				_List_fromArray(
 					[
 						$elm$html$Html$Attributes$class('border-none btn btn-red-500'),
-						$elm$html$Html$Events$onClick($author$project$Page$Club$CancelEdit)
+						$elm$html$Html$Events$onClick(cancelMsg)
 					]),
 				_List_fromArray(
 					[
 						$elm$html$Html$text('Cancelar')
 					]))
 			]));
-}();
-var $author$project$Page$Club$EditClub = {$: 'EditClub'};
-var $author$project$Page$Club$viewClubCardOwner = function (club) {
-	var divClass = 'container bg-indigo-500 rounded-lg text-white p-6 my-4 max-w-lg';
-	return A2(
-		$elm$html$Html$div,
-		_List_fromArray(
-			[
-				$elm$html$Html$Attributes$class(divClass)
-			]),
-		_List_fromArray(
-			[
-				A2(
-				$elm$html$Html$h1,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('font-bold text-xl')
-					]),
-				_List_fromArray(
-					[
-						$elm$html$Html$text(club.name)
-					])),
-				A2($author$project$Page$Club$clubCardElement, 'Localização', club.localization),
-				A2($author$project$Page$Club$clubCardElement, 'Fundação', club.createdAt),
-				A2($author$project$Page$Club$clubCardElement, 'Site', club.website),
-				A2($author$project$Page$Club$clubCardElement, 'Contato', club.contact),
-				A2(
-				$elm$html$Html$button,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('btn btn-indigo-500 mt-4'),
-						$elm$html$Html$Events$onClick($author$project$Page$Club$EditClub)
-					]),
-				_List_fromArray(
-					[
-						$elm$html$Html$text('Editar')
-					]))
-			]));
 };
-var $author$project$Page$Club$viewMembers = function (_v0) {
-	return A2(
-		$elm$html$Html$div,
-		_List_fromArray(
-			[
-				$elm$html$Html$Attributes$class('m-2')
-			]),
-		_List_fromArray(
-			[
-				A2(
-				$elm$html$Html$h1,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('list-heading')
-					]),
-				_List_fromArray(
-					[
-						$elm$html$Html$text('Membros')
-					])),
-				A2(
-				$elm$html$Html$div,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('space-y-4')
-					]),
-				_List_fromArray(
-					[
-						A2(
-						$elm$html$Html$p,
-						_List_Nil,
-						_List_fromArray(
-							[
-								$elm$html$Html$text('TODO')
-							]))
-					]))
-			]));
+var $author$project$Page$Club$RemoveMember = function (a) {
+	return {$: 'RemoveMember', a: a};
 };
+var $elm$core$List$filter = F2(
+	function (isGood, list) {
+		return A3(
+			$elm$core$List$foldr,
+			F2(
+				function (x, xs) {
+					return isGood(x) ? A2($elm$core$List$cons, x, xs) : xs;
+				}),
+			_List_Nil,
+			list);
+	});
 var $elm$html$Html$a = _VirtualDom_node('a');
 var $author$project$UserShort$getUrl = function (user) {
 	return A2(
@@ -8757,6 +9015,126 @@ var $elm$html$Html$Attributes$href = function (url) {
 		'href',
 		_VirtualDom_noJavaScriptUri(url));
 };
+var $author$project$Model$ClubMembership$view = F2(
+	function (membership, removeMsg) {
+		var user = membership.user;
+		return A2(
+			$elm$html$Html$div,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class('list-item')
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$elm$html$Html$a,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$href(
+							$author$project$UserShort$getUrl(user)),
+							$elm$html$Html$Attributes$class('flex-grow hover:underline')
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text(user.username)
+						])),
+					membership.approved ? A2($elm$html$Html$span, _List_Nil, _List_Nil) : (membership.denied ? A2(
+					$elm$html$Html$span,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('font-bold')
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text('Negada')
+						])) : A2(
+					$elm$html$Html$span,
+					_List_Nil,
+					_List_fromArray(
+						[
+							$elm$html$Html$text('Pendente')
+						]))),
+					A2(
+					$elm$html$Html$span,
+					_List_Nil,
+					_List_fromArray(
+						[
+							$elm$html$Html$text(
+							$elm$core$String$fromInt(user.totalTournaments) + ' Torneios')
+						])),
+					A2(
+					$elm$html$Html$span,
+					_List_Nil,
+					_List_fromArray(
+						[
+							$elm$html$Html$text(user.createdAt)
+						])),
+					function () {
+					if (removeMsg.$ === 'Nothing') {
+						return A2($elm$html$Html$div, _List_Nil, _List_Nil);
+					} else {
+						var msg = removeMsg.a;
+						return A2(
+							$elm$html$Html$button,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$class('border-none btn btn-red-500'),
+									$elm$html$Html$Events$onClick(msg)
+								]),
+							_List_fromArray(
+								[
+									$elm$html$Html$text('Cancelar')
+								]));
+					}
+				}()
+				]));
+	});
+var $author$project$Page$Club$viewMembers = F2(
+	function (club, isOwner) {
+		var transform = isOwner ? function (m) {
+			return A2(
+				$author$project$Model$ClubMembership$view,
+				m,
+				$elm$core$Maybe$Just(
+					$author$project$Page$Club$RemoveMember(m)));
+		} : function (m) {
+			return A2($author$project$Model$ClubMembership$view, m, $elm$core$Maybe$Nothing);
+		};
+		var filter = isOwner ? function (_v0) {
+			return true;
+		} : function (m) {
+			return m.approved && (!m.denied);
+		};
+		return A2(
+			$elm$html$Html$div,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class('m-2')
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$elm$html$Html$h1,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('list-heading')
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text('Membros')
+						])),
+					A2(
+					$elm$html$Html$div,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('space-y-4')
+						]),
+					A2(
+						$elm$core$List$map,
+						transform,
+						A2($elm$core$List$filter, filter, club.members)))
+				]));
+	});
 var $author$project$UserShort$view = function (user) {
 	return A2(
 		$elm$html$Html$div,
@@ -8826,7 +9204,62 @@ var $author$project$Page$Club$viewOwner = function (club) {
 					]))
 			]));
 };
-var $author$project$Page$Club$viewTournaments = function (_v0) {
+var $author$project$Model$TournamentShort$getUrl = function (tournament) {
+	return A2(
+		$elm$url$Url$Builder$absolute,
+		_List_fromArray(
+			[
+				'tournaments',
+				$elm$core$String$fromInt(tournament.id)
+			]),
+		_List_Nil);
+};
+var $author$project$Model$TournamentShort$view = function (tournament) {
+	return A2(
+		$elm$html$Html$div,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('list-item')
+			]),
+		_List_fromArray(
+			[
+				A2(
+				$elm$html$Html$a,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$href(
+						$author$project$Model$TournamentShort$getUrl(tournament)),
+						$elm$html$Html$Attributes$class('flex-grow hover:underline')
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text(tournament.name)
+					])),
+				A2(
+				$elm$html$Html$span,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text(
+						$elm$core$String$fromInt(tournament.totalPlayers) + ' Jogadores')
+					])),
+				A2(
+				$elm$html$Html$span,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text('Inicio em ' + tournament.startDate)
+					])),
+				A2(
+				$elm$html$Html$span,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text(tournament.status)
+					]))
+			]));
+};
+var $author$project$Page$Club$viewTournaments = function (club) {
 	return A2(
 		$elm$html$Html$div,
 		_List_fromArray(
@@ -8851,16 +9284,7 @@ var $author$project$Page$Club$viewTournaments = function (_v0) {
 					[
 						$elm$html$Html$Attributes$class('space-y-4')
 					]),
-				_List_fromArray(
-					[
-						A2(
-						$elm$html$Html$p,
-						_List_Nil,
-						_List_fromArray(
-							[
-								$elm$html$Html$text('TODO')
-							]))
-					]))
+				A2($elm$core$List$map, $author$project$Model$TournamentShort$view, club.tournaments))
 			]));
 };
 var $author$project$Page$Club$viewClub = function (model) {
@@ -8874,40 +9298,21 @@ var $author$project$Page$Club$viewClub = function (model) {
 					[
 						$elm$html$Html$text('Carregando...')
 					]));
-		case 'ViewAnonymus':
+		case 'View':
 			var club = _v0.a;
+			var _switch = _v0.b;
 			return A2(
 				$elm$html$Html$div,
 				_List_Nil,
 				_List_fromArray(
 					[
-						$author$project$Page$Club$viewClubCard(club),
+						A2($author$project$Page$Club$viewClubCard, club, _switch),
 						$author$project$Page$Club$viewOwner(club),
 						$author$project$Page$Club$viewTournaments(club),
-						$author$project$Page$Club$viewMembers(club)
-					]));
-		case 'ViewOwner':
-			var club = _v0.a;
-			return A2(
-				$elm$html$Html$div,
-				_List_Nil,
-				_List_fromArray(
-					[
-						$author$project$Page$Club$viewClubCardOwner(club),
-						$author$project$Page$Club$viewOwner(club),
-						$author$project$Page$Club$viewTournaments(club),
-						$author$project$Page$Club$viewMembers(club),
 						A2(
-						$elm$html$Html$button,
-						_List_fromArray(
-							[
-								$elm$html$Html$Attributes$class('border-none btn btn-red-500'),
-								$elm$html$Html$Events$onClick($author$project$Page$Club$ConfirmDelete)
-							]),
-						_List_fromArray(
-							[
-								$elm$html$Html$text('Excluir')
-							]))
+						$author$project$Page$Club$viewMembers,
+						club,
+						_Utils_eq(_switch, $author$project$Page$Club$Owner))
 					]));
 		case 'Edit':
 			var club = _v0.a;
@@ -8916,17 +9321,19 @@ var $author$project$Page$Club$viewClub = function (model) {
 				_List_Nil,
 				_List_fromArray(
 					[
-						$author$project$Page$Club$viewClubCardEdit,
+						$author$project$Page$Club$viewClubCardEdit(false),
 						$author$project$Page$Club$viewOwner(club),
 						$author$project$Page$Club$viewTournaments(club),
-						$author$project$Page$Club$viewMembers(club)
+						A2($author$project$Page$Club$viewMembers, club, true)
 					]));
 		default:
 			return A2(
 				$elm$html$Html$div,
 				_List_Nil,
 				_List_fromArray(
-					[$author$project$Page$Club$viewClubCardEdit]));
+					[
+						$author$project$Page$Club$viewClubCardEdit(true)
+					]));
 	}
 };
 var $author$project$Viewer$getUrl = function (viewer) {
@@ -9718,33 +10125,9 @@ var $author$project$Page$User$viewOwnedClubs = function (maybeUser) {
 			]));
 };
 var $elm$core$Basics$ge = _Utils_ge;
-var $elm$core$Basics$negate = function (n) {
-	return -n;
-};
 var $elm$core$Basics$abs = function (n) {
 	return (n < 0) ? (-n) : n;
 };
-var $elm$core$List$any = F2(
-	function (isOkay, list) {
-		any:
-		while (true) {
-			if (!list.b) {
-				return false;
-			} else {
-				var x = list.a;
-				var xs = list.b;
-				if (isOkay(x)) {
-					return true;
-				} else {
-					var $temp$isOkay = isOkay,
-						$temp$list = xs;
-					isOkay = $temp$isOkay;
-					list = $temp$list;
-					continue any;
-				}
-			}
-		}
-	});
 var $elm$core$String$foldr = _String_foldr;
 var $elm$core$String$toList = function (string) {
 	return A3($elm$core$String$foldr, $elm$core$List$cons, _List_Nil, string);
@@ -10324,61 +10707,6 @@ var $author$project$Page$User$viewStats = function (maybeUser) {
 		return $author$project$Model$Stats$view(user.stats);
 	}
 };
-var $author$project$Model$TournamentShort$getUrl = function (tournament) {
-	return A2(
-		$elm$url$Url$Builder$absolute,
-		_List_fromArray(
-			[
-				'tournaments',
-				$elm$core$String$fromInt(tournament.id)
-			]),
-		_List_Nil);
-};
-var $author$project$Model$TournamentShort$view = function (tournament) {
-	return A2(
-		$elm$html$Html$div,
-		_List_fromArray(
-			[
-				$elm$html$Html$Attributes$class('list-item')
-			]),
-		_List_fromArray(
-			[
-				A2(
-				$elm$html$Html$a,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$href(
-						$author$project$Model$TournamentShort$getUrl(tournament)),
-						$elm$html$Html$Attributes$class('flex-grow hover:underline')
-					]),
-				_List_fromArray(
-					[
-						$elm$html$Html$text(tournament.name)
-					])),
-				A2(
-				$elm$html$Html$span,
-				_List_Nil,
-				_List_fromArray(
-					[
-						$elm$html$Html$text(
-						$elm$core$String$fromInt(tournament.totalPlayers) + ' Jogadores')
-					])),
-				A2(
-				$elm$html$Html$span,
-				_List_Nil,
-				_List_fromArray(
-					[
-						$elm$html$Html$text('Inicio em ' + tournament.startDate)
-					])),
-				A2(
-				$elm$html$Html$span,
-				_List_Nil,
-				_List_fromArray(
-					[
-						$elm$html$Html$text(tournament.status)
-					]))
-			]));
-};
 var $author$project$Page$User$viewTournaments = function (maybeUser) {
 	return A2(
 		$elm$html$Html$div,
@@ -10605,7 +10933,7 @@ var $author$project$Page$User$viewUserCard = function (state) {
 			]));
 };
 var $author$project$Page$User$view = function (model) {
-	var user = $author$project$Page$User$stateToUser(model.state);
+	var maybeUser = $author$project$Page$User$stateToUser(model.state);
 	return {
 		body: _List_fromArray(
 			[
@@ -10620,13 +10948,20 @@ var $author$project$Page$User$view = function (model) {
 				}
 			}(),
 				$author$project$Page$User$viewUserCard(model.state),
-				$author$project$Page$User$viewOwnedClubs(user),
-				$author$project$Page$User$viewMemberships(user),
-				$author$project$Page$User$viewTournaments(user),
-				$author$project$Page$User$viewNotifications(user),
-				$author$project$Page$User$viewStats(user)
+				$author$project$Page$User$viewOwnedClubs(maybeUser),
+				$author$project$Page$User$viewMemberships(maybeUser),
+				$author$project$Page$User$viewTournaments(maybeUser),
+				$author$project$Page$User$viewNotifications(maybeUser),
+				$author$project$Page$User$viewStats(maybeUser)
 			]),
-		title: 'Login'
+		title: function () {
+			if (maybeUser.$ === 'Just') {
+				var user = maybeUser.a;
+				return 'Usuário - ' + user.username;
+			} else {
+				return 'Usuário';
+			}
+		}()
 	};
 };
 var $author$project$Main$viewWelcomeCard = A2(
