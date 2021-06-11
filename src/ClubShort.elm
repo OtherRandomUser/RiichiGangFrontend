@@ -50,13 +50,6 @@ getUrl : ClubShort -> String
 getUrl club =
   Url.Builder.absolute ["clubs", String.fromInt club.id] []
 
--- view : ClubShort -> Html msg
--- view club =
---   div [ class "list-item" ]
---     [ a [ href (getUrl club), class "flex-grow hover:underline" ] [ text club.name ]
---     , span [] [ text club.createdAt ]
---     ]
-
 view : ClubShort -> Html msg
 view club =
   div [ class "list-item" ]
@@ -64,5 +57,5 @@ view club =
     , span [] [ text club.localization ]
     , span [] [ text ((String.fromInt club.totalTournaments) ++ " Torneios") ]
     , span [] [ text ((String.fromInt club.totalPlayers) ++ " Jogadores") ]
-    , span [] [ text club.createdAt ]
+    , span [] [ text ("Fundado em " ++ club.createdAt) ]
     ]

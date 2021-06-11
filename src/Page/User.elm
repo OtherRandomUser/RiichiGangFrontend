@@ -9,11 +9,15 @@ import Json.Encode as Encode
 -- import Browser.Navigation as Nav
 
 import Api exposing (..)
+import ClubShort
 import CommonHtml exposing (viewNav, errorCard)
+import Model.Membership
+import Model.Notification exposing (Notification)
+import Model.Stats
+import Model.TournamentShort
 import Session exposing (..)
 import User exposing (User)
 import Viewer exposing (..)
-import ClubShort
 
 
 -- data modeling --
@@ -39,6 +43,7 @@ type alias UpdateForm =
 
 type Msg
   = GotUser (Result Api.ApiError User)
+  | GotNotifications (Result Api.ApiError (List Notification))
   | EditUser
   | CancelEdit
   | ConfirmEdit
@@ -47,6 +52,7 @@ type Msg
   | InputEmail String
   | InputPassword String
   | InputPasswordAgain String
+  | NotificationAction String
 
 init : Session -> Int -> (Model, Cmd Msg)
 init session id =
@@ -71,6 +77,7 @@ initState session user =
     Anonymus _ ->
       ViewAnonymus user
 
+
 -- -- update --
 
 update : Msg -> Model -> (Model, Cmd Msg)
@@ -80,6 +87,14 @@ update msg model =
       case result of
         Ok user ->
           ({ model | state = initState model.session user, error = Nothing }, Cmd.none)
+
+        Err error ->
+          ({ model | error = Just (Api.errorToString error) }, Cmd.none)
+
+    (GotNotifications result, ViewProfile user) ->
+      case result of
+        Ok notifications ->
+          ({ model | state = ViewProfile { user | notifications = notifications } }, Cmd.none)
 
         Err error ->
           ({ model | error = Just (Api.errorToString error) }, Cmd.none)
@@ -122,6 +137,20 @@ update msg model =
 
     (InputPasswordAgain passwordAgain, EditProfile user form) ->
       updateForm (\f -> { f | passwordAgain = passwordAgain }) user form model
+
+    (NotificationAction url, ViewProfile _) ->
+      case Session.toViewer model.session of
+        Just viewer ->
+          ( model
+          , Api.privatePost
+            { url = url
+            , body = Http.emptyBody
+            , expect = Api.expectJson GotNotifications Model.Notification.listDecoder
+            } viewer
+          )
+
+        Nothing ->
+          ({ model | error = Just "You shouldn't be able to do this " }, Cmd.none)
 
     (_, _) ->
       ({ model | error = Just "Estado inválido" }, Cmd.none)
@@ -178,9 +207,10 @@ view model =
 
     , viewUserCard model.state
     , viewOwnedClubs user
-    , p [] [ text "TODO filiacoes" ]
-    , p [] [ text "TODO torneios" ]
-    , p [] [ text "TODO notificações" ]
+    , viewMemberships user
+    , viewTournaments user
+    , viewNotifications user
+    , viewStats user
     ]
   }
 
@@ -241,6 +271,61 @@ viewOwnedClubs maybeUser =
     , button [ class "border-transparent btn btn-indigo-500 mt-4" ] [ text "Novo" ] -- TODO implement after implementing the page
 
     ]
+
+viewMemberships : Maybe User -> Html Msg
+viewMemberships maybeUser =
+  div [ class "m-2" ]
+    [ h1 [ class "list-heading" ] [ text "Filiações" ]
+
+    , case maybeUser of
+      Nothing ->
+        p [] [ text "Nada ainda" ]
+
+      Just user ->
+        div [ class "space-y-4" ] (List.map Model.Membership.view user.memberships)
+    ]
+
+viewTournaments : Maybe User -> Html Msg
+viewTournaments maybeUser =
+  div [ class "m-2" ]
+    [ h1 [ class "list-heading" ] [ text "Torneios" ]
+
+    , case maybeUser of
+      Nothing ->
+        p [] [ text "Nada ainda" ]
+
+      Just user ->
+        div [ class "space-y-4" ] (List.map Model.TournamentShort.view user.tournaments)
+
+    ]
+
+viewNotifications : Maybe User -> Html Msg
+viewNotifications maybeUser =
+  let
+    transform = \n -> Model.Notification.view n
+      (NotificationAction (Model.Notification.getConfirmUrl n))
+      (NotificationAction (Model.Notification.getDenyUrl n))
+  in
+  div [ class "m-2" ]
+    [ h1 [ class "list-heading" ] [ text "Notificações" ]
+
+    , case maybeUser of
+      Nothing ->
+        p [] [ text "Nada ainda" ]
+
+      Just user ->
+        div [ class "space-y-4" ] (List.map transform user.notifications)
+
+    ]
+
+viewStats : Maybe User -> Html Msg
+viewStats maybeUser =
+  case maybeUser of
+    Nothing ->
+      div [] []
+
+    Just user ->
+      Model.Stats.view user.stats
 
 stateToUser : State -> Maybe User
 stateToUser state =

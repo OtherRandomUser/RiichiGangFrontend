@@ -32094,6 +32094,16 @@ video {
   color: rgba(255, 255, 255, var(--tw-text-opacity));
 }
 
+.tooltip {
+  position: absolute;
+  visibility: hidden;
+}
+
+.has-tooltip:hover .tooltip {
+  visibility: visible;
+  z-index: 50;
+}
+
 @media (min-width: 640px) {
   .sm\:container {
     width: 100%;
