@@ -12,6 +12,7 @@ import Session exposing (..)
 import Page.Club as ClubPage
 import Page.Clubs as ClubsPage
 import Page.Login as Login
+import Page.Ruleset
 import Page.SignUp as SignUp
 import Page.User as User
 import Route exposing (Route)
@@ -37,6 +38,7 @@ type Model
   | SignUp SignUp.Model
   | Clubs ClubsPage.Model
   | Club ClubPage.Model
+  | Ruleset Page.Ruleset.Model
   | User User.Model
 
 type Msg
@@ -46,6 +48,7 @@ type Msg
   | GotSignUpMsg SignUp.Msg
   | GotClubsMsg ClubsPage.Msg
   | GotClubMsg ClubPage.Msg
+  | GotRulesetMsg Page.Ruleset.Msg
   | GotUserMsg User.Msg
 
 init : () -> Url.Url -> Nav.Key -> (Model, Cmd Msg)
@@ -86,6 +89,10 @@ changeRouteTo maybeRoute model =
         ClubPage.init session clubId
           |> updateWith Club GotClubMsg
 
+      Just (Route.Ruleset clubId rulesetId) ->
+        Page.Ruleset.initGet session clubId rulesetId
+          |> updateWith Ruleset GotRulesetMsg
+
       Just (Route.User userId) ->
         User.init session userId
           |> updateWith User GotUserMsg
@@ -110,6 +117,9 @@ toSession model =
 
     Club club ->
       ClubPage.toSession club
+
+    Ruleset ruleset ->
+      Page.Ruleset.toSession ruleset
 
     User user ->
       User.toSession user
@@ -200,6 +210,14 @@ view model =
       in
       { title = page.title
       , body = List.map (Html.map GotClubMsg) page.body
+      }
+
+    Ruleset subModel ->
+      let
+        page = Page.Ruleset.view subModel
+      in
+      { title = page.title
+      , body = List.map (Html.map GotRulesetMsg) page.body
       }
 
     User subModel ->

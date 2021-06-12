@@ -38,6 +38,9 @@ clubInvite id = (clubMembers id) ++ "/invite"
 clubMember : Int -> Int -> String
 clubMember clubId userId = (clubMembers clubId) ++ "/" ++ (String.fromInt userId)
 
+clubRuleset : Int -> Int -> String
+clubRuleset clubId rulesetId = (club clubId) ++ "/rulesets/" ++ (String.fromInt rulesetId)
+
 
 -- Request Utils --
 

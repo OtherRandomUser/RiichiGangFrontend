@@ -5400,6 +5400,9 @@ var $author$project$Main$GotClubsMsg = function (a) {
 var $author$project$Main$GotLoginMsg = function (a) {
 	return {$: 'GotLoginMsg', a: a};
 };
+var $author$project$Main$GotRulesetMsg = function (a) {
+	return {$: 'GotRulesetMsg', a: a};
+};
 var $author$project$Main$GotSignUpMsg = function (a) {
 	return {$: 'GotSignUpMsg', a: a};
 };
@@ -5411,6 +5414,9 @@ var $author$project$Main$Login = function (a) {
 };
 var $author$project$Main$NotFound = function (a) {
 	return {$: 'NotFound', a: a};
+};
+var $author$project$Main$Ruleset = function (a) {
+	return {$: 'Ruleset', a: a};
 };
 var $author$project$Main$SignUp = function (a) {
 	return {$: 'SignUp', a: a};
@@ -6693,6 +6699,136 @@ var $author$project$Page$User$init = F2(
 			A3($author$project$Page$User$Model, session, $author$project$Page$User$Uninitialized, $elm$core$Maybe$Nothing),
 			$author$project$Page$User$get(id));
 	});
+var $author$project$Page$Ruleset$Model = F3(
+	function (session, error, state) {
+		return {error: error, session: session, state: state};
+	});
+var $author$project$Page$Ruleset$Uninitialized = {$: 'Uninitialized'};
+var $author$project$Page$Ruleset$GotRuleset = function (a) {
+	return {$: 'GotRuleset', a: a};
+};
+var $author$project$Api$clubRuleset = F2(
+	function (clubId, rulesetId) {
+		return $author$project$Api$club(clubId) + ('/rulesets/' + $elm$core$String$fromInt(rulesetId));
+	});
+var $author$project$Model$Ruleset$decoder = A3(
+	$webbhuset$elm_json_decode$Json$Decode$Field$require,
+	'id',
+	$elm$json$Json$Decode$int,
+	function (id) {
+		return A3(
+			$webbhuset$elm_json_decode$Json$Decode$Field$require,
+			'createdAt',
+			$elm$json$Json$Decode$string,
+			function (createdAt) {
+				return A3(
+					$webbhuset$elm_json_decode$Json$Decode$Field$require,
+					'name',
+					$elm$json$Json$Decode$string,
+					function (name) {
+						return A3(
+							$webbhuset$elm_json_decode$Json$Decode$Field$require,
+							'mochiten',
+							$elm$json$Json$Decode$int,
+							function (mochiten) {
+								return A3(
+									$webbhuset$elm_json_decode$Json$Decode$Field$require,
+									'genten',
+									$elm$json$Json$Decode$int,
+									function (genten) {
+										return A3(
+											$webbhuset$elm_json_decode$Json$Decode$Field$require,
+											'uma',
+											$elm$json$Json$Decode$string,
+											function (uma) {
+												return A3(
+													$webbhuset$elm_json_decode$Json$Decode$Field$require,
+													'oka',
+													$elm$json$Json$Decode$int,
+													function (oka) {
+														return A3(
+															$webbhuset$elm_json_decode$Json$Decode$Field$require,
+															'atozuke',
+															$elm$json$Json$Decode$string,
+															function (atozuke) {
+																return A3(
+																	$webbhuset$elm_json_decode$Json$Decode$Field$require,
+																	'kuitan',
+																	$elm$json$Json$Decode$string,
+																	function (kuitan) {
+																		return A3(
+																			$webbhuset$elm_json_decode$Json$Decode$Field$require,
+																			'kuikae',
+																			$elm$json$Json$Decode$string,
+																			function (kuikae) {
+																				return A3(
+																					$webbhuset$elm_json_decode$Json$Decode$Field$require,
+																					'uradora',
+																					$elm$json$Json$Decode$string,
+																					function (uradora) {
+																						return A3(
+																							$webbhuset$elm_json_decode$Json$Decode$Field$require,
+																							'kandora',
+																							$elm$json$Json$Decode$string,
+																							function (kandora) {
+																								return A3(
+																									$webbhuset$elm_json_decode$Json$Decode$Field$require,
+																									'kanuradora',
+																									$elm$json$Json$Decode$string,
+																									function (kanuradora) {
+																										return A3(
+																											$webbhuset$elm_json_decode$Json$Decode$Field$require,
+																											'akadora',
+																											$elm$json$Json$Decode$string,
+																											function (akadora) {
+																												return A3(
+																													$webbhuset$elm_json_decode$Json$Decode$Field$require,
+																													'agariyame',
+																													$elm$json$Json$Decode$string,
+																													function (agariyame) {
+																														return A3(
+																															$webbhuset$elm_json_decode$Json$Decode$Field$require,
+																															'tenpaiyame',
+																															$elm$json$Json$Decode$string,
+																															function (tenpaiyame) {
+																																return A3(
+																																	$webbhuset$elm_json_decode$Json$Decode$Field$require,
+																																	'tobi',
+																																	$elm$json$Json$Decode$string,
+																																	function (tobi) {
+																																		return $elm$json$Json$Decode$succeed(
+																																			{agariyame: agariyame, akadora: akadora, atozuke: atozuke, createdAt: createdAt, genten: genten, id: id, kandora: kandora, kanuradora: kanuradora, kuikae: kuikae, kuitan: kuitan, mochiten: mochiten, name: name, oka: oka, tenpaiyame: tenpaiyame, tobi: tobi, uma: uma, uradora: uradora});
+																																	});
+																															});
+																													});
+																											});
+																									});
+																							});
+																					});
+																			});
+																	});
+															});
+													});
+											});
+									});
+							});
+					});
+			});
+	});
+var $author$project$Page$Ruleset$get = F2(
+	function (clubId, rulesetId) {
+		return $elm$http$Http$get(
+			{
+				expect: A2($author$project$Api$expectJson, $author$project$Page$Ruleset$GotRuleset, $author$project$Model$Ruleset$decoder),
+				url: A2($author$project$Api$clubRuleset, clubId, rulesetId)
+			});
+	});
+var $author$project$Page$Ruleset$initGet = F3(
+	function (session, clubId, rulesetId) {
+		return _Utils_Tuple2(
+			A3($author$project$Page$Ruleset$Model, session, $elm$core$Maybe$Nothing, $author$project$Page$Ruleset$Uninitialized),
+			A2($author$project$Page$Ruleset$get, clubId, rulesetId));
+	});
 var $author$project$Session$navKey = function (session) {
 	if (session.$ === 'LoggedIn') {
 		var key = session.a;
@@ -6710,6 +6846,9 @@ var $author$project$Page$Clubs$toSession = function (model) {
 	return model.session;
 };
 var $author$project$Page$Login$toSession = function (model) {
+	return model.session;
+};
+var $author$project$Page$Ruleset$toSession = function (model) {
 	return model.session;
 };
 var $author$project$Page$SignUp$toSession = function (model) {
@@ -6738,6 +6877,9 @@ var $author$project$Main$toSession = function (model) {
 		case 'Club':
 			var club = model.a;
 			return $author$project$Page$Club$toSession(club);
+		case 'Ruleset':
+			var ruleset = model.a;
+			return $author$project$Page$Ruleset$toSession(ruleset);
 		default:
 			var user = model.a;
 			return $author$project$Page$User$toSession(user);
@@ -6804,6 +6946,15 @@ var $author$project$Main$changeRouteTo = F2(
 						$author$project$Main$Club,
 						$author$project$Main$GotClubMsg,
 						A2($author$project$Page$Club$init, session, clubId));
+				case 'Ruleset':
+					var _v6 = maybeRoute.a;
+					var clubId = _v6.a;
+					var rulesetId = _v6.b;
+					return A3(
+						$author$project$Main$updateWith,
+						$author$project$Main$Ruleset,
+						$author$project$Main$GotRulesetMsg,
+						A3($author$project$Page$Ruleset$initGet, session, clubId, rulesetId));
 				default:
 					var userId = maybeRoute.a.a;
 					return A3(
@@ -6940,6 +7091,10 @@ var $author$project$Route$Clubs = {$: 'Clubs'};
 var $author$project$Route$Home = {$: 'Home'};
 var $author$project$Route$Login = {$: 'Login'};
 var $author$project$Route$Logout = {$: 'Logout'};
+var $author$project$Route$Ruleset = F2(
+	function (a, b) {
+		return {$: 'Ruleset', a: a, b: b};
+	});
 var $author$project$Route$SignUp = {$: 'SignUp'};
 var $author$project$Route$User = function (a) {
 	return {$: 'User', a: a};
@@ -7111,6 +7266,19 @@ var $author$project$Route$parser = $elm$url$Url$Parser$oneOf(
 				$elm$url$Url$Parser$slash,
 				$elm$url$Url$Parser$s('clubs'),
 				$elm$url$Url$Parser$int)),
+			A2(
+			$elm$url$Url$Parser$map,
+			$author$project$Route$Ruleset,
+			A2(
+				$elm$url$Url$Parser$slash,
+				$elm$url$Url$Parser$s('clubs'),
+				A2(
+					$elm$url$Url$Parser$slash,
+					$elm$url$Url$Parser$int,
+					A2(
+						$elm$url$Url$Parser$slash,
+						$elm$url$Url$Parser$s('rulesets'),
+						$elm$url$Url$Parser$int)))),
 			A2(
 			$elm$url$Url$Parser$map,
 			$author$project$Route$User,
@@ -8651,7 +8819,7 @@ var $author$project$Main$update = F2(
 					} else {
 						break _v0$7;
 					}
-				default:
+				case 'GotUserMsg':
 					if (_v0.b.$ === 'User') {
 						var subMsg = _v0.a.a;
 						var user = _v0.b.a;
@@ -8663,6 +8831,8 @@ var $author$project$Main$update = F2(
 					} else {
 						break _v0$7;
 					}
+				default:
+					break _v0$7;
 			}
 		}
 		return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
@@ -9738,6 +9908,159 @@ var $author$project$Page$Login$view = function (model) {
 				$author$project$Page$Login$viewLoginCard
 			]),
 		title: 'Login'
+	};
+};
+var $author$project$Page$Ruleset$stateToTitle = function (state) {
+	if (state.$ === 'Uninitialized') {
+		return 'Ruleset';
+	} else {
+		var ruleset = state.a;
+		return 'Ruleset - ' + ruleset.name;
+	}
+};
+var $author$project$Model$Ruleset$agariyameDescr = 'Permite que o dealer decida terminar o jogo após ter ganho a última mão da partida';
+var $author$project$Model$Ruleset$akadoraDescr = 'Cincos vermelhos';
+var $author$project$Model$Ruleset$atozukeDescr = 'Permite a vitória por ron mesmo quando uma ou mais das peças pelas quais o jogador está esperando não nenhum yaku';
+var $author$project$Model$Ruleset$gentenDescr = 'Quantidade mínima de pontos que o jogador em primeiro lugar precisa atingir ao fim da partida';
+var $author$project$Model$Ruleset$kandoraDescr = 'Dora adicional mostrado quando um jogador declara kan';
+var $author$project$Model$Ruleset$kanuradoraDescr = 'Dora adicional (um para cada kandora) mostrado quando uma mão ganha com riichi';
+var $author$project$Model$Ruleset$kuikaeDescr = 'Permite fazer uma chamada e descartar uma peça que complete o mesmo bloco, por exemplo: chii 678 e descartar 9, ou pon 999 e descartar 9. Quando parcialmente permitido apenas não permite descartar a mesma peça chamada';
+var $author$project$Model$Ruleset$kuitanDescr = 'Permite tanyao em mãos abertas';
+var $author$project$Model$Ruleset$mochitenDescr = 'Quantidade de pontos que cada jogador possui no início da partida';
+var $author$project$Model$Ruleset$okaDescr = 'Pontuação bônus dada ao jogador em primeiro lugar';
+var $author$project$Model$Ruleset$tenpaiyameDescr = 'Permite que o dealer decida terminar o jogo após terminar em tenpai na última mão da partida';
+var $author$project$Model$Ruleset$tobiDescr = 'Partida encerrada prematuramente caso algum jogador fique com pontos negativos';
+var $author$project$Model$Ruleset$umaDescr = 'Pontuação adicional de cada colocação 1º/2º/3º/4º';
+var $author$project$Model$Ruleset$uradoraDescr = 'Dora adicional mostrado quando uma mão ganha com riichi';
+var $author$project$Model$Ruleset$viewRule = F3(
+	function (rule, value, description) {
+		return A2(
+			$elm$html$Html$div,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class('list-item')
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$elm$html$Html$p,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('py-2 has-tooltip')
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text(rule),
+							A2(
+							$elm$html$Html$span,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$class('tooltip rounded shadow-lg p-1 bg-black text-white -mt-8')
+								]),
+							_List_fromArray(
+								[
+									$elm$html$Html$text(description)
+								]))
+						])),
+					A2(
+					$elm$html$Html$p,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('py-2')
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text(value)
+						]))
+				]));
+	});
+var $author$project$Model$Ruleset$view = function (ruleset) {
+	return A2(
+		$elm$html$Html$div,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('m-2')
+			]),
+		_List_fromArray(
+			[
+				A2(
+				$elm$html$Html$h1,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('list-heading')
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('Regras - ' + ruleset.name)
+					])),
+				A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('space-y-4')
+					]),
+				_List_fromArray(
+					[
+						A3(
+						$author$project$Model$Ruleset$viewRule,
+						'mochiten',
+						$elm$core$String$fromInt(ruleset.mochiten),
+						$author$project$Model$Ruleset$mochitenDescr),
+						A3(
+						$author$project$Model$Ruleset$viewRule,
+						'genten',
+						$elm$core$String$fromInt(ruleset.genten),
+						$author$project$Model$Ruleset$gentenDescr),
+						A3($author$project$Model$Ruleset$viewRule, 'uma', ruleset.uma, $author$project$Model$Ruleset$umaDescr),
+						A3(
+						$author$project$Model$Ruleset$viewRule,
+						'oka',
+						$elm$core$String$fromInt(ruleset.oka),
+						$author$project$Model$Ruleset$okaDescr),
+						A3($author$project$Model$Ruleset$viewRule, 'atozuke', ruleset.atozuke, $author$project$Model$Ruleset$atozukeDescr),
+						A3($author$project$Model$Ruleset$viewRule, 'kuitan', ruleset.kuitan, $author$project$Model$Ruleset$kuitanDescr),
+						A3($author$project$Model$Ruleset$viewRule, 'kuikae', ruleset.kuikae, $author$project$Model$Ruleset$kuikaeDescr),
+						A3($author$project$Model$Ruleset$viewRule, 'uradora', ruleset.uradora, $author$project$Model$Ruleset$uradoraDescr),
+						A3($author$project$Model$Ruleset$viewRule, 'kandora', ruleset.kandora, $author$project$Model$Ruleset$kandoraDescr),
+						A3($author$project$Model$Ruleset$viewRule, 'kanuradora', ruleset.kanuradora, $author$project$Model$Ruleset$kanuradoraDescr),
+						A3($author$project$Model$Ruleset$viewRule, 'akadora', ruleset.akadora, $author$project$Model$Ruleset$akadoraDescr),
+						A3($author$project$Model$Ruleset$viewRule, 'agariyame', ruleset.agariyame, $author$project$Model$Ruleset$agariyameDescr),
+						A3($author$project$Model$Ruleset$viewRule, 'tenpaiyame', ruleset.tenpaiyame, $author$project$Model$Ruleset$tenpaiyameDescr),
+						A3($author$project$Model$Ruleset$viewRule, 'tobi', ruleset.tobi, $author$project$Model$Ruleset$tobiDescr)
+					]))
+			]));
+};
+var $author$project$Page$Ruleset$view = function (model) {
+	return {
+		body: _List_fromArray(
+			[
+				$author$project$CommonHtml$viewNav(model.session),
+				function () {
+				var _v0 = model.error;
+				if (_v0.$ === 'Just') {
+					var error = _v0.a;
+					return $author$project$CommonHtml$errorCard(error);
+				} else {
+					return $elm$html$Html$text('');
+				}
+			}(),
+				function () {
+				var _v1 = model.state;
+				if (_v1.$ === 'Uninitialized') {
+					return A2(
+						$elm$html$Html$p,
+						_List_Nil,
+						_List_fromArray(
+							[
+								$elm$html$Html$text('Carregando...')
+							]));
+				} else {
+					var ruleset = _v1.a;
+					return $author$project$Model$Ruleset$view(ruleset);
+				}
+			}()
+			]),
+		title: $author$project$Page$Ruleset$stateToTitle(model.state)
 	};
 };
 var $author$project$Page$SignUp$InputEmail = function (a) {
@@ -11125,6 +11448,16 @@ var $author$project$Main$view = function (model) {
 				body: A2(
 					$elm$core$List$map,
 					$elm$html$Html$map($author$project$Main$GotClubMsg),
+					page.body),
+				title: page.title
+			};
+		case 'Ruleset':
+			var subModel = model.a;
+			var page = $author$project$Page$Ruleset$view(subModel);
+			return {
+				body: A2(
+					$elm$core$List$map,
+					$elm$html$Html$map($author$project$Main$GotRulesetMsg),
 					page.body),
 				title: page.title
 			};
