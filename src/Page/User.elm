@@ -194,6 +194,7 @@ view : Model -> Browser.Document Msg
 view model =
   let
     maybeUser = stateToUser model.state
+    viewer = Session.toViewer model.session
   in
   { title = case maybeUser of
     Just user ->
@@ -215,7 +216,10 @@ view model =
     , viewOwnedClubs maybeUser
     , viewMemberships maybeUser
     , viewTournaments maybeUser
-    , viewNotifications maybeUser
+    , if isOwnProfile maybeUser viewer then
+        viewNotifications maybeUser
+      else
+        div [] []
     , viewStats maybeUser
     ]
   }
@@ -332,6 +336,20 @@ viewStats maybeUser =
 
     Just user ->
       Model.Stats.view user.stats
+
+isOwnProfile : Maybe User -> Maybe Viewer -> Bool
+isOwnProfile maybeUser maybeViewer =
+  case maybeViewer of
+    Nothing ->
+      False
+
+    Just viewer ->
+      case maybeUser of
+        Nothing ->
+          False
+
+        Just user ->
+          user.username == viewer.username
 
 stateToUser : State -> Maybe User
 stateToUser state =

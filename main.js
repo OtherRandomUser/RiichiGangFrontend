@@ -9814,6 +9814,20 @@ var $author$project$Page$SignUp$view = function (model) {
 		title: 'Sign Up'
 	};
 };
+var $author$project$Page$User$isOwnProfile = F2(
+	function (maybeUser, maybeViewer) {
+		if (maybeViewer.$ === 'Nothing') {
+			return false;
+		} else {
+			var viewer = maybeViewer.a;
+			if (maybeUser.$ === 'Nothing') {
+				return false;
+			} else {
+				var user = maybeUser.a;
+				return _Utils_eq(user.username, viewer.username);
+			}
+		}
+	});
 var $author$project$Page$User$stateToUser = function (state) {
 	switch (state.$) {
 		case 'Uninitialized':
@@ -10933,6 +10947,7 @@ var $author$project$Page$User$viewUserCard = function (state) {
 			]));
 };
 var $author$project$Page$User$view = function (model) {
+	var viewer = $author$project$Session$toViewer(model.session);
 	var maybeUser = $author$project$Page$User$stateToUser(model.state);
 	return {
 		body: _List_fromArray(
@@ -10951,7 +10966,7 @@ var $author$project$Page$User$view = function (model) {
 				$author$project$Page$User$viewOwnedClubs(maybeUser),
 				$author$project$Page$User$viewMemberships(maybeUser),
 				$author$project$Page$User$viewTournaments(maybeUser),
-				$author$project$Page$User$viewNotifications(maybeUser),
+				A2($author$project$Page$User$isOwnProfile, maybeUser, viewer) ? $author$project$Page$User$viewNotifications(maybeUser) : A2($elm$html$Html$div, _List_Nil, _List_Nil),
 				$author$project$Page$User$viewStats(maybeUser)
 			]),
 		title: function () {
