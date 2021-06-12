@@ -194,7 +194,7 @@ view : Model -> Browser.Document Msg
 view model =
   let
     maybeUser = stateToUser model.state
-    viewer = Session.toViewer model.session
+    maybeViewer = Session.toViewer model.session
   in
   { title = case maybeUser of
     Just user ->
@@ -213,10 +213,10 @@ view model =
         text ""
 
     , viewUserCard model.state
-    , viewOwnedClubs maybeUser
+    , viewOwnedClubs maybeUser maybeViewer
     , viewMemberships maybeUser
     , viewTournaments maybeUser
-    , if isOwnProfile maybeUser viewer then
+    , if isOwnProfile maybeUser maybeViewer then
         viewNotifications maybeUser
       else
         div [] []
@@ -266,8 +266,8 @@ userCardElement title value =
     , span [ class "inline-block" ] [ text value ]
     ]
 
-viewOwnedClubs : Maybe User -> Html Msg
-viewOwnedClubs maybeUser =
+viewOwnedClubs : Maybe User -> Maybe Viewer -> Html Msg
+viewOwnedClubs maybeUser maybeViewer =
   div [ class "m-2" ]
     [ h1 [ class "list-heading" ] [ text "Clubes do Usuário" ]
 
@@ -278,7 +278,10 @@ viewOwnedClubs maybeUser =
       Just user ->
         div [ class "space-y-4" ] (List.map ClubShort.view user.ownedClubs)
 
-    , button [ class "border-transparent btn btn-indigo-500 mt-4" ] [ text "Novo" ] -- TODO implement after implementing the page
+    , if isOwnProfile maybeUser maybeViewer then
+        button [ class "border-transparent btn btn-indigo-500 mt-4" ] [ text "Novo" ]
+      else
+        div [] []
 
     ]
 

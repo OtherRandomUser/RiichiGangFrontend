@@ -10438,57 +10438,58 @@ var $author$project$Page$User$viewNotifications = function (maybeUser) {
 			}()
 			]));
 };
-var $author$project$Page$User$viewOwnedClubs = function (maybeUser) {
-	return A2(
-		$elm$html$Html$div,
-		_List_fromArray(
-			[
-				$elm$html$Html$Attributes$class('m-2')
-			]),
-		_List_fromArray(
-			[
-				A2(
-				$elm$html$Html$h1,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('list-heading')
-					]),
-				_List_fromArray(
-					[
-						$elm$html$Html$text('Clubes do Usuário')
-					])),
-				function () {
-				if (maybeUser.$ === 'Nothing') {
-					return A2(
-						$elm$html$Html$p,
-						_List_Nil,
-						_List_fromArray(
-							[
-								$elm$html$Html$text('Nada ainda')
-							]));
-				} else {
-					var user = maybeUser.a;
-					return A2(
-						$elm$html$Html$div,
-						_List_fromArray(
-							[
-								$elm$html$Html$Attributes$class('space-y-4')
-							]),
-						A2($elm$core$List$map, $author$project$ClubShort$view, user.ownedClubs));
-				}
-			}(),
-				A2(
-				$elm$html$Html$button,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('border-transparent btn btn-indigo-500 mt-4')
-					]),
-				_List_fromArray(
-					[
-						$elm$html$Html$text('Novo')
-					]))
-			]));
-};
+var $author$project$Page$User$viewOwnedClubs = F2(
+	function (maybeUser, maybeViewer) {
+		return A2(
+			$elm$html$Html$div,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class('m-2')
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$elm$html$Html$h1,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('list-heading')
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text('Clubes do Usuário')
+						])),
+					function () {
+					if (maybeUser.$ === 'Nothing') {
+						return A2(
+							$elm$html$Html$p,
+							_List_Nil,
+							_List_fromArray(
+								[
+									$elm$html$Html$text('Nada ainda')
+								]));
+					} else {
+						var user = maybeUser.a;
+						return A2(
+							$elm$html$Html$div,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$class('space-y-4')
+								]),
+							A2($elm$core$List$map, $author$project$ClubShort$view, user.ownedClubs));
+					}
+				}(),
+					A2($author$project$Page$User$isOwnProfile, maybeUser, maybeViewer) ? A2(
+					$elm$html$Html$button,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('border-transparent btn btn-indigo-500 mt-4')
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text('Novo')
+						])) : A2($elm$html$Html$div, _List_Nil, _List_Nil)
+				]));
+	});
 var $elm$core$Basics$ge = _Utils_ge;
 var $elm$core$Basics$abs = function (n) {
 	return (n < 0) ? (-n) : n;
@@ -11319,7 +11320,7 @@ var $author$project$Page$User$viewUserCard = function (state) {
 			]));
 };
 var $author$project$Page$User$view = function (model) {
-	var viewer = $author$project$Session$toViewer(model.session);
+	var maybeViewer = $author$project$Session$toViewer(model.session);
 	var maybeUser = $author$project$Page$User$stateToUser(model.state);
 	return {
 		body: _List_fromArray(
@@ -11335,10 +11336,10 @@ var $author$project$Page$User$view = function (model) {
 				}
 			}(),
 				$author$project$Page$User$viewUserCard(model.state),
-				$author$project$Page$User$viewOwnedClubs(maybeUser),
+				A2($author$project$Page$User$viewOwnedClubs, maybeUser, maybeViewer),
 				$author$project$Page$User$viewMemberships(maybeUser),
 				$author$project$Page$User$viewTournaments(maybeUser),
-				A2($author$project$Page$User$isOwnProfile, maybeUser, viewer) ? $author$project$Page$User$viewNotifications(maybeUser) : A2($elm$html$Html$div, _List_Nil, _List_Nil),
+				A2($author$project$Page$User$isOwnProfile, maybeUser, maybeViewer) ? $author$project$Page$User$viewNotifications(maybeUser) : A2($elm$html$Html$div, _List_Nil, _List_Nil),
 				$author$project$Page$User$viewStats(maybeUser)
 			]),
 		title: function () {
