@@ -7218,25 +7218,27 @@ var $author$project$Api$errorToString = function (error) {
 	}
 };
 var $author$project$Page$Club$Anonymus = {$: 'Anonymus'};
-var $author$project$Page$Club$Member = {$: 'Member'};
+var $author$project$Page$Club$Member = function (a) {
+	return {$: 'Member', a: a};
+};
 var $author$project$Page$Club$NonMember = {$: 'NonMember'};
-var $elm$core$List$any = F2(
-	function (isOkay, list) {
-		any:
+var $elm_community$list_extra$List$Extra$find = F2(
+	function (predicate, list) {
+		find:
 		while (true) {
 			if (!list.b) {
-				return false;
+				return $elm$core$Maybe$Nothing;
 			} else {
-				var x = list.a;
-				var xs = list.b;
-				if (isOkay(x)) {
-					return true;
+				var first = list.a;
+				var rest = list.b;
+				if (predicate(first)) {
+					return $elm$core$Maybe$Just(first);
 				} else {
-					var $temp$isOkay = isOkay,
-						$temp$list = xs;
-					isOkay = $temp$isOkay;
+					var $temp$predicate = predicate,
+						$temp$list = rest;
+					predicate = $temp$predicate;
 					list = $temp$list;
-					continue any;
+					continue find;
 				}
 			}
 		}
@@ -7255,9 +7257,22 @@ var $author$project$Page$Club$initState = F2(
 		if (_v0.$ === 'Just') {
 			var viewer = _v0.a;
 			var isMember = function (m) {
-				return _Utils_eq(m.user.id, viewer.id) && m.approved;
+				return _Utils_eq(m.user.id, viewer.id);
 			};
-			return _Utils_eq(club.owner.id, viewer.id) ? A2($author$project$Page$Club$View, club, $author$project$Page$Club$Owner) : (A2($elm$core$List$any, isMember, club.members) ? A2($author$project$Page$Club$View, club, $author$project$Page$Club$Member) : A2($author$project$Page$Club$View, club, $author$project$Page$Club$NonMember));
+			if (_Utils_eq(club.owner.id, viewer.id)) {
+				return A2($author$project$Page$Club$View, club, $author$project$Page$Club$Owner);
+			} else {
+				var _v1 = A2($elm_community$list_extra$List$Extra$find, isMember, club.members);
+				if (_v1.$ === 'Just') {
+					var membership = _v1.a;
+					return A2(
+						$author$project$Page$Club$View,
+						club,
+						$author$project$Page$Club$Member(membership));
+				} else {
+					return A2($author$project$Page$Club$View, club, $author$project$Page$Club$NonMember);
+				}
+			}
 		} else {
 			return A2($author$project$Page$Club$View, club, $author$project$Page$Club$Anonymus);
 		}
@@ -7513,9 +7528,9 @@ var $author$project$Page$Club$validatePatch = function (form) {
 var $author$project$Page$Club$update = F2(
 	function (msg, model) {
 		var makeRequest = function (request) {
-			var _v31 = $author$project$Session$toViewer(model.session);
-			if (_v31.$ === 'Just') {
-				var viewer = _v31.a;
+			var _v30 = $author$project$Session$toViewer(model.session);
+			if (_v30.$ === 'Just') {
+				var viewer = _v30.a;
 				return _Utils_Tuple2(
 					model,
 					request(viewer));
@@ -7709,7 +7724,6 @@ var $author$project$Page$Club$update = F2(
 						var _v22 = _v0.a;
 						var _v23 = _v0.b;
 						var club = _v23.a;
-						var _v24 = _v23.b;
 						return makeRequest(
 							function (viewer) {
 								return A2($author$project$Page$Club$requestLeave, club, viewer);
@@ -7720,9 +7734,9 @@ var $author$project$Page$Club$update = F2(
 				case 'RemoveMember':
 					if ((_v0.b.$ === 'View') && (_v0.b.b.$ === 'Owner')) {
 						var membership = _v0.a.a;
-						var _v25 = _v0.b;
-						var club = _v25.a;
-						var _v26 = _v25.b;
+						var _v24 = _v0.b;
+						var club = _v24.a;
+						var _v25 = _v24.b;
 						return makeRequest(
 							function (viewer) {
 								return A3($author$project$Page$Club$requestRemoveMember, club, membership, viewer);
@@ -7746,9 +7760,9 @@ var $author$project$Page$Club$update = F2(
 								model);
 						case 'Edit':
 							var name = _v0.a.a;
-							var _v27 = _v0.b;
-							var club = _v27.a;
-							var form = _v27.b;
+							var _v26 = _v0.b;
+							var club = _v26.a;
+							var form = _v26.b;
 							return A4(
 								$author$project$Page$Club$updateEditForm,
 								function (f) {
@@ -7778,9 +7792,9 @@ var $author$project$Page$Club$update = F2(
 								model);
 						case 'Edit':
 							var website = _v0.a.a;
-							var _v28 = _v0.b;
-							var club = _v28.a;
-							var form = _v28.b;
+							var _v27 = _v0.b;
+							var club = _v27.a;
+							var form = _v27.b;
 							return A4(
 								$author$project$Page$Club$updateEditForm,
 								function (f) {
@@ -7810,9 +7824,9 @@ var $author$project$Page$Club$update = F2(
 								model);
 						case 'Edit':
 							var contact = _v0.a.a;
-							var _v29 = _v0.b;
-							var club = _v29.a;
-							var form = _v29.b;
+							var _v28 = _v0.b;
+							var club = _v28.a;
+							var form = _v28.b;
 							return A4(
 								$author$project$Page$Club$updateEditForm,
 								function (f) {
@@ -7842,9 +7856,9 @@ var $author$project$Page$Club$update = F2(
 								model);
 						case 'Edit':
 							var localization = _v0.a.a;
-							var _v30 = _v0.b;
-							var club = _v30.a;
-							var form = _v30.b;
+							var _v29 = _v0.b;
+							var club = _v29.a;
+							var form = _v29.b;
 							return A4(
 								$author$project$Page$Club$updateEditForm,
 								function (f) {
@@ -8769,6 +8783,9 @@ var $elm$html$Html$Events$onClick = function (msg) {
 		'click',
 		$elm$json$Json$Decode$succeed(msg));
 };
+var $author$project$Model$ClubMembership$statusText = function (membership) {
+	return membership.approved ? 'Aprovada' : (membership.denied ? 'Negada' : 'Pendente');
+};
 var $author$project$Page$Club$viewClubCard = F2(
 	function (club, _switch) {
 		var divClass = 'container bg-indigo-500 rounded-lg text-white p-6 my-4 max-w-lg';
@@ -8828,16 +8845,27 @@ var $author$project$Page$Club$viewClubCard = F2(
 											]))
 									]));
 						case 'Member':
+							var membership = _switch.a;
 							return A2(
-								$elm$html$Html$button,
+								$elm$html$Html$div,
+								_List_Nil,
 								_List_fromArray(
 									[
-										$elm$html$Html$Attributes$class('btn btn-indigo-500 mt-4'),
-										$elm$html$Html$Events$onClick($author$project$Page$Club$Leave)
-									]),
-								_List_fromArray(
-									[
-										$elm$html$Html$text('Sair')
+										A2(
+										$author$project$Page$Club$clubCardElement,
+										'Status da Filiação',
+										$author$project$Model$ClubMembership$statusText(membership)),
+										A2(
+										$elm$html$Html$button,
+										_List_fromArray(
+											[
+												$elm$html$Html$Attributes$class('btn btn-indigo-500 mt-4'),
+												$elm$html$Html$Events$onClick($author$project$Page$Club$Leave)
+											]),
+										_List_fromArray(
+											[
+												$elm$html$Html$text('Sair')
+											]))
 									]));
 						default:
 							return A2(
@@ -10142,6 +10170,27 @@ var $elm$core$Basics$ge = _Utils_ge;
 var $elm$core$Basics$abs = function (n) {
 	return (n < 0) ? (-n) : n;
 };
+var $elm$core$List$any = F2(
+	function (isOkay, list) {
+		any:
+		while (true) {
+			if (!list.b) {
+				return false;
+			} else {
+				var x = list.a;
+				var xs = list.b;
+				if (isOkay(x)) {
+					return true;
+				} else {
+					var $temp$isOkay = isOkay,
+						$temp$list = xs;
+					isOkay = $temp$isOkay;
+					list = $temp$list;
+					continue any;
+				}
+			}
+		}
+	});
 var $elm$core$String$foldr = _String_foldr;
 var $elm$core$String$toList = function (string) {
 	return A3($elm$core$String$foldr, $elm$core$List$cons, _List_Nil, string);

@@ -53,3 +53,12 @@ view membership removeMsg =
       Just msg ->
         button [ class "border-none btn btn-red-500", onClick msg ] [ text "Cancelar" ]
     ]
+
+statusText : ClubMembership -> String
+statusText membership =
+  if membership.approved then
+    "Aprovada"
+  else if membership.denied then
+    "Negada"
+  else
+    "Pendente"

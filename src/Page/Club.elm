@@ -6,6 +6,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Http
+import List.Extra
 import Json.Encode as Encode
 import Url.Builder
 
@@ -34,7 +35,7 @@ type State
 type ViewSwitch
   = Anonymus
   | Owner
-  | Member
+  | Member ClubMembership
   | NonMember
 
 type alias Form =
@@ -143,7 +144,7 @@ update msg model =
     (AskInvite, View club NonMember) ->
       makeRequest (\viewer -> requestInvite club viewer)
 
-    (Leave, View club Member) ->
+    (Leave, View club (Member _)) ->
       makeRequest (\viewer -> requestLeave club viewer)
 
     (RemoveMember membership, View club Owner) ->
@@ -278,14 +279,16 @@ initState club session =
   case Session.toViewer session of
     Just viewer ->
       let
-        isMember = \m -> m.user.id == viewer.id && m.approved
+        isMember = \m -> m.user.id == viewer.id
       in
       if club.owner.id == viewer.id then
         View club Owner
-      else if List.any isMember club.members then
-        View club Member
-      else
-        View club NonMember
+      else case List.Extra.find isMember club.members of
+        Just membership ->
+          View club (Member membership)
+
+        Nothing ->
+          View club NonMember
 
     Nothing ->
       View club Anonymus
@@ -392,8 +395,11 @@ viewClubCard club switch =
             , button [ class "border-none btn btn-red-500 mt-4", onClick ConfirmDelete ] [ text "Excluir" ]
             ]
 
-        Member ->
-          button [ class "btn btn-indigo-500 mt-4", onClick Leave ] [ text "Sair" ]
+        Member membership ->
+          div []
+            [ clubCardElement "Status da Filiação" (Model.ClubMembership.statusText membership)
+            , button [ class "btn btn-indigo-500 mt-4", onClick Leave ] [ text "Sair" ]
+            ]
 
         NonMember ->
           button [ class "btn btn-indigo-500 mt-4", onClick AskInvite ] [ text "Pedir Convite" ]
