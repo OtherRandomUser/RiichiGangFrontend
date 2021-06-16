@@ -5,8 +5,6 @@ import Html.Attributes exposing (..)
 import Json.Decode as Decode
 import Json.Decode.Field as Field
 import Url.Builder
-import Url exposing (Protocol(..))
-
 
 
 type alias ClubShort =

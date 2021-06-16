@@ -5406,6 +5406,9 @@ var $author$project$Main$GotRulesetMsg = function (a) {
 var $author$project$Main$GotSignUpMsg = function (a) {
 	return {$: 'GotSignUpMsg', a: a};
 };
+var $author$project$Main$GotTournamentsMsg = function (a) {
+	return {$: 'GotTournamentsMsg', a: a};
+};
 var $author$project$Main$GotUserMsg = function (a) {
 	return {$: 'GotUserMsg', a: a};
 };
@@ -5420,6 +5423,9 @@ var $author$project$Main$Ruleset = function (a) {
 };
 var $author$project$Main$SignUp = function (a) {
 	return {$: 'SignUp', a: a};
+};
+var $author$project$Main$Tournaments = function (a) {
+	return {$: 'Tournaments', a: a};
 };
 var $author$project$Main$User = function (a) {
 	return {$: 'User', a: a};
@@ -6492,6 +6498,25 @@ var $author$project$Page$SignUp$init = function (session) {
 		},
 		$elm$core$Platform$Cmd$none);
 };
+var $author$project$Page$Tournaments$Model = F3(
+	function (session, error, tournaments) {
+		return {error: error, session: session, tournaments: tournaments};
+	});
+var $author$project$Page$Tournaments$GotTournaments = function (a) {
+	return {$: 'GotTournaments', a: a};
+};
+var $author$project$Model$TournamentShort$listDecoder = $elm$json$Json$Decode$list($author$project$Model$TournamentShort$decoder);
+var $author$project$Api$tournaments = $author$project$Api$backendUrl + '/tournaments';
+var $author$project$Page$Tournaments$get = $elm$http$Http$get(
+	{
+		expect: A2($author$project$Api$expectJson, $author$project$Page$Tournaments$GotTournaments, $author$project$Model$TournamentShort$listDecoder),
+		url: $author$project$Api$tournaments
+	});
+var $author$project$Page$Tournaments$init = function (session) {
+	return _Utils_Tuple2(
+		A3($author$project$Page$Tournaments$Model, session, $elm$core$Maybe$Nothing, _List_Nil),
+		$author$project$Page$Tournaments$get);
+};
 var $author$project$Page$User$Model = F3(
 	function (session, state, error) {
 		return {error: error, session: session, state: state};
@@ -6854,6 +6879,9 @@ var $author$project$Page$Ruleset$toSession = function (model) {
 var $author$project$Page$SignUp$toSession = function (model) {
 	return model.session;
 };
+var $author$project$Page$Tournaments$toSession = function (model) {
+	return model.session;
+};
 var $author$project$Page$User$toSession = function (model) {
 	return model.session;
 };
@@ -6880,6 +6908,9 @@ var $author$project$Main$toSession = function (model) {
 		case 'Ruleset':
 			var ruleset = model.a;
 			return $author$project$Page$Ruleset$toSession(ruleset);
+		case 'Tournaments':
+			var tournaments = model.a;
+			return $author$project$Page$Tournaments$toSession(tournaments);
 		default:
 			var user = model.a;
 			return $author$project$Page$User$toSession(user);
@@ -6955,6 +6986,13 @@ var $author$project$Main$changeRouteTo = F2(
 						$author$project$Main$Ruleset,
 						$author$project$Main$GotRulesetMsg,
 						A3($author$project$Page$Ruleset$initGet, session, clubId, rulesetId));
+				case 'Tournaments':
+					var _v7 = maybeRoute.a;
+					return A3(
+						$author$project$Main$updateWith,
+						$author$project$Main$Tournaments,
+						$author$project$Main$GotTournamentsMsg,
+						$author$project$Page$Tournaments$init(session));
 				default:
 					var userId = maybeRoute.a.a;
 					return A3(
@@ -7096,6 +7134,7 @@ var $author$project$Route$Ruleset = F2(
 		return {$: 'Ruleset', a: a, b: b};
 	});
 var $author$project$Route$SignUp = {$: 'SignUp'};
+var $author$project$Route$Tournaments = {$: 'Tournaments'};
 var $author$project$Route$User = function (a) {
 	return {$: 'User', a: a};
 };
@@ -7279,6 +7318,10 @@ var $author$project$Route$parser = $elm$url$Url$Parser$oneOf(
 						$elm$url$Url$Parser$slash,
 						$elm$url$Url$Parser$s('rulesets'),
 						$elm$url$Url$Parser$int)))),
+			A2(
+			$elm$url$Url$Parser$map,
+			$author$project$Route$Tournaments,
+			$elm$url$Url$Parser$s('tournaments')),
 			A2(
 			$elm$url$Url$Parser$map,
 			$author$project$Route$User,
@@ -10165,6 +10208,56 @@ var $author$project$Page$SignUp$view = function (model) {
 		title: 'Sign Up'
 	};
 };
+var $author$project$Page$Tournaments$view = function (model) {
+	return {
+		body: _List_fromArray(
+			[
+				$author$project$CommonHtml$viewNav(model.session),
+				function () {
+				var _v0 = model.error;
+				if (_v0.$ === 'Just') {
+					var error = _v0.a;
+					return $author$project$CommonHtml$errorCard(error);
+				} else {
+					return $elm$html$Html$text('');
+				}
+			}(),
+				A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('m-2')
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$h1,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('list-heading')
+							]),
+						_List_fromArray(
+							[
+								$elm$html$Html$text('Torneios')
+							])),
+						$elm$core$List$isEmpty(model.tournaments) ? A2(
+						$elm$html$Html$p,
+						_List_Nil,
+						_List_fromArray(
+							[
+								$elm$html$Html$text('Nada ainda')
+							])) : A2(
+						$elm$html$Html$div,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('space-y-4')
+							]),
+						A2($elm$core$List$map, $author$project$Model$TournamentShort$view, model.tournaments))
+					]))
+			]),
+		title: 'Torneios'
+	};
+};
 var $author$project$Page$User$isOwnProfile = F2(
 	function (maybeUser, maybeViewer) {
 		if (maybeViewer.$ === 'Nothing') {
@@ -11459,6 +11552,16 @@ var $author$project$Main$view = function (model) {
 				body: A2(
 					$elm$core$List$map,
 					$elm$html$Html$map($author$project$Main$GotRulesetMsg),
+					page.body),
+				title: page.title
+			};
+		case 'Tournaments':
+			var subModel = model.a;
+			var page = $author$project$Page$Tournaments$view(subModel);
+			return {
+				body: A2(
+					$elm$core$List$map,
+					$elm$html$Html$map($author$project$Main$GotTournamentsMsg),
 					page.body),
 				title: page.title
 			};

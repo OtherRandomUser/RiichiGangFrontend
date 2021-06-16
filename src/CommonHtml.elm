@@ -45,3 +45,10 @@ errorCard msg =
     [ strong [ class "font-bold" ] [ text "Erro! " ]
     , span [ class "block sm:inline" ] [ text msg ]
     ]
+
+cardElement : String -> String -> Html msg
+cardElement title value = 
+  div [ class "block" ]
+    [ strong [ class "inline-block font-bold" ] [ text title ]
+    , span [ class "inline-block" ] [ text value ]
+    ]

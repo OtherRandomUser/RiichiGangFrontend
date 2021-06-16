@@ -16,6 +16,7 @@ type alias TournamentShort =
   , status : String
   }
 
+
 decoder : Decode.Decoder TournamentShort
 decoder =
   Field.require "id" Decode.int <| \id ->
@@ -33,6 +34,9 @@ decoder =
     , startDate = startDate
     , status = status
     }
+
+listDecoder : Decode.Decoder (List TournamentShort)
+listDecoder = Decode.list decoder
 
 getUrl : TournamentShort -> String
 getUrl tournament =

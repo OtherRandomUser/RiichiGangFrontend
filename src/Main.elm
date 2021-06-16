@@ -14,6 +14,7 @@ import Page.Clubs as ClubsPage
 import Page.Login as Login
 import Page.Ruleset
 import Page.SignUp as SignUp
+import Page.Tournaments
 import Page.User as User
 import Route exposing (Route)
 import Route exposing (Route(..))
@@ -39,6 +40,7 @@ type Model
   | Clubs ClubsPage.Model
   | Club ClubPage.Model
   | Ruleset Page.Ruleset.Model
+  | Tournaments Page.Tournaments.Model
   | User User.Model
 
 type Msg
@@ -49,6 +51,7 @@ type Msg
   | GotClubsMsg ClubsPage.Msg
   | GotClubMsg ClubPage.Msg
   | GotRulesetMsg Page.Ruleset.Msg
+  | GotTournamentsMsg Page.Tournaments.Msg
   | GotUserMsg User.Msg
 
 init : () -> Url.Url -> Nav.Key -> (Model, Cmd Msg)
@@ -93,6 +96,10 @@ changeRouteTo maybeRoute model =
         Page.Ruleset.initGet session clubId rulesetId
           |> updateWith Ruleset GotRulesetMsg
 
+      Just (Route.Tournaments) ->
+        Page.Tournaments.init session
+          |> updateWith Tournaments GotTournamentsMsg
+
       Just (Route.User userId) ->
         User.init session userId
           |> updateWith User GotUserMsg
@@ -120,6 +127,9 @@ toSession model =
 
     Ruleset ruleset ->
       Page.Ruleset.toSession ruleset
+
+    Tournaments tournaments ->
+      Page.Tournaments.toSession tournaments
 
     User user ->
       User.toSession user
@@ -218,6 +228,14 @@ view model =
       in
       { title = page.title
       , body = List.map (Html.map GotRulesetMsg) page.body
+      }
+
+    Tournaments subModel ->
+      let
+        page = Page.Tournaments.view subModel
+      in
+      { title = page.title
+      , body = List.map (Html.map GotTournamentsMsg) page.body
       }
 
     User subModel ->

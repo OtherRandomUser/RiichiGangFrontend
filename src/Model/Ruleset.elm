@@ -6,8 +6,6 @@ import Json.Decode as Decode
 import Json.Decode.Field as Field
 import Url.Builder
 
-import Club exposing (Club)
-
 
 type alias Ruleset =
   { id : Int
@@ -148,6 +146,6 @@ tenpaiyameDescr = "Permite que o dealer decida terminar o jogo após terminar em
 tobiDescr : String
 tobiDescr = "Partida encerrada prematuramente caso algum jogador fique com pontos negativos"
 
-getUrl : Club -> Ruleset -> String
-getUrl club ruleset =
-  Url.Builder.absolute ["clubs", String.fromInt club.id, "rulesets", String.fromInt ruleset.id] []
+getUrl : Int -> Ruleset -> String
+getUrl clubId ruleset =
+  Url.Builder.absolute ["clubs", String.fromInt clubId, "rulesets", String.fromInt ruleset.id] []

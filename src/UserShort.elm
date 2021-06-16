@@ -32,6 +32,10 @@ getUrl : UserShort -> String
 getUrl user =
   Url.Builder.absolute ["users", String.fromInt user.id] []
 
+getUrlId : Int -> String
+getUrlId id =
+  Url.Builder.absolute ["users", String.fromInt id] []
+
 view : UserShort -> Html msg
 view user =
   div [ class "list-item" ]

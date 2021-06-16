@@ -14,6 +14,7 @@ type Route
   | Clubs
   | Club Int
   | Ruleset Int Int
+  | Tournaments
   | User Int
 
 parser : Parser (Route -> c) c
@@ -26,6 +27,7 @@ parser =
     , Parser.map Clubs (s "clubs")
     , Parser.map Club (s "clubs" </> int)
     , Parser.map Ruleset (s "clubs" </> int </> s "rulesets" </> int)
+    , Parser.map Tournaments (s "tournaments")
     , Parser.map User (s "users" </> int)
     ]
 
@@ -73,6 +75,9 @@ routeToPieces route =
 
     Ruleset clubId rulesetId ->
       [ "clubs", (String.fromInt clubId), "rulesets", (String.fromInt rulesetId) ]
+
+    Tournaments ->
+      [ "tournaments" ]
 
     User id ->
       [ "users", String.fromInt id ]

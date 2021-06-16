@@ -41,6 +41,15 @@ clubMember clubId userId = (clubMembers clubId) ++ "/" ++ (String.fromInt userId
 clubRuleset : Int -> Int -> String
 clubRuleset clubId rulesetId = (club clubId) ++ "/rulesets/" ++ (String.fromInt rulesetId)
 
+tournaments : String
+tournaments = backendUrl ++ "/tournaments"
+
+tournament : Int -> String
+tournament id = String.concat [tournaments, "/", String.fromInt id]
+
+tournamentPlayer : Int -> Int -> String
+tournamentPlayer tournamentId playerId = String.concat [tournament tournamentId, "/players/", String.fromInt playerId]
+
 
 -- Request Utils --
 
