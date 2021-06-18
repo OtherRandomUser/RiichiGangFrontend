@@ -47,8 +47,17 @@ tournaments = backendUrl ++ "/tournaments"
 tournament : Int -> String
 tournament id = String.concat [tournaments, "/", String.fromInt id]
 
+tournamentInit : Int -> String
+tournamentInit id = String.concat [tournament id, "/init"]
+
+tournamentPlayers : Int -> String
+tournamentPlayers tournamentId = String.concat [tournament tournamentId, "/players"]
+
 tournamentPlayer : Int -> Int -> String
-tournamentPlayer tournamentId playerId = String.concat [tournament tournamentId, "/players/", String.fromInt playerId]
+tournamentPlayer tournamentId playerId = String.concat [tournamentPlayers tournamentId, "/", String.fromInt playerId]
+
+joinTournament : Int -> String
+joinTournament tournamentId = String.concat [tournamentPlayers tournamentId, "/invite"]
 
 
 -- Request Utils --
