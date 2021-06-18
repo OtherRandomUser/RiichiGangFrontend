@@ -5406,6 +5406,9 @@ var $author$project$Main$GotRulesetMsg = function (a) {
 var $author$project$Main$GotSignUpMsg = function (a) {
 	return {$: 'GotSignUpMsg', a: a};
 };
+var $author$project$Main$GotTournamentMsg = function (a) {
+	return {$: 'GotTournamentMsg', a: a};
+};
 var $author$project$Main$GotTournamentsMsg = function (a) {
 	return {$: 'GotTournamentsMsg', a: a};
 };
@@ -5423,6 +5426,9 @@ var $author$project$Main$Ruleset = function (a) {
 };
 var $author$project$Main$SignUp = function (a) {
 	return {$: 'SignUp', a: a};
+};
+var $author$project$Main$Tournament = function (a) {
+	return {$: 'Tournament', a: a};
 };
 var $author$project$Main$Tournaments = function (a) {
 	return {$: 'Tournaments', a: a};
@@ -6498,6 +6504,357 @@ var $author$project$Page$SignUp$init = function (session) {
 		},
 		$elm$core$Platform$Cmd$none);
 };
+var $author$project$Page$Tournament$Model = F4(
+	function (session, error, state, rulesets) {
+		return {error: error, rulesets: rulesets, session: session, state: state};
+	});
+var $author$project$Page$Tournament$Uninitialized = {$: 'Uninitialized'};
+var $author$project$Page$Tournament$GotTournament = function (a) {
+	return {$: 'GotTournament', a: a};
+};
+var $elm$json$Json$Decode$float = _Json_decodeFloat;
+var $author$project$Model$BracketPlayerShort$decoder = A3(
+	$webbhuset$elm_json_decode$Json$Decode$Field$require,
+	'userId',
+	$elm$json$Json$Decode$int,
+	function (userId) {
+		return A3(
+			$webbhuset$elm_json_decode$Json$Decode$Field$require,
+			'name',
+			$elm$json$Json$Decode$string,
+			function (name) {
+				return A3(
+					$webbhuset$elm_json_decode$Json$Decode$Field$require,
+					'placement',
+					$elm$json$Json$Decode$int,
+					function (placement) {
+						return A3(
+							$webbhuset$elm_json_decode$Json$Decode$Field$require,
+							'score',
+							$elm$json$Json$Decode$float,
+							function (score) {
+								return $elm$json$Json$Decode$succeed(
+									{name: name, placement: placement, score: score, userId: userId});
+							});
+					});
+			});
+	});
+var $author$project$Model$BracketShort$decoder = A3(
+	$webbhuset$elm_json_decode$Json$Decode$Field$require,
+	'id',
+	$elm$json$Json$Decode$int,
+	function (id) {
+		return A3(
+			$webbhuset$elm_json_decode$Json$Decode$Field$require,
+			'sequence',
+			$elm$json$Json$Decode$int,
+			function (sequence) {
+				return A3(
+					$webbhuset$elm_json_decode$Json$Decode$Field$require,
+					'name',
+					$elm$json$Json$Decode$string,
+					function (name) {
+						return A3(
+							$webbhuset$elm_json_decode$Json$Decode$Field$require,
+							'description',
+							$elm$json$Json$Decode$string,
+							function (description) {
+								return A3(
+									$webbhuset$elm_json_decode$Json$Decode$Field$require,
+									'createdAt',
+									$elm$json$Json$Decode$string,
+									function (createdAt) {
+										return A3(
+											$webbhuset$elm_json_decode$Json$Decode$Field$require,
+											'startedAt',
+											$elm$json$Json$Decode$string,
+											function (startedAt) {
+												return A3(
+													$webbhuset$elm_json_decode$Json$Decode$Field$require,
+													'finishedAt',
+													$elm$json$Json$Decode$string,
+													function (finishedAt) {
+														return A3(
+															$webbhuset$elm_json_decode$Json$Decode$Field$require,
+															'winCondition',
+															$elm$json$Json$Decode$string,
+															function (winCondition) {
+																return A3(
+																	$webbhuset$elm_json_decode$Json$Decode$Field$require,
+																	'numberOfAdvancing',
+																	$elm$json$Json$Decode$int,
+																	function (numberOfAdvancing) {
+																		return A3(
+																			$webbhuset$elm_json_decode$Json$Decode$Field$require,
+																			'numberOfSeries',
+																			$elm$json$Json$Decode$int,
+																			function (numberOfSeries) {
+																				return A3(
+																					$webbhuset$elm_json_decode$Json$Decode$Field$require,
+																					'gamesPerSeries',
+																					$elm$json$Json$Decode$int,
+																					function (gamesPerSeries) {
+																						return A3(
+																							$webbhuset$elm_json_decode$Json$Decode$Field$require,
+																							'finalScoreMultiplier',
+																							$elm$json$Json$Decode$float,
+																							function (finalScoreMultiplier) {
+																								return A3(
+																									$webbhuset$elm_json_decode$Json$Decode$Field$require,
+																									'players',
+																									$elm$json$Json$Decode$list($author$project$Model$BracketPlayerShort$decoder),
+																									function (players) {
+																										return $elm$json$Json$Decode$succeed(
+																											{createdAt: createdAt, description: description, finalScoreMultiplier: finalScoreMultiplier, finishedAt: finishedAt, gamesPerSeries: gamesPerSeries, id: id, name: name, numberOfAdvancing: numberOfAdvancing, numberOfSeries: numberOfSeries, players: players, sequence: sequence, startedAt: startedAt, winCondition: winCondition});
+																									});
+																							});
+																					});
+																			});
+																	});
+															});
+													});
+											});
+									});
+							});
+					});
+			});
+	});
+var $author$project$Model$Ruleset$decoder = A3(
+	$webbhuset$elm_json_decode$Json$Decode$Field$require,
+	'id',
+	$elm$json$Json$Decode$int,
+	function (id) {
+		return A3(
+			$webbhuset$elm_json_decode$Json$Decode$Field$require,
+			'createdAt',
+			$elm$json$Json$Decode$string,
+			function (createdAt) {
+				return A3(
+					$webbhuset$elm_json_decode$Json$Decode$Field$require,
+					'name',
+					$elm$json$Json$Decode$string,
+					function (name) {
+						return A3(
+							$webbhuset$elm_json_decode$Json$Decode$Field$require,
+							'mochiten',
+							$elm$json$Json$Decode$int,
+							function (mochiten) {
+								return A3(
+									$webbhuset$elm_json_decode$Json$Decode$Field$require,
+									'genten',
+									$elm$json$Json$Decode$int,
+									function (genten) {
+										return A3(
+											$webbhuset$elm_json_decode$Json$Decode$Field$require,
+											'uma',
+											$elm$json$Json$Decode$string,
+											function (uma) {
+												return A3(
+													$webbhuset$elm_json_decode$Json$Decode$Field$require,
+													'oka',
+													$elm$json$Json$Decode$int,
+													function (oka) {
+														return A3(
+															$webbhuset$elm_json_decode$Json$Decode$Field$require,
+															'atozuke',
+															$elm$json$Json$Decode$string,
+															function (atozuke) {
+																return A3(
+																	$webbhuset$elm_json_decode$Json$Decode$Field$require,
+																	'kuitan',
+																	$elm$json$Json$Decode$string,
+																	function (kuitan) {
+																		return A3(
+																			$webbhuset$elm_json_decode$Json$Decode$Field$require,
+																			'kuikae',
+																			$elm$json$Json$Decode$string,
+																			function (kuikae) {
+																				return A3(
+																					$webbhuset$elm_json_decode$Json$Decode$Field$require,
+																					'uradora',
+																					$elm$json$Json$Decode$string,
+																					function (uradora) {
+																						return A3(
+																							$webbhuset$elm_json_decode$Json$Decode$Field$require,
+																							'kandora',
+																							$elm$json$Json$Decode$string,
+																							function (kandora) {
+																								return A3(
+																									$webbhuset$elm_json_decode$Json$Decode$Field$require,
+																									'kanuradora',
+																									$elm$json$Json$Decode$string,
+																									function (kanuradora) {
+																										return A3(
+																											$webbhuset$elm_json_decode$Json$Decode$Field$require,
+																											'akadora',
+																											$elm$json$Json$Decode$string,
+																											function (akadora) {
+																												return A3(
+																													$webbhuset$elm_json_decode$Json$Decode$Field$require,
+																													'agariyame',
+																													$elm$json$Json$Decode$string,
+																													function (agariyame) {
+																														return A3(
+																															$webbhuset$elm_json_decode$Json$Decode$Field$require,
+																															'tenpaiyame',
+																															$elm$json$Json$Decode$string,
+																															function (tenpaiyame) {
+																																return A3(
+																																	$webbhuset$elm_json_decode$Json$Decode$Field$require,
+																																	'tobi',
+																																	$elm$json$Json$Decode$string,
+																																	function (tobi) {
+																																		return $elm$json$Json$Decode$succeed(
+																																			{agariyame: agariyame, akadora: akadora, atozuke: atozuke, createdAt: createdAt, genten: genten, id: id, kandora: kandora, kanuradora: kanuradora, kuikae: kuikae, kuitan: kuitan, mochiten: mochiten, name: name, oka: oka, tenpaiyame: tenpaiyame, tobi: tobi, uma: uma, uradora: uradora});
+																																	});
+																															});
+																													});
+																											});
+																									});
+																							});
+																					});
+																			});
+																	});
+															});
+													});
+											});
+									});
+							});
+					});
+			});
+	});
+var $author$project$Model$TournamentPlayer$decoder = A3(
+	$webbhuset$elm_json_decode$Json$Decode$Field$require,
+	'userId',
+	$elm$json$Json$Decode$int,
+	function (userId) {
+		return A3(
+			$webbhuset$elm_json_decode$Json$Decode$Field$require,
+			'username',
+			$elm$json$Json$Decode$string,
+			function (username) {
+				return A3(
+					$webbhuset$elm_json_decode$Json$Decode$Field$require,
+					'status',
+					$elm$json$Json$Decode$string,
+					function (status) {
+						return $elm$json$Json$Decode$succeed(
+							{status: status, userId: userId, username: username});
+					});
+			});
+	});
+var $author$project$Model$Tournament$decoder = A3(
+	$webbhuset$elm_json_decode$Json$Decode$Field$require,
+	'id',
+	$elm$json$Json$Decode$int,
+	function (id) {
+		return A3(
+			$webbhuset$elm_json_decode$Json$Decode$Field$require,
+			'clubId',
+			$elm$json$Json$Decode$int,
+			function (clubId) {
+				return A3(
+					$webbhuset$elm_json_decode$Json$Decode$Field$require,
+					'createdAt',
+					$elm$json$Json$Decode$string,
+					function (createdAt) {
+						return A3(
+							$webbhuset$elm_json_decode$Json$Decode$Field$require,
+							'ownerId',
+							$elm$json$Json$Decode$int,
+							function (ownerId) {
+								return A3(
+									$webbhuset$elm_json_decode$Json$Decode$Field$require,
+									'name',
+									$elm$json$Json$Decode$string,
+									function (name) {
+										return A3(
+											$webbhuset$elm_json_decode$Json$Decode$Field$require,
+											'description',
+											$elm$json$Json$Decode$string,
+											function (description) {
+												return A3(
+													$webbhuset$elm_json_decode$Json$Decode$Field$require,
+													'startDate',
+													$elm$json$Json$Decode$string,
+													function (startDate) {
+														return A3(
+															$webbhuset$elm_json_decode$Json$Decode$Field$require,
+															'status',
+															$elm$json$Json$Decode$string,
+															function (status) {
+																return A3(
+																	$webbhuset$elm_json_decode$Json$Decode$Field$require,
+																	'allowNonMembers',
+																	$elm$json$Json$Decode$bool,
+																	function (allowNonMembers) {
+																		return A3(
+																			$webbhuset$elm_json_decode$Json$Decode$Field$require,
+																			'requirePermission',
+																			$elm$json$Json$Decode$bool,
+																			function (requirePermission) {
+																				return A3(
+																					$webbhuset$elm_json_decode$Json$Decode$Field$require,
+																					'playerStatus',
+																					$elm$json$Json$Decode$string,
+																					function (playerStatus) {
+																						return A3(
+																							$webbhuset$elm_json_decode$Json$Decode$Field$require,
+																							'ruleset',
+																							$author$project$Model$Ruleset$decoder,
+																							function (ruleset) {
+																								return A3(
+																									$webbhuset$elm_json_decode$Json$Decode$Field$require,
+																									'players',
+																									$elm$json$Json$Decode$list($author$project$Model$TournamentPlayer$decoder),
+																									function (players) {
+																										return A3(
+																											$webbhuset$elm_json_decode$Json$Decode$Field$require,
+																											'brackets',
+																											$elm$json$Json$Decode$list($author$project$Model$BracketShort$decoder),
+																											function (brackets) {
+																												return $elm$json$Json$Decode$succeed(
+																													{allowNonMembers: allowNonMembers, brackets: brackets, clubId: clubId, createdAt: createdAt, description: description, id: id, name: name, ownerId: ownerId, playerStatus: playerStatus, players: players, requirePermission: requirePermission, ruleset: ruleset, startDate: startDate, status: status});
+																											});
+																									});
+																							});
+																					});
+																			});
+																	});
+															});
+													});
+											});
+									});
+							});
+					});
+			});
+	});
+var $elm$core$String$concat = function (strings) {
+	return A2($elm$core$String$join, '', strings);
+};
+var $author$project$Api$tournaments = $author$project$Api$backendUrl + '/tournaments';
+var $author$project$Api$tournament = function (id) {
+	return $elm$core$String$concat(
+		_List_fromArray(
+			[
+				$author$project$Api$tournaments,
+				'/',
+				$elm$core$String$fromInt(id)
+			]));
+};
+var $author$project$Page$Tournament$get = function (id) {
+	return $elm$http$Http$get(
+		{
+			expect: A2($author$project$Api$expectJson, $author$project$Page$Tournament$GotTournament, $author$project$Model$Tournament$decoder),
+			url: $author$project$Api$tournament(id)
+		});
+};
+var $author$project$Page$Tournament$init = F2(
+	function (session, tournamentId) {
+		return _Utils_Tuple2(
+			A4($author$project$Page$Tournament$Model, session, $elm$core$Maybe$Nothing, $author$project$Page$Tournament$Uninitialized, _List_Nil),
+			$author$project$Page$Tournament$get(tournamentId));
+	});
 var $author$project$Page$Tournaments$Model = F3(
 	function (session, error, tournaments) {
 		return {error: error, session: session, tournaments: tournaments};
@@ -6506,7 +6863,6 @@ var $author$project$Page$Tournaments$GotTournaments = function (a) {
 	return {$: 'GotTournaments', a: a};
 };
 var $author$project$Model$TournamentShort$listDecoder = $elm$json$Json$Decode$list($author$project$Model$TournamentShort$decoder);
-var $author$project$Api$tournaments = $author$project$Api$backendUrl + '/tournaments';
 var $author$project$Page$Tournaments$get = $elm$http$Http$get(
 	{
 		expect: A2($author$project$Api$expectJson, $author$project$Page$Tournaments$GotTournaments, $author$project$Model$TournamentShort$listDecoder),
@@ -6580,7 +6936,6 @@ var $author$project$Model$Notification$decoder = A3(
 					});
 			});
 	});
-var $elm$json$Json$Decode$float = _Json_decodeFloat;
 var $author$project$Model$Stats$statsDecoder = A3(
 	$webbhuset$elm_json_decode$Json$Decode$Field$require,
 	'totalGames',
@@ -6732,113 +7087,23 @@ var $author$project$Page$Ruleset$Uninitialized = {$: 'Uninitialized'};
 var $author$project$Page$Ruleset$GotRuleset = function (a) {
 	return {$: 'GotRuleset', a: a};
 };
+var $author$project$Api$clubRulesets = function (clubId) {
+	return $elm$core$String$concat(
+		_List_fromArray(
+			[
+				$author$project$Api$club(clubId),
+				'/rulesets'
+			]));
+};
 var $author$project$Api$clubRuleset = F2(
 	function (clubId, rulesetId) {
-		return $author$project$Api$club(clubId) + ('/rulesets/' + $elm$core$String$fromInt(rulesetId));
-	});
-var $author$project$Model$Ruleset$decoder = A3(
-	$webbhuset$elm_json_decode$Json$Decode$Field$require,
-	'id',
-	$elm$json$Json$Decode$int,
-	function (id) {
-		return A3(
-			$webbhuset$elm_json_decode$Json$Decode$Field$require,
-			'createdAt',
-			$elm$json$Json$Decode$string,
-			function (createdAt) {
-				return A3(
-					$webbhuset$elm_json_decode$Json$Decode$Field$require,
-					'name',
-					$elm$json$Json$Decode$string,
-					function (name) {
-						return A3(
-							$webbhuset$elm_json_decode$Json$Decode$Field$require,
-							'mochiten',
-							$elm$json$Json$Decode$int,
-							function (mochiten) {
-								return A3(
-									$webbhuset$elm_json_decode$Json$Decode$Field$require,
-									'genten',
-									$elm$json$Json$Decode$int,
-									function (genten) {
-										return A3(
-											$webbhuset$elm_json_decode$Json$Decode$Field$require,
-											'uma',
-											$elm$json$Json$Decode$string,
-											function (uma) {
-												return A3(
-													$webbhuset$elm_json_decode$Json$Decode$Field$require,
-													'oka',
-													$elm$json$Json$Decode$int,
-													function (oka) {
-														return A3(
-															$webbhuset$elm_json_decode$Json$Decode$Field$require,
-															'atozuke',
-															$elm$json$Json$Decode$string,
-															function (atozuke) {
-																return A3(
-																	$webbhuset$elm_json_decode$Json$Decode$Field$require,
-																	'kuitan',
-																	$elm$json$Json$Decode$string,
-																	function (kuitan) {
-																		return A3(
-																			$webbhuset$elm_json_decode$Json$Decode$Field$require,
-																			'kuikae',
-																			$elm$json$Json$Decode$string,
-																			function (kuikae) {
-																				return A3(
-																					$webbhuset$elm_json_decode$Json$Decode$Field$require,
-																					'uradora',
-																					$elm$json$Json$Decode$string,
-																					function (uradora) {
-																						return A3(
-																							$webbhuset$elm_json_decode$Json$Decode$Field$require,
-																							'kandora',
-																							$elm$json$Json$Decode$string,
-																							function (kandora) {
-																								return A3(
-																									$webbhuset$elm_json_decode$Json$Decode$Field$require,
-																									'kanuradora',
-																									$elm$json$Json$Decode$string,
-																									function (kanuradora) {
-																										return A3(
-																											$webbhuset$elm_json_decode$Json$Decode$Field$require,
-																											'akadora',
-																											$elm$json$Json$Decode$string,
-																											function (akadora) {
-																												return A3(
-																													$webbhuset$elm_json_decode$Json$Decode$Field$require,
-																													'agariyame',
-																													$elm$json$Json$Decode$string,
-																													function (agariyame) {
-																														return A3(
-																															$webbhuset$elm_json_decode$Json$Decode$Field$require,
-																															'tenpaiyame',
-																															$elm$json$Json$Decode$string,
-																															function (tenpaiyame) {
-																																return A3(
-																																	$webbhuset$elm_json_decode$Json$Decode$Field$require,
-																																	'tobi',
-																																	$elm$json$Json$Decode$string,
-																																	function (tobi) {
-																																		return $elm$json$Json$Decode$succeed(
-																																			{agariyame: agariyame, akadora: akadora, atozuke: atozuke, createdAt: createdAt, genten: genten, id: id, kandora: kandora, kanuradora: kanuradora, kuikae: kuikae, kuitan: kuitan, mochiten: mochiten, name: name, oka: oka, tenpaiyame: tenpaiyame, tobi: tobi, uma: uma, uradora: uradora});
-																																	});
-																															});
-																													});
-																											});
-																									});
-																							});
-																					});
-																			});
-																	});
-															});
-													});
-											});
-									});
-							});
-					});
-			});
+		return $elm$core$String$concat(
+			_List_fromArray(
+				[
+					$author$project$Api$clubRulesets(clubId),
+					'/',
+					$elm$core$String$fromInt(rulesetId)
+				]));
 	});
 var $author$project$Page$Ruleset$get = F2(
 	function (clubId, rulesetId) {
@@ -6879,6 +7144,9 @@ var $author$project$Page$Ruleset$toSession = function (model) {
 var $author$project$Page$SignUp$toSession = function (model) {
 	return model.session;
 };
+var $author$project$Page$Tournament$toSession = function (model) {
+	return model.session;
+};
 var $author$project$Page$Tournaments$toSession = function (model) {
 	return model.session;
 };
@@ -6911,6 +7179,9 @@ var $author$project$Main$toSession = function (model) {
 		case 'Tournaments':
 			var tournaments = model.a;
 			return $author$project$Page$Tournaments$toSession(tournaments);
+		case 'Tournament':
+			var tournament = model.a;
+			return $author$project$Page$Tournament$toSession(tournament);
 		default:
 			var user = model.a;
 			return $author$project$Page$User$toSession(user);
@@ -6993,6 +7264,13 @@ var $author$project$Main$changeRouteTo = F2(
 						$author$project$Main$Tournaments,
 						$author$project$Main$GotTournamentsMsg,
 						$author$project$Page$Tournaments$init(session));
+				case 'Tournament':
+					var tournamentId = maybeRoute.a.a;
+					return A3(
+						$author$project$Main$updateWith,
+						$author$project$Main$Tournament,
+						$author$project$Main$GotTournamentMsg,
+						A2($author$project$Page$Tournament$init, session, tournamentId));
 				default:
 					var userId = maybeRoute.a.a;
 					return A3(
@@ -7134,6 +7412,9 @@ var $author$project$Route$Ruleset = F2(
 		return {$: 'Ruleset', a: a, b: b};
 	});
 var $author$project$Route$SignUp = {$: 'SignUp'};
+var $author$project$Route$Tournament = function (a) {
+	return {$: 'Tournament', a: a};
+};
 var $author$project$Route$Tournaments = {$: 'Tournaments'};
 var $author$project$Route$User = function (a) {
 	return {$: 'User', a: a};
@@ -7322,6 +7603,13 @@ var $author$project$Route$parser = $elm$url$Url$Parser$oneOf(
 			$elm$url$Url$Parser$map,
 			$author$project$Route$Tournaments,
 			$elm$url$Url$Parser$s('tournaments')),
+			A2(
+			$elm$url$Url$Parser$map,
+			$author$project$Route$Tournament,
+			A2(
+				$elm$url$Url$Parser$slash,
+				$elm$url$Url$Parser$s('tournaments'),
+				$elm$url$Url$Parser$int)),
 			A2(
 			$elm$url$Url$Parser$map,
 			$author$project$Route$User,
@@ -10208,6 +10496,890 @@ var $author$project$Page$SignUp$view = function (model) {
 		title: 'Sign Up'
 	};
 };
+var $author$project$Page$Tournament$stateToTitle = function (model) {
+	var _v0 = model.state;
+	switch (_v0.$) {
+		case 'Uninitialized':
+			return 'Tournament';
+		case 'View':
+			var tournament = _v0.b;
+			return 'Tournament - ' + tournament.name;
+		default:
+			var tournament = _v0.a;
+			return 'Tournament - ' + tournament.name;
+	}
+};
+var $author$project$Page$Tournament$Owner = {$: 'Owner'};
+var $elm$core$String$fromFloat = _String_fromNumber;
+var $author$project$UserShort$getUrlId = function (id) {
+	return A2(
+		$elm$url$Url$Builder$absolute,
+		_List_fromArray(
+			[
+				'users',
+				$elm$core$String$fromInt(id)
+			]),
+		_List_Nil);
+};
+var $author$project$Model$BracketPlayerShort$view = function (player) {
+	var scoreTextPrefix = (player.score > 0) ? '+' : '';
+	return A2(
+		$elm$html$Html$div,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('list-item')
+			]),
+		_List_fromArray(
+			[
+				A2(
+				$elm$html$Html$span,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text(
+						'#' + $elm$core$String$fromInt(player.placement))
+					])),
+				A2(
+				$elm$html$Html$a,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$href(
+						$author$project$UserShort$getUrlId(player.userId)),
+						$elm$html$Html$Attributes$class('flex-grow hover:underline')
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text(player.name)
+					])),
+				A2(
+				$elm$html$Html$span,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text(
+						_Utils_ap(
+							scoreTextPrefix,
+							$elm$core$String$fromFloat(player.score)))
+					]))
+			]));
+};
+var $author$project$Model$BracketShort$view = function (bracket) {
+	var junc = (bracket.finishedAt !== '') ? ' - ' : '';
+	return A2(
+		$elm$html$Html$div,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('m-2')
+			]),
+		_List_fromArray(
+			[
+				A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('flex space-x-2')
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$h1,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('list-heading')
+							]),
+						_List_fromArray(
+							[
+								$elm$html$Html$text(bracket.name)
+							])),
+						A2(
+						$elm$html$Html$span,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('text-indigo-500 pt-0.5')
+							]),
+						_List_fromArray(
+							[
+								$elm$html$Html$text(
+								$elm$core$String$concat(
+									_List_fromArray(
+										[bracket.startedAt, junc, bracket.finishedAt])))
+							]))
+					])),
+				$elm$core$List$isEmpty(bracket.players) ? A2(
+				$elm$html$Html$p,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text('Nada ainda')
+					])) : A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('space-y-4')
+					]),
+				A2($elm$core$List$map, $author$project$Model$BracketPlayerShort$view, bracket.players))
+			]));
+};
+var $author$project$Page$Tournament$viewBrackets = function (tournament) {
+	return A2(
+		$elm$html$Html$div,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('space-y-4')
+			]),
+		A2($elm$core$List$map, $author$project$Model$BracketShort$view, tournament.brackets));
+};
+var $author$project$Page$Tournament$AddBracket = {$: 'AddBracket'};
+var $author$project$Page$Tournament$InputBracketMul = F2(
+	function (a, b) {
+		return {$: 'InputBracketMul', a: a, b: b};
+	});
+var $author$project$Page$Tournament$InputBracketNAdv = F2(
+	function (a, b) {
+		return {$: 'InputBracketNAdv', a: a, b: b};
+	});
+var $author$project$Page$Tournament$InputBracketNGames = F2(
+	function (a, b) {
+		return {$: 'InputBracketNGames', a: a, b: b};
+	});
+var $author$project$Page$Tournament$InputBracketNSeries = F2(
+	function (a, b) {
+		return {$: 'InputBracketNSeries', a: a, b: b};
+	});
+var $author$project$Page$Tournament$InputBracketName = F2(
+	function (a, b) {
+		return {$: 'InputBracketName', a: a, b: b};
+	});
+var $author$project$Page$Tournament$InputBracketWinCon = F2(
+	function (a, b) {
+		return {$: 'InputBracketWinCon', a: a, b: b};
+	});
+var $author$project$Page$Tournament$RemoveBracket = function (a) {
+	return {$: 'RemoveBracket', a: a};
+};
+var $elm$html$Html$Attributes$min = $elm$html$Html$Attributes$stringProperty('min');
+var $elm$html$Html$option = _VirtualDom_node('option');
+var $elm$html$Html$select = _VirtualDom_node('select');
+var $elm$html$Html$Attributes$step = function (n) {
+	return A2($elm$html$Html$Attributes$stringProperty, 'step', n);
+};
+var $elm$html$Html$Attributes$value = $elm$html$Html$Attributes$stringProperty('value');
+var $author$project$Page$Tournament$viewBracketEdit = function (form) {
+	return A2(
+		$elm$html$Html$div,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('list-item')
+			]),
+		_List_fromArray(
+			[
+				A2(
+				$elm$html$Html$input,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$type_('text'),
+						$elm$html$Html$Attributes$placeholder('Nome'),
+						$elm$html$Html$Attributes$class('border-none rounded-sm p-1 bg-gray-100 text-gray-400 placeholder-gray-400 w-1/12'),
+						$elm$html$Html$Events$onInput(
+						$author$project$Page$Tournament$InputBracketName(form.sequence))
+					]),
+				_List_Nil),
+				A2(
+				$elm$html$Html$select,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$placeholder('Condição de vitória'),
+						$elm$html$Html$Attributes$class('border-none rounded-sm p-1 bg-gray-100 text-gray-400 w-2/12'),
+						$elm$html$Html$Events$onInput(
+						$author$project$Page$Tournament$InputBracketWinCon(form.sequence))
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$option,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$value('First')
+							]),
+						_List_fromArray(
+							[
+								$elm$html$Html$text('Primeiro de cada Série')
+							])),
+						A2(
+						$elm$html$Html$option,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$value('FirstAndSecond')
+							]),
+						_List_fromArray(
+							[
+								$elm$html$Html$text('Primeiro e Segundo de cada Série')
+							])),
+						A2(
+						$elm$html$Html$option,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$value('TopX')
+							]),
+						_List_fromArray(
+							[
+								$elm$html$Html$text('Top X Jogadores')
+							])),
+						A2(
+						$elm$html$Html$option,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$value('None')
+							]),
+						_List_fromArray(
+							[
+								$elm$html$Html$text('Chave Final')
+							]))
+					])),
+				A2(
+				$elm$html$Html$input,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$type_('number'),
+						$elm$html$Html$Attributes$placeholder('Número de Jogadores a Avançar'),
+						$elm$html$Html$Attributes$min('4'),
+						$elm$html$Html$Attributes$step('4'),
+						$elm$html$Html$Attributes$class('border-none rounded-sm p-1 bg-gray-100 text-gray-400 placeholder-gray-400 w-2/12'),
+						$elm$html$Html$Events$onInput(
+						$author$project$Page$Tournament$InputBracketNAdv(form.sequence))
+					]),
+				_List_Nil),
+				A2(
+				$elm$html$Html$input,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$type_('number'),
+						$elm$html$Html$Attributes$placeholder('Número de Séries'),
+						$elm$html$Html$Attributes$min('1'),
+						$elm$html$Html$Attributes$step('1'),
+						$elm$html$Html$Attributes$class('border-none rounded-sm p-1 bg-gray-100 text-gray-400 placeholder-gray-400 w-2/12'),
+						$elm$html$Html$Events$onInput(
+						$author$project$Page$Tournament$InputBracketNSeries(form.sequence))
+					]),
+				_List_Nil),
+				A2(
+				$elm$html$Html$input,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$type_('number'),
+						$elm$html$Html$Attributes$placeholder('Número de Jogos por Série'),
+						$elm$html$Html$Attributes$min('1'),
+						$elm$html$Html$Attributes$step('1'),
+						$elm$html$Html$Attributes$class('border-none rounded-sm p-1 bg-gray-100 text-gray-400 placeholder-gray-400 w-2/12'),
+						$elm$html$Html$Events$onInput(
+						$author$project$Page$Tournament$InputBracketNGames(form.sequence))
+					]),
+				_List_Nil),
+				A2(
+				$elm$html$Html$input,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$type_('number'),
+						$elm$html$Html$Attributes$placeholder('Multiplicador de Pontuação'),
+						$elm$html$Html$Attributes$min('0'),
+						$elm$html$Html$Attributes$step('0.1'),
+						$elm$html$Html$Attributes$class('border-none rounded-sm p-1 bg-gray-100 text-gray-400 placeholder-gray-400 w-2/12'),
+						$elm$html$Html$Events$onInput(
+						$author$project$Page$Tournament$InputBracketMul(form.sequence))
+					]),
+				_List_Nil),
+				A2(
+				$elm$html$Html$button,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('border px-3 inline-btn btn-indigo-500'),
+						$elm$html$Html$Events$onClick(
+						$author$project$Page$Tournament$RemoveBracket(form.sequence))
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('X')
+					]))
+			]));
+};
+var $author$project$Page$Tournament$viewBracketsEdit = function (form) {
+	return A2(
+		$elm$html$Html$div,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('m-2')
+			]),
+		_List_fromArray(
+			[
+				A2(
+				$elm$html$Html$h1,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('list-heading')
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('Chaves')
+					])),
+				A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('flex space-x-4 px-5')
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$p,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('font-bold w-1/12')
+							]),
+						_List_fromArray(
+							[
+								$elm$html$Html$text('Nome')
+							])),
+						A2(
+						$elm$html$Html$p,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('font-bold w-2/12')
+							]),
+						_List_fromArray(
+							[
+								$elm$html$Html$text('Condição de Vitória')
+							])),
+						A2(
+						$elm$html$Html$p,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('font-bold w-2/12')
+							]),
+						_List_fromArray(
+							[
+								$elm$html$Html$text('Número de Jogadores a Avançar')
+							])),
+						A2(
+						$elm$html$Html$p,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('font-bold w-2/12')
+							]),
+						_List_fromArray(
+							[
+								$elm$html$Html$text('Número de Séries')
+							])),
+						A2(
+						$elm$html$Html$p,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('font-bold w-2/12')
+							]),
+						_List_fromArray(
+							[
+								$elm$html$Html$text('Número de Jogos por Série')
+							])),
+						A2(
+						$elm$html$Html$p,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('font-bold w-2/12')
+							]),
+						_List_fromArray(
+							[
+								$elm$html$Html$text('Multiplicador de Pontuação')
+							]))
+					])),
+				A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('space-y-4')
+					]),
+				A2($elm$core$List$map, $author$project$Page$Tournament$viewBracketEdit, form.brackets)),
+				A2(
+				$elm$html$Html$button,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('border-transparent btn btn-indigo-500 mt-4'),
+						$elm$html$Html$Events$onClick($author$project$Page$Tournament$AddBracket)
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('Nova Chave')
+					]))
+			]));
+};
+var $author$project$Page$Tournament$RemovePlayer = function (a) {
+	return {$: 'RemovePlayer', a: a};
+};
+var $author$project$Model$TournamentPlayer$view = F3(
+	function (player, isOwner, remove) {
+		return A2(
+			$elm$html$Html$div,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class('list-item')
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$elm$html$Html$a,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$href(
+							$author$project$UserShort$getUrlId(player.userId)),
+							$elm$html$Html$Attributes$class('py-2 hover:underline')
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text(player.username)
+						])),
+					A2(
+					$elm$html$Html$span,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('py-2')
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text(player.status)
+						])),
+					isOwner ? A2(
+					$elm$html$Html$button,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('p-2 inline-btn btn-red-500'),
+							$elm$html$Html$Events$onClick(remove)
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text('Remover')
+						])) : $elm$html$Html$text('')
+				]));
+	});
+var $author$project$Page$Tournament$viewPlayers = F2(
+	function (tournament, isOwner) {
+		if (tournament.status !== 'Agendado') {
+			return $elm$html$Html$text('');
+		} else {
+			var transform = function (p) {
+				return A3(
+					$author$project$Model$TournamentPlayer$view,
+					p,
+					isOwner,
+					$author$project$Page$Tournament$RemovePlayer(p));
+			};
+			return A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('m-2')
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$h1,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('list-heading')
+							]),
+						_List_fromArray(
+							[
+								$elm$html$Html$text('Jogadores')
+							])),
+						A2(
+						$elm$html$Html$div,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('space-y-4')
+							]),
+						A2($elm$core$List$map, transform, tournament.players))
+					]));
+		}
+	});
+var $author$project$Page$Tournament$DeleteTournament = {$: 'DeleteTournament'};
+var $author$project$Page$Tournament$EditTournament = {$: 'EditTournament'};
+var $author$project$Page$Tournament$InitTournament = {$: 'InitTournament'};
+var $author$project$Page$Tournament$JoinTournament = {$: 'JoinTournament'};
+var $author$project$Page$Tournament$LeaveTournament = {$: 'LeaveTournament'};
+var $author$project$CommonHtml$cardElement = F2(
+	function (title, value) {
+		return A2(
+			$elm$html$Html$div,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class('block')
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$elm$html$Html$strong,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('inline-block font-bold')
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text(title)
+						])),
+					A2(
+					$elm$html$Html$span,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('inline-block')
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text(value)
+						]))
+				]));
+	});
+var $author$project$Model$Ruleset$getUrl = F2(
+	function (clubId, ruleset) {
+		return A2(
+			$elm$url$Url$Builder$absolute,
+			_List_fromArray(
+				[
+					'clubs',
+					$elm$core$String$fromInt(clubId),
+					'rulesets',
+					$elm$core$String$fromInt(ruleset.id)
+				]),
+			_List_Nil);
+	});
+var $author$project$Page$Tournament$viewTournamentCard = F2(
+	function (tournament, _switch) {
+		return A2(
+			$elm$html$Html$div,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class('container bg-indigo-500 rounded-lg text-white p-6 my-4 max-w-lg')
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$elm$html$Html$h1,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('font-bold text-xl')
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text(tournament.name)
+						])),
+					A2(
+					$elm$html$Html$p,
+					_List_Nil,
+					_List_fromArray(
+						[
+							$elm$html$Html$text(tournament.description)
+						])),
+					A2($author$project$CommonHtml$cardElement, 'Data de Inicio', tournament.startDate),
+					tournament.allowNonMembers ? A2($author$project$CommonHtml$cardElement, '', 'Qualquer usuário poderá participar') : A2($author$project$CommonHtml$cardElement, '', 'Somente membros do clube poderão participar'),
+					tournament.requirePermission ? A2($author$project$CommonHtml$cardElement, '', 'Será necessária a confirmação pelo dono do clube para a participação no torneio') : $elm$html$Html$text(''),
+					A2(
+					$elm$html$Html$a,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$href(
+							A2($author$project$Model$Ruleset$getUrl, tournament.clubId, tournament.ruleset)),
+							$elm$html$Html$Attributes$class('hover:underline')
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text('Regras')
+						])),
+					A2($author$project$CommonHtml$cardElement, 'Status', tournament.status),
+					(tournament.playerStatus !== '') ? A2($author$project$CommonHtml$cardElement, 'Status do Jogador', tournament.playerStatus) : $elm$html$Html$text(''),
+					function () {
+					if (tournament.status !== 'Agendado') {
+						return $elm$html$Html$text('');
+					} else {
+						switch (_switch.$) {
+							case 'Anonymus':
+								return $elm$html$Html$text('');
+							case 'Owner':
+								return A2(
+									$elm$html$Html$div,
+									_List_Nil,
+									_List_fromArray(
+										[
+											A2(
+											$elm$html$Html$button,
+											_List_fromArray(
+												[
+													$elm$html$Html$Attributes$class('btn btn-indigo-500 mt-4'),
+													$elm$html$Html$Events$onClick($author$project$Page$Tournament$EditTournament)
+												]),
+											_List_fromArray(
+												[
+													$elm$html$Html$text('Editar')
+												])),
+											A2(
+											$elm$html$Html$button,
+											_List_fromArray(
+												[
+													$elm$html$Html$Attributes$class('border-none btn btn-green-500 mt-4'),
+													$elm$html$Html$Events$onClick($author$project$Page$Tournament$InitTournament)
+												]),
+											_List_fromArray(
+												[
+													$elm$html$Html$text('Iniciar')
+												])),
+											A2(
+											$elm$html$Html$button,
+											_List_fromArray(
+												[
+													$elm$html$Html$Attributes$class('border-none btn btn-red-500 mt-4'),
+													$elm$html$Html$Events$onClick($author$project$Page$Tournament$DeleteTournament)
+												]),
+											_List_fromArray(
+												[
+													$elm$html$Html$text('Excluir')
+												]))
+										]));
+							case 'Participant':
+								return A2(
+									$elm$html$Html$button,
+									_List_fromArray(
+										[
+											$elm$html$Html$Attributes$class('border-none btn btn-red-500 mt-4'),
+											$elm$html$Html$Events$onClick($author$project$Page$Tournament$LeaveTournament)
+										]),
+									_List_fromArray(
+										[
+											$elm$html$Html$text('Sair')
+										]));
+							default:
+								return A2(
+									$elm$html$Html$button,
+									_List_fromArray(
+										[
+											$elm$html$Html$Attributes$class('btn btn-indigo-500 mt-4'),
+											$elm$html$Html$Events$onClick($author$project$Page$Tournament$JoinTournament)
+										]),
+									_List_fromArray(
+										[
+											$elm$html$Html$text('Participar')
+										]));
+						}
+					}
+				}()
+				]));
+	});
+var $author$project$Page$Tournament$CancelEdit = {$: 'CancelEdit'};
+var $author$project$Page$Tournament$ConfirmEdit = {$: 'ConfirmEdit'};
+var $author$project$Page$Tournament$InputAllow = function (a) {
+	return {$: 'InputAllow', a: a};
+};
+var $author$project$Page$Tournament$InputDescription = function (a) {
+	return {$: 'InputDescription', a: a};
+};
+var $author$project$Page$Tournament$InputName = function (a) {
+	return {$: 'InputName', a: a};
+};
+var $author$project$Page$Tournament$InputPermission = function (a) {
+	return {$: 'InputPermission', a: a};
+};
+var $author$project$Page$Tournament$InputRuleset = function (a) {
+	return {$: 'InputRuleset', a: a};
+};
+var $author$project$Page$Tournament$InputStartDate = function (a) {
+	return {$: 'InputStartDate', a: a};
+};
+var $elm$html$Html$br = _VirtualDom_node('br');
+var $elm$html$Html$label = _VirtualDom_node('label');
+var $elm$html$Html$Events$targetChecked = A2(
+	$elm$json$Json$Decode$at,
+	_List_fromArray(
+		['target', 'checked']),
+	$elm$json$Json$Decode$bool);
+var $elm$html$Html$Events$onCheck = function (tagger) {
+	return A2(
+		$elm$html$Html$Events$on,
+		'change',
+		A2($elm$json$Json$Decode$map, tagger, $elm$html$Html$Events$targetChecked));
+};
+var $author$project$Page$Tournament$viewRuleset = function (ruleset) {
+	return A2(
+		$elm$html$Html$option,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$value(ruleset.name)
+			]),
+		_List_fromArray(
+			[
+				$elm$html$Html$text(ruleset.name)
+			]));
+};
+var $author$project$Page$Tournament$viewTournamentEditCard = function (model) {
+	return A2(
+		$elm$html$Html$div,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('container bg-indigo-500 rounded-lg text-white p-6 my-4 max-w-lg')
+			]),
+		_List_fromArray(
+			[
+				A2(
+				$elm$html$Html$p,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text('Preencha os campos que deseja atualizar e pressione confirmar')
+					])),
+				A2(
+				$elm$html$Html$input,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$type_('text'),
+						$elm$html$Html$Attributes$placeholder('Nome'),
+						$elm$html$Html$Attributes$class('login-input'),
+						$elm$html$Html$Events$onInput($author$project$Page$Tournament$InputName)
+					]),
+				_List_Nil),
+				A2(
+				$elm$html$Html$input,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$type_('text'),
+						$elm$html$Html$Attributes$placeholder('Descrição'),
+						$elm$html$Html$Attributes$class('login-input'),
+						$elm$html$Html$Events$onInput($author$project$Page$Tournament$InputDescription)
+					]),
+				_List_Nil),
+				A2(
+				$elm$html$Html$input,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$type_('date'),
+						$elm$html$Html$Attributes$placeholder('Data de Início'),
+						$elm$html$Html$Attributes$class('login-input'),
+						$elm$html$Html$Events$onInput($author$project$Page$Tournament$InputStartDate)
+					]),
+				_List_Nil),
+				A2(
+				$elm$html$Html$select,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('login-input'),
+						$elm$html$Html$Events$onInput($author$project$Page$Tournament$InputRuleset)
+					]),
+				A2($elm$core$List$map, $author$project$Page$Tournament$viewRuleset, model.rulesets)),
+				A2($elm$html$Html$br, _List_Nil, _List_Nil),
+				A2(
+				$elm$html$Html$input,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$type_('checkbox'),
+						$elm$html$Html$Events$onCheck($author$project$Page$Tournament$InputAllow)
+					]),
+				_List_Nil),
+				A2(
+				$elm$html$Html$label,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text('Permitir a participação de não integrantes do clube?')
+					])),
+				A2($elm$html$Html$br, _List_Nil, _List_Nil),
+				A2(
+				$elm$html$Html$input,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$type_('checkbox'),
+						$elm$html$Html$Events$onCheck($author$project$Page$Tournament$InputPermission)
+					]),
+				_List_Nil),
+				A2(
+				$elm$html$Html$label,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text('Exigir permissão para participar?')
+					])),
+				A2(
+				$elm$html$Html$button,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('border-none btn btn-green-500'),
+						$elm$html$Html$Events$onClick($author$project$Page$Tournament$ConfirmEdit)
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('Confirmar')
+					])),
+				A2(
+				$elm$html$Html$button,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('border-none btn btn-red-500'),
+						$elm$html$Html$Events$onClick($author$project$Page$Tournament$CancelEdit)
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('Cancelar')
+					]))
+			]));
+};
+var $author$project$Page$Tournament$viewTournament = function (model) {
+	var _v0 = model.state;
+	switch (_v0.$) {
+		case 'Uninitialized':
+			return A2(
+				$elm$html$Html$p,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text('Carregando...')
+					]));
+		case 'View':
+			var _switch = _v0.a;
+			var tournament = _v0.b;
+			return A2(
+				$elm$html$Html$div,
+				_List_Nil,
+				_List_fromArray(
+					[
+						A2($author$project$Page$Tournament$viewTournamentCard, tournament, _switch),
+						A2(
+						$author$project$Page$Tournament$viewPlayers,
+						tournament,
+						_Utils_eq(_switch, $author$project$Page$Tournament$Owner)),
+						$author$project$Page$Tournament$viewBrackets(tournament)
+					]));
+		default:
+			var form = _v0.b;
+			return A2(
+				$elm$html$Html$div,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$author$project$Page$Tournament$viewTournamentEditCard(model),
+						$author$project$Page$Tournament$viewBracketsEdit(form)
+					]));
+	}
+};
+var $author$project$Page$Tournament$view = function (model) {
+	return {
+		body: _List_fromArray(
+			[
+				$author$project$CommonHtml$viewNav(model.session),
+				function () {
+				var _v0 = model.error;
+				if (_v0.$ === 'Just') {
+					var error = _v0.a;
+					return $author$project$CommonHtml$errorCard(error);
+				} else {
+					return $elm$html$Html$text('');
+				}
+			}(),
+				$author$project$Page$Tournament$viewTournament(model)
+			]),
+		title: $author$project$Page$Tournament$stateToTitle(model)
+	};
+};
 var $author$project$Page$Tournaments$view = function (model) {
 	return {
 		body: _List_fromArray(
@@ -10628,7 +11800,6 @@ var $myrho$elm_round$Round$addSign = F2(
 			(signed && isNotZero) ? '-' : '',
 			str);
 	});
-var $elm$core$String$fromFloat = _String_fromNumber;
 var $elm$core$String$cons = _String_cons;
 var $elm$core$Char$fromCode = _Char_fromCode;
 var $myrho$elm_round$Round$increaseNum = function (_v0) {
@@ -11562,6 +12733,16 @@ var $author$project$Main$view = function (model) {
 				body: A2(
 					$elm$core$List$map,
 					$elm$html$Html$map($author$project$Main$GotTournamentsMsg),
+					page.body),
+				title: page.title
+			};
+		case 'Tournament':
+			var subModel = model.a;
+			var page = $author$project$Page$Tournament$view(subModel);
+			return {
+				body: A2(
+					$elm$core$List$map,
+					$elm$html$Html$map($author$project$Main$GotTournamentMsg),
 					page.body),
 				title: page.title
 			};

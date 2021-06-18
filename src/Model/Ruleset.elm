@@ -68,6 +68,10 @@ decoder =
     , tobi = tobi
     }
 
+listDecoder : Decode.Decoder (List Ruleset)
+listDecoder =
+  Decode.list decoder
+
 view : Ruleset -> Html msg
 view ruleset =
   div [ class "m-2" ]

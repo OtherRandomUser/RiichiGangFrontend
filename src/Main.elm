@@ -15,6 +15,7 @@ import Page.Login as Login
 import Page.Ruleset
 import Page.SignUp as SignUp
 import Page.Tournaments
+import Page.Tournament
 import Page.User as User
 import Route exposing (Route)
 import Route exposing (Route(..))
@@ -41,6 +42,7 @@ type Model
   | Club ClubPage.Model
   | Ruleset Page.Ruleset.Model
   | Tournaments Page.Tournaments.Model
+  | Tournament Page.Tournament.Model
   | User User.Model
 
 type Msg
@@ -52,6 +54,7 @@ type Msg
   | GotClubMsg ClubPage.Msg
   | GotRulesetMsg Page.Ruleset.Msg
   | GotTournamentsMsg Page.Tournaments.Msg
+  | GotTournamentMsg Page.Tournament.Msg
   | GotUserMsg User.Msg
 
 init : () -> Url.Url -> Nav.Key -> (Model, Cmd Msg)
@@ -100,6 +103,10 @@ changeRouteTo maybeRoute model =
         Page.Tournaments.init session
           |> updateWith Tournaments GotTournamentsMsg
 
+      Just (Route.Tournament tournamentId) ->
+        Page.Tournament.init session tournamentId
+          |> updateWith Tournament GotTournamentMsg
+
       Just (Route.User userId) ->
         User.init session userId
           |> updateWith User GotUserMsg
@@ -130,6 +137,9 @@ toSession model =
 
     Tournaments tournaments ->
       Page.Tournaments.toSession tournaments
+
+    Tournament tournament ->
+      Page.Tournament.toSession tournament
 
     User user ->
       User.toSession user
@@ -171,7 +181,7 @@ update msg model =
     (_, _) ->
       (model, Cmd.none)
 
-updateWith : (subModel -> Model) -> (subMsg -> Msg) -> ( subModel, Cmd subMsg ) -> ( Model, Cmd Msg)
+updateWith : (subModel -> Model) -> (subMsg -> Msg) -> (subModel, Cmd subMsg) -> (Model, Cmd Msg)
 updateWith toModel toMsg ( subModel, subCmd ) =
   ( toModel subModel
   , Cmd.map toMsg subCmd
@@ -236,6 +246,14 @@ view model =
       in
       { title = page.title
       , body = List.map (Html.map GotTournamentsMsg) page.body
+      }
+
+    Tournament subModel ->
+      let
+        page = Page.Tournament.view subModel
+      in
+      { title = page.title
+      , body = List.map (Html.map GotTournamentMsg) page.body
       }
 
     User subModel ->

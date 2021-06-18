@@ -17,18 +17,18 @@ import Session exposing (Session(..))
 import List.Extra
 import CommonHtml exposing (viewNav)
 import CommonHtml exposing (errorCard)
-import Model.Ruleset
+import Model.Ruleset as Ruleset exposing (Ruleset)
 import Model.TournamentPlayer exposing (TournamentPlayer)
 import Viewer exposing (Viewer)
 import Model.BracketShort as BracketShort
 import Api exposing (tournament)
-import Model.Ruleset exposing (Ruleset)
 
 
 type alias Model =
   { session : Session
   , error : Maybe String
   , state : State
+  , rulesets : List Ruleset
   }
 
 type State
@@ -44,7 +44,7 @@ type ViewSwitch
   | NonParticipant
 
 type alias Form =
-  { ruleset : Ruleset
+  { ruleset : Maybe Ruleset
   , name : String
   , description : String
   , startDate : String
@@ -66,6 +66,7 @@ type alias BracketForm =
 type Msg
   = GotTournament (Result Api.ApiError Tournament)
   | GotDelete (Result Api.ApiError ())
+  | GotRulesets (Result Api.ApiError (List Ruleset))
   | RemovePlayer TournamentPlayer
   | JoinTournament
   | LeaveTournament
@@ -77,6 +78,7 @@ type Msg
   | InputName String
   | InputDescription String
   | InputStartDate String
+  | InputRuleset String
   | InputAllow Bool
   | InputPermission Bool
   | AddBracket
@@ -90,7 +92,7 @@ type Msg
 
 init : Session -> Int -> (Model, Cmd Msg)
 init session tournamentId =
-  (Model session Nothing Uninitialized, get tournamentId)
+  (Model session Nothing Uninitialized [], get tournamentId)
 
 get : Int -> Cmd Msg
 get id =
@@ -126,6 +128,14 @@ update msg model =
         Err error ->
           ({ model | error = Just (Api.errorToString error) }, Cmd.none)
 
+    (GotRulesets result, _) ->
+      case result of
+        Ok rulesets ->
+          ({ model | rulesets = rulesets, error = Nothing }, Cmd.none)
+
+        Err error ->
+          ({ model | error = Just (Api.errorToString error) }, Cmd.none)
+
     (RemovePlayer player, View _ tournament) ->
       makeRequest (\viewer -> requestRemovePlayer viewer tournament player)
 
@@ -139,7 +149,7 @@ update msg model =
       makeRequest (\viewer -> requestInit viewer tournament)
 
     (EditTournament, View Owner tournament) ->
-      ({ model | state = Edit tournament (initForm tournament) }, Cmd.none)
+      ({ model | state = Edit tournament (initForm tournament) }, requestRulesets tournament.clubId)
 
     (ConfirmEdit, Edit tournament form) ->
       makeRequest (\viewer -> requestPatch viewer tournament form)
@@ -158,6 +168,12 @@ update msg model =
 
     (InputStartDate startDate, Edit tournament form) ->
       updateEditForm (\f -> { f | startDate = startDate }) tournament form model
+
+    (InputRuleset name, Edit tournament form) ->
+      let
+        ruleset = List.Extra.find (\r -> r.name == name) model.rulesets
+      in
+      updateEditForm (\f -> { f | ruleset = ruleset }) tournament form model
 
     (InputAllow allow, Edit tournament form) ->
       updateEditForm (\f -> { f | allowNonMembers = allow }) tournament form model
@@ -264,7 +280,7 @@ initForm tournament =
       b.gamesPerSeries
       b.finalScoreMultiplier
   in
-  Form tournament.ruleset "" "" "" tournament.allowNonMembers tournament.requirePermission
+  Form (Just tournament.ruleset) "" "" "" tournament.allowNonMembers tournament.requirePermission
     <| List.map mapBracket tournament.brackets
 
 addBracket : List BracketForm -> List BracketForm
@@ -331,13 +347,23 @@ requestPatch viewer tournament form =
     , body = Http.jsonBody (patchEncoder form)
     } viewer
 
+requestRulesets : Int -> Cmd Msg
+requestRulesets clubId =
+  Http.get
+    { url = Api.clubRulesets clubId
+    , expect = Api.expectJson GotRulesets Ruleset.listDecoder
+    }
+
 patchEncoder : Form -> Encode.Value
 patchEncoder form =
   let
     maybeNull val = if String.isEmpty val then Encode.null else Encode.string val
   in
   Encode.object
-    [ ("rulesetId", Encode.int form.ruleset.id)
+    [ ("rulesetId", case form.ruleset of
+        Just ruleset -> Encode.int ruleset.id
+        Nothing -> Encode.null
+      )
     , ("name", maybeNull form.name)
     , ("description", maybeNull form.description)
     , ("startDate", maybeNull form.startDate)
@@ -391,7 +417,7 @@ viewTournament model =
 
     Edit _ form ->
       div []
-        [ viewTournamentEditCard
+        [ viewTournamentEditCard model
         , viewBracketsEdit form
         ]
 
@@ -412,7 +438,7 @@ viewTournamentCard tournament switch =
       else
         text ""
 
-    , a [ href (Model.Ruleset.getUrl tournament.clubId tournament.ruleset), class "hover:underline" ] [ text "Regras" ]
+    , a [ href (Ruleset.getUrl tournament.clubId tournament.ruleset), class "hover:underline" ] [ text "Regras" ]
 
     , cardElement "Status" tournament.status
 
@@ -446,13 +472,15 @@ viewTournamentCard tournament switch =
             ]
     ]
 
-viewTournamentEditCard : Html Msg
-viewTournamentEditCard =
+viewTournamentEditCard : Model -> Html Msg
+viewTournamentEditCard model =
   div [ class "container bg-indigo-500 rounded-lg text-white p-6 my-4 max-w-lg" ]
     [ p [] [ text "Preencha os campos que deseja atualizar e pressione confirmar" ]
     , input [ type_ "text", placeholder "Nome", class "login-input", onInput InputName ] []
     , input [ type_ "text", placeholder "Descrição", class "login-input", onInput InputDescription ] []
     , input [ type_ "date", placeholder "Data de Início", class "login-input", onInput InputStartDate ] []
+    , select [ class "login-input", onInput InputRuleset ] (List.map viewRuleset model.rulesets)
+    , br [] []
     , input [ type_ "checkbox", onCheck InputAllow ] []
     , label [] [ text "Permitir a participação de não integrantes do clube?" ]
     , br [] []
@@ -461,6 +489,10 @@ viewTournamentEditCard =
     , button [ class "border-none btn btn-green-500", onClick ConfirmEdit ] [ text "Confirmar" ]
     , button [ class "border-none btn btn-red-500", onClick CancelEdit ] [ text "Cancelar" ]
     ]
+
+viewRuleset : Ruleset -> Html msg
+viewRuleset ruleset =
+  option [ value ruleset.name ] [ text ruleset.name ]
 
 viewBracketsEdit : Form -> Html Msg
 viewBracketsEdit form =

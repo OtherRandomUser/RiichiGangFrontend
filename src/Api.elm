@@ -38,8 +38,11 @@ clubInvite id = (clubMembers id) ++ "/invite"
 clubMember : Int -> Int -> String
 clubMember clubId userId = (clubMembers clubId) ++ "/" ++ (String.fromInt userId)
 
+clubRulesets : Int -> String
+clubRulesets clubId = String.concat [club clubId, "/rulesets"]
+
 clubRuleset : Int -> Int -> String
-clubRuleset clubId rulesetId = (club clubId) ++ "/rulesets/" ++ (String.fromInt rulesetId)
+clubRuleset clubId rulesetId = String.concat [clubRulesets clubId, "/", String.fromInt rulesetId]
 
 tournaments : String
 tournaments = backendUrl ++ "/tournaments"
