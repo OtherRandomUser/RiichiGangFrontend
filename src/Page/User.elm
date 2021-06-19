@@ -1,12 +1,13 @@
 module Page.User exposing (..)
 
 import Browser
+import Browser.Navigation as Nav
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Http
 import Json.Encode as Encode
--- import Browser.Navigation as Nav
+import Url.Builder
 
 import Api exposing (..)
 import ClubShort
@@ -15,6 +16,7 @@ import Model.Membership
 import Model.Notification exposing (Notification)
 import Model.Stats
 import Model.TournamentShort
+import Route
 import Session exposing (..)
 import User exposing (User)
 import Viewer exposing (..)
@@ -53,6 +55,7 @@ type Msg
   | InputPassword String
   | InputPasswordAgain String
   | NotificationAction String
+  | NewClub
 
 init : Session -> Int -> (Model, Cmd Msg)
 init session id =
@@ -151,6 +154,9 @@ update msg model =
 
         Nothing ->
           ({ model | error = Just "You shouldn't be able to do this " }, Cmd.none)
+
+    (NewClub, _) ->
+      (model, Nav.pushUrl (Session.navKey model.session) (Url.Builder.absolute (Route.routeToPieces (Route.NewClub)) []))
 
     (_, _) ->
       ({ model | error = Just "Estado inválido" }, Cmd.none)
@@ -279,7 +285,7 @@ viewOwnedClubs maybeUser maybeViewer =
         div [ class "space-y-4" ] (List.map ClubShort.view user.ownedClubs)
 
     , if isOwnProfile maybeUser maybeViewer then
-        button [ class "border-transparent btn btn-indigo-500 mt-4" ] [ text "Novo" ]
+        button [ class "border-transparent btn btn-indigo-500 mt-4", onClick NewClub ] [ text "Novo" ]
       else
         div [] []
 

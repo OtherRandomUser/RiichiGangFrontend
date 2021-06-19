@@ -39,9 +39,11 @@ type Model
   | Login Login.Model
   | SignUp SignUp.Model
   | Clubs ClubsPage.Model
+  | NewClub ClubPage.Model
   | Club ClubPage.Model
   | Ruleset Page.Ruleset.Model
   | Tournaments Page.Tournaments.Model
+  | NewTournament Page.Tournament.Model
   | Tournament Page.Tournament.Model
   | User User.Model
 
@@ -51,9 +53,11 @@ type Msg
   | GotLoginMsg Login.Msg
   | GotSignUpMsg SignUp.Msg
   | GotClubsMsg ClubsPage.Msg
+  | GotNewClubMsg ClubPage.Msg
   | GotClubMsg ClubPage.Msg
   | GotRulesetMsg Page.Ruleset.Msg
   | GotTournamentsMsg Page.Tournaments.Msg
+  | GotNewTournamentMsg Page.Tournament.Msg
   | GotTournamentMsg Page.Tournament.Msg
   | GotUserMsg User.Msg
 
@@ -91,6 +95,10 @@ changeRouteTo maybeRoute model =
         ClubsPage.init session
           |> updateWith Clubs GotClubsMsg
 
+      Just Route.NewClub ->
+        ClubPage.initNew session
+          |> updateWith NewClub GotNewClubMsg
+
       Just (Route.Club clubId) ->
         ClubPage.init session clubId
           |> updateWith Club GotClubMsg
@@ -102,6 +110,10 @@ changeRouteTo maybeRoute model =
       Just (Route.Tournaments) ->
         Page.Tournaments.init session
           |> updateWith Tournaments GotTournamentsMsg
+
+      Just (Route.NewTournament clubId) ->
+        Page.Tournament.initNew session clubId
+          |> updateWith NewTournament GotNewTournamentMsg
 
       Just (Route.Tournament tournamentId) ->
         Page.Tournament.init session tournamentId
@@ -129,6 +141,9 @@ toSession model =
     Clubs clubs ->
       ClubsPage.toSession clubs
 
+    NewClub club ->
+      ClubPage.toSession club
+
     Club club ->
       ClubPage.toSession club
 
@@ -137,6 +152,9 @@ toSession model =
 
     Tournaments tournaments ->
       Page.Tournaments.toSession tournaments
+
+    NewTournament tournament ->
+      Page.Tournament.toSession tournament
 
     Tournament tournament ->
       Page.Tournament.toSession tournament
@@ -224,6 +242,14 @@ view model =
       , body = List.map (Html.map GotClubsMsg) page.body
       }
 
+    NewClub subModel ->
+      let
+        page = ClubPage.view subModel
+      in
+      { title = page.title
+      , body = List.map (Html.map GotClubMsg) page.body
+      }
+
     Club subModel ->
       let
         page = ClubPage.view subModel
@@ -246,6 +272,14 @@ view model =
       in
       { title = page.title
       , body = List.map (Html.map GotTournamentsMsg) page.body
+      }
+
+    NewTournament subModel ->
+      let
+        page = Page.Tournament.view subModel
+      in
+      { title = page.title
+      , body = List.map (Html.map GotTournamentMsg) page.body
       }
 
     Tournament subModel ->

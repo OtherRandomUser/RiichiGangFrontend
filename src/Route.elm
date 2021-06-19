@@ -12,9 +12,11 @@ type Route
   | Logout
   | SignUp
   | Clubs
+  | NewClub
   | Club Int
   | Ruleset Int Int
   | Tournaments
+  | NewTournament Int
   | Tournament Int
   | User Int
 
@@ -26,9 +28,11 @@ parser =
     , Parser.map Logout (s "logout")
     , Parser.map SignUp (s "signup")
     , Parser.map Clubs (s "clubs")
+    , Parser.map NewClub (s "clubs" </> s "new")
     , Parser.map Club (s "clubs" </> int)
     , Parser.map Ruleset (s "clubs" </> int </> s "rulesets" </> int)
     , Parser.map Tournaments (s "tournaments")
+    , Parser.map Tournament (s "tournaments" </> s "new" </> int)
     , Parser.map Tournament (s "tournaments" </> int)
     , Parser.map User (s "users" </> int)
     ]
@@ -72,6 +76,9 @@ routeToPieces route =
     Clubs ->
       [ "clubs" ]
 
+    NewClub ->
+      [ "clubs", "new" ]
+
     Club id ->
       [ "clubs", String.fromInt id ]
 
@@ -80,6 +87,9 @@ routeToPieces route =
 
     Tournaments ->
       [ "tournaments" ]
+
+    NewTournament clubId ->
+      [ "tournaments", "new", (String.fromInt clubId) ]
 
     Tournament tournamentId ->
       [ "tournaments", (String.fromInt tournamentId) ]

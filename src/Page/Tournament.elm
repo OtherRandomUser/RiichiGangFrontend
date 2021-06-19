@@ -11,17 +11,15 @@ import Url.Builder
 
 import Api
 import CommonHtml exposing (..)
+import List.Extra
+import Model.BracketShort as BracketShort
+import Model.Ruleset as Ruleset exposing (Ruleset)
 import Model.Tournament as Tournament exposing (Tournament)
+import Model.TournamentPlayer exposing (TournamentPlayer)
+import Route
 import Session exposing (Session)
 import Session exposing (Session(..))
-import List.Extra
-import CommonHtml exposing (viewNav)
-import CommonHtml exposing (errorCard)
-import Model.Ruleset as Ruleset exposing (Ruleset)
-import Model.TournamentPlayer exposing (TournamentPlayer)
 import Viewer exposing (Viewer)
-import Model.BracketShort as BracketShort
-import Api exposing (tournament)
 
 
 type alias Model =
@@ -35,7 +33,7 @@ type State
   = Uninitialized
   | View ViewSwitch Tournament
   | Edit Tournament Form
-  -- TODO | New Form
+  | New Form
 
 type ViewSwitch
   = Anonymus
@@ -65,12 +63,15 @@ type alias BracketForm =
 
 type Msg
   = GotTournament (Result Api.ApiError Tournament)
+  | GotPostTournament (Result Api.ApiError Tournament)
   | GotDelete (Result Api.ApiError ())
   | GotRulesets (Result Api.ApiError (List Ruleset))
   | RemovePlayer TournamentPlayer
   | JoinTournament
   | LeaveTournament
   | InitTournament
+  | ConfirmNew
+  | CancelNew
   | EditTournament
   | ConfirmEdit
   | CancelEdit
@@ -94,6 +95,10 @@ init : Session -> Int -> (Model, Cmd Msg)
 init session tournamentId =
   (Model session Nothing Uninitialized [], get tournamentId)
 
+initNew : Session -> Int -> (Model, Cmd Msg)
+initNew session clubId =
+  (Model session Nothing (New (Form Nothing "" "" "" False False [])) [], requestRulesets clubId)
+
 get : Int -> Cmd Msg
 get id =
   Http.get
@@ -116,6 +121,14 @@ update msg model =
       case result of
         Ok tournament ->
           ({ model | state = initState tournament model.session, error = Nothing }, Cmd.none)
+
+        Err error ->
+          ({ model | error = Just (Api.errorToString error) }, Cmd.none)
+
+    (GotPostTournament result, _) ->
+      case result of
+        Ok tournament ->
+          (model, Nav.pushUrl (Session.navKey model.session) (Url.Builder.absolute (Route.routeToPieces (Route.Tournament tournament.id)) []))
 
         Err error ->
           ({ model | error = Just (Api.errorToString error) }, Cmd.none)
@@ -148,6 +161,17 @@ update msg model =
     (InitTournament, View Owner tournament) ->
       makeRequest (\viewer -> requestInit viewer tournament)
 
+    (ConfirmNew, New form) ->
+      case validateNew form of
+        Ok _ ->
+          makeRequest (\viewer -> requestPost form viewer)
+
+        Err error ->
+          ({ model | error = Just error}, Cmd.none)
+
+    (CancelNew, New _) ->
+      (model, Nav.back (Session.navKey model.session) 1)
+
     (EditTournament, View Owner tournament) ->
       ({ model | state = Edit tournament (initForm tournament) }, requestRulesets tournament.clubId)
 
@@ -160,14 +184,29 @@ update msg model =
     (DeleteTournament, View Owner tournament) ->
       makeRequest (\viewer -> requestDelete viewer tournament)
 
+    (InputName name, New form) ->
+      updateNewForm { form | name = name } model
+
     (InputName name, Edit tournament form) ->
       updateEditForm (\f -> { f | name = name }) tournament form model
+
+    (InputDescription description, New form) ->
+      updateNewForm { form | description = description } model
 
     (InputDescription description, Edit tournament form) ->
       updateEditForm (\f -> { f | description = description }) tournament form model
 
+    (InputStartDate startDate, New form) ->
+      updateNewForm { form | startDate = startDate } model
+
     (InputStartDate startDate, Edit tournament form) ->
       updateEditForm (\f -> { f | startDate = startDate }) tournament form model
+
+    (InputRuleset name, New form) ->
+      let
+        ruleset = List.Extra.find (\r -> r.name == name) model.rulesets
+      in
+      updateNewForm { form | ruleset = ruleset } model
 
     (InputRuleset name, Edit tournament form) ->
       let
@@ -175,23 +214,49 @@ update msg model =
       in
       updateEditForm (\f -> { f | ruleset = ruleset }) tournament form model
 
+    (InputAllow allow, New form) ->
+      updateNewForm { form | allowNonMembers = allow } model
+
     (InputAllow allow, Edit tournament form) ->
       updateEditForm (\f -> { f | allowNonMembers = allow }) tournament form model
+
+    (InputPermission permission, New form) ->
+      updateNewForm { form | requirePermission = permission } model
 
     (InputPermission permission, Edit tournament form) ->
       updateEditForm (\f -> { f | requirePermission = permission }) tournament form model
 
+    (AddBracket, New form) ->
+      updateNewForm { form | brackets = addBracket form.brackets } model
+
     (AddBracket, Edit tournament form) ->
       updateEditForm (\f -> { f | brackets = addBracket f.brackets }) tournament form model
+
+    (RemoveBracket seq, New form) ->
+      updateNewForm { form | brackets = removeBracket seq form.brackets } model
 
     (RemoveBracket seq, Edit tournament form) ->
       updateEditForm (\f -> { f | brackets = removeBracket seq f.brackets }) tournament form model
 
+    (InputBracketName seq name, New form) ->
+      updateNewForm { form | brackets = updateBracket (\b -> { b | name = name }) form.brackets seq } model
+
     (InputBracketName seq name, Edit tournament form) ->
       updateEditForm (\f -> { f | brackets = updateBracket (\b -> { b | name = name }) f.brackets seq }) tournament form model
 
+    (InputBracketWinCon seq winCon, New form) ->
+      updateNewForm { form | brackets = updateBracket (\b -> { b | winCondition = winCon }) form.brackets seq } model
+
     (InputBracketWinCon seq winCon, Edit tournament form) ->
       updateEditForm (\f -> { f | brackets = updateBracket (\b -> { b | winCondition = winCon }) f.brackets seq }) tournament form model
+
+    (InputBracketNAdv seq nadv, New form) ->
+      case String.toInt nadv of
+        Just i ->
+          updateNewForm { form | brackets = updateBracket (\b -> { b | numberOfAdvancing = i }) form.brackets seq } model
+
+        Nothing ->
+          ({ model | error = Just "Falha na conversão de number of advancing players para inteiro" }, Cmd.none)
 
     (InputBracketNAdv seq nadv, Edit tournament form) ->
       case String.toInt nadv of
@@ -201,6 +266,14 @@ update msg model =
         Nothing ->
           ({ model | error = Just "Falha na conversão de number of advancing players para inteiro" }, Cmd.none)
 
+    (InputBracketNSeries seq nseries, New form) ->
+      case String.toInt nseries of
+        Just i ->
+          updateNewForm { form | brackets = updateBracket (\b -> { b | numberOfSeries = i }) form.brackets seq } model
+
+        Nothing ->
+          ({ model | error = Just "Falha na conversão de número de séries para inteiro" }, Cmd.none)
+
     (InputBracketNSeries seq nseries, Edit tournament form) ->
       case String.toInt nseries of
         Just i ->
@@ -209,10 +282,26 @@ update msg model =
         Nothing ->
           ({ model | error = Just "Falha na conversão de número de séries para inteiro" }, Cmd.none)
 
+    (InputBracketNGames seq ngames, New form) ->
+      case String.toInt ngames of
+        Just i ->
+          updateNewForm { form | brackets = updateBracket (\b -> { b | gamesPerSeries = i }) form.brackets seq } model
+
+        Nothing ->
+          ({ model | error = Just "Falha na conversão de número de séries para ponto flutuante" }, Cmd.none)
+
     (InputBracketNGames seq ngames, Edit tournament form) ->
       case String.toInt ngames of
         Just i ->
           updateEditForm (\f -> { f | brackets = updateBracket (\b -> { b | gamesPerSeries = i }) f.brackets seq }) tournament form model
+
+        Nothing ->
+          ({ model | error = Just "Falha na conversão de número de séries para ponto flutuante" }, Cmd.none)
+
+    (InputBracketMul seq mul, New form) ->
+      case String.toFloat mul of
+        Just fl ->
+          updateNewForm { form | brackets = updateBracket (\b -> { b | finalScoreMultiplier = fl }) form.brackets seq } model
 
         Nothing ->
           ({ model | error = Just "Falha na conversão de número de séries para inteiro" }, Cmd.none)
@@ -229,8 +318,9 @@ update msg model =
       ({ model | error = Just "Estado inválido" }, Cmd.none)
 
 -- updateNewForm : (Form -> Form) -> 
--- updateNewForm transform form model =
---   ({ model | state = New (transform form) }, Cmd.none)
+updateNewForm : Form -> Model -> (Model, Cmd msg)
+updateNewForm form model =
+  ({ model | state = New form }, Cmd.none)
 
 updateEditForm : (Form -> Form) -> Tournament -> Form -> Model -> (Model, Cmd msg)
 updateEditForm transform tournament form model =
@@ -301,6 +391,53 @@ removeBracket : Int -> List BracketForm -> List BracketForm
 removeBracket seq brackets =
   List.sortBy (\b -> b.sequence)
     <| List.filter (\b -> b.sequence /= seq) brackets
+
+validateNew : Form -> Result String ()
+validateNew form =
+  let
+    validateBracket b =
+      if String.isEmpty b.name then
+        Err "Preencha o nome da chave"
+      else if String.isEmpty b.winCondition then
+        Err "Preencha a condição de vitória da chave"
+      else if b.winCondition == "TopX" && b.numberOfAdvancing <= 0 then
+        Err "O número de jogadores a avançar para a próxima fase precisa ser maior que zero"
+      else if b.numberOfSeries <= 0 then
+        Err "Cada chave precisa de ao menos uma série"
+      else if b.gamesPerSeries <= 0 then
+        Err "Cada série precisa de ao menos um jogo"
+      else if b.finalScoreMultiplier < 0 then
+        Err "O multiplicador de pontuação não pode ser negativo"
+      else
+        Ok ()
+  in
+  if form.ruleset == Nothing then
+    Err "Preencha o conjunto de regras"
+  else if String.isEmpty form.name then
+    Err "Preencha o nome do torneio"
+  else if String.isEmpty form.description then
+    Err "Preencha a descrição do torneio"
+  else if String.isEmpty form.startDate then
+    Err "Preencha a data de início do torneio"
+  else if List.isEmpty form.brackets then
+    Err "Crie ao menos uma chave"
+  else
+    let
+      res = form.brackets
+        |> List.map validateBracket
+        |> List.Extra.find (\r -> r /= Ok ())
+    in
+    case res of
+      Just err -> err
+      Nothing -> Ok ()
+
+requestPost : Form -> Viewer -> Cmd Msg
+requestPost form viewer =
+  Api.privatePost
+    { url = Api.tournaments
+    , expect = Api.expectJson GotPostTournament Tournament.decoder
+    , body = Http.jsonBody (patchEncoder form)
+    } viewer
 
 requestRemovePlayer : Viewer -> Tournament -> TournamentPlayer -> Cmd Msg
 requestRemovePlayer viewer tournament player =
@@ -417,7 +554,13 @@ viewTournament model =
 
     Edit _ form ->
       div []
-        [ viewTournamentEditCard model
+        [ viewTournamentEditCard model False
+        , viewBracketsEdit form
+        ]
+
+    New form ->
+      div []
+        [ viewTournamentEditCard model True
         , viewBracketsEdit form
         ]
 
@@ -472,8 +615,8 @@ viewTournamentCard tournament switch =
             ]
     ]
 
-viewTournamentEditCard : Model -> Html Msg
-viewTournamentEditCard model =
+viewTournamentEditCard : Model -> Bool -> Html Msg
+viewTournamentEditCard model isNew =
   div [ class "container bg-indigo-500 rounded-lg text-white p-6 my-4 max-w-lg" ]
     [ p [] [ text "Preencha os campos que deseja atualizar e pressione confirmar" ]
     , input [ type_ "text", placeholder "Nome", class "login-input", onInput InputName ] []
@@ -486,8 +629,8 @@ viewTournamentEditCard model =
     , br [] []
     , input [ type_ "checkbox", onCheck InputPermission ] []
     , label [] [ text "Exigir permissão para participar?" ]
-    , button [ class "border-none btn btn-green-500", onClick ConfirmEdit ] [ text "Confirmar" ]
-    , button [ class "border-none btn btn-red-500", onClick CancelEdit ] [ text "Cancelar" ]
+    , button [ class "border-none btn btn-green-500", onClick (if isNew then ConfirmNew else ConfirmEdit) ] [ text "Confirmar" ]
+    , button [ class "border-none btn btn-red-500", onClick (if isNew then CancelNew else CancelEdit) ] [ text "Cancelar" ]
     ]
 
 viewRuleset : Ruleset -> Html msg
@@ -549,14 +692,10 @@ viewBrackets tournament =
 stateToTitle : Model -> String
 stateToTitle model =
   case model.state of
-    Uninitialized ->
-      "Tournament"
-
-    View _ tournament ->
-      "Tournament - " ++ tournament.name
-
-    Edit tournament _ ->
-      "Tournament - " ++ tournament.name
+    Uninitialized -> "Tournament"
+    View _ tournament -> "Tournament - " ++ tournament.name
+    Edit tournament _ -> "Tournament - " ++ tournament.name
+    New _ -> "Tournament - Novo"
 
 toSession : Model -> Session
 toSession model =

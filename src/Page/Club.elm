@@ -15,6 +15,7 @@ import Club exposing (Club)
 import CommonHtml exposing (..)
 import Model.TournamentShort
 import Model.ClubMembership exposing (ClubMembership)
+import Route
 import Session exposing (Session)
 import UserShort
 import Viewer exposing (Viewer)
@@ -47,6 +48,7 @@ type alias Form =
 
 type Msg
   = GotClub (Result Api.ApiError Club)
+  | GotPostClub (Result Api.ApiError Club)
   | EditClub
   | ConfirmEdit
   | CancelEdit
@@ -62,6 +64,7 @@ type Msg
   | InputWebsite String
   | InputContact String
   | InputLocalization String
+  | NewTournament
 
 init : Session -> Int -> (Model, Cmd Msg)
 init session clubId =
@@ -93,6 +96,14 @@ update msg model =
       case result of
         Ok club ->
           ({ model | state = initState club model.session, error = Nothing }, Cmd.none)
+
+        Err error ->
+          ({ model | error = Just (Api.errorToString error) }, Cmd.none)
+
+    (GotPostClub result, _) ->
+      case result of
+        Ok club ->
+          (model, Nav.pushUrl (Session.navKey model.session) (Url.Builder.absolute (Route.routeToPieces (Route.Club club.id)) []))
 
         Err error ->
           ({ model | error = Just (Api.errorToString error) }, Cmd.none)
@@ -174,6 +185,9 @@ update msg model =
     (InputLocalization localization, Edit club form) ->
       updateEditForm (\f -> { f | localization = localization }) club form model
 
+    (NewTournament, View club Owner) ->
+      (model, Nav.pushUrl (Session.navKey model.session) (Url.Builder.absolute (Route.routeToPieces (Route.NewTournament club.id)) []))
+
     (_, _) ->
       ({ model | error = Just "Estado inválido" }, Cmd.none)
 
@@ -221,7 +235,7 @@ requestPost form viewer =
   Api.privatePost
     { url = Api.clubs
     , body = Http.jsonBody (postEncoder form)
-    , expect = Api.expectJson GotClub Club.clubDecoder
+    , expect = Api.expectJson GotPostClub Club.clubDecoder
     } viewer
 
 requestDelete : Club -> Viewer -> Cmd Msg
@@ -320,7 +334,7 @@ viewClub model =
       div []
         [ viewClubCard club switch
         , viewOwner club
-        , viewTournaments club
+        , viewTournaments club (switch == Owner)
         , viewMembers club (switch == Owner)
         ]
 
@@ -328,7 +342,7 @@ viewClub model =
       div []
         [ viewClubCardEdit False
         , viewOwner club
-        , viewTournaments club
+        , viewTournaments club False
         , viewMembers club True
         ]
 
@@ -357,11 +371,15 @@ viewMembers club isOwner =
     , div [ class "space-y-4" ] (List.map transform (List.filter filter club.members))
     ]
 
-viewTournaments : Club -> Html Msg
-viewTournaments club =
+viewTournaments : Club -> Bool -> Html Msg
+viewTournaments club isOwner =
   div [ class "m-2" ]
     [ h1 [ class "list-heading" ] [ text "Torneios" ]
     , div [ class "space-y-4" ] (List.map Model.TournamentShort.view club.tournaments)
+    , if isOwner then
+        button [ class "border-transparent btn btn-indigo-500 mt-4", onClick NewTournament ] [ text "Novo" ]
+      else
+        div [] []
     ]
 
 viewOwner : Club -> Html Msg

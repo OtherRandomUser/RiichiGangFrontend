@@ -5400,6 +5400,12 @@ var $author$project$Main$GotClubsMsg = function (a) {
 var $author$project$Main$GotLoginMsg = function (a) {
 	return {$: 'GotLoginMsg', a: a};
 };
+var $author$project$Main$GotNewClubMsg = function (a) {
+	return {$: 'GotNewClubMsg', a: a};
+};
+var $author$project$Main$GotNewTournamentMsg = function (a) {
+	return {$: 'GotNewTournamentMsg', a: a};
+};
 var $author$project$Main$GotRulesetMsg = function (a) {
 	return {$: 'GotRulesetMsg', a: a};
 };
@@ -5417,6 +5423,12 @@ var $author$project$Main$GotUserMsg = function (a) {
 };
 var $author$project$Main$Login = function (a) {
 	return {$: 'Login', a: a};
+};
+var $author$project$Main$NewClub = function (a) {
+	return {$: 'NewClub', a: a};
+};
+var $author$project$Main$NewTournament = function (a) {
+	return {$: 'NewTournament', a: a};
 };
 var $author$project$Main$NotFound = function (a) {
 	return {$: 'NotFound', a: a};
@@ -7119,6 +7131,53 @@ var $author$project$Page$Ruleset$initGet = F3(
 			A3($author$project$Page$Ruleset$Model, session, $elm$core$Maybe$Nothing, $author$project$Page$Ruleset$Uninitialized),
 			A2($author$project$Page$Ruleset$get, clubId, rulesetId));
 	});
+var $author$project$Page$Club$Form = F4(
+	function (name, website, contact, localization) {
+		return {contact: contact, localization: localization, name: name, website: website};
+	});
+var $author$project$Page$Club$New = function (a) {
+	return {$: 'New', a: a};
+};
+var $author$project$Page$Club$initNew = function (session) {
+	return _Utils_Tuple2(
+		A3(
+			$author$project$Page$Club$Model,
+			session,
+			$elm$core$Maybe$Nothing,
+			$author$project$Page$Club$New(
+				A4($author$project$Page$Club$Form, '', '', '', ''))),
+		$elm$core$Platform$Cmd$none);
+};
+var $author$project$Page$Tournament$Form = F7(
+	function (ruleset, name, description, startDate, allowNonMembers, requirePermission, brackets) {
+		return {allowNonMembers: allowNonMembers, brackets: brackets, description: description, name: name, requirePermission: requirePermission, ruleset: ruleset, startDate: startDate};
+	});
+var $author$project$Page$Tournament$New = function (a) {
+	return {$: 'New', a: a};
+};
+var $author$project$Page$Tournament$GotRulesets = function (a) {
+	return {$: 'GotRulesets', a: a};
+};
+var $author$project$Model$Ruleset$listDecoder = $elm$json$Json$Decode$list($author$project$Model$Ruleset$decoder);
+var $author$project$Page$Tournament$requestRulesets = function (clubId) {
+	return $elm$http$Http$get(
+		{
+			expect: A2($author$project$Api$expectJson, $author$project$Page$Tournament$GotRulesets, $author$project$Model$Ruleset$listDecoder),
+			url: $author$project$Api$clubRulesets(clubId)
+		});
+};
+var $author$project$Page$Tournament$initNew = F2(
+	function (session, clubId) {
+		return _Utils_Tuple2(
+			A4(
+				$author$project$Page$Tournament$Model,
+				session,
+				$elm$core$Maybe$Nothing,
+				$author$project$Page$Tournament$New(
+					A7($author$project$Page$Tournament$Form, $elm$core$Maybe$Nothing, '', '', '', false, false, _List_Nil)),
+				_List_Nil),
+			$author$project$Page$Tournament$requestRulesets(clubId));
+	});
 var $author$project$Session$navKey = function (session) {
 	if (session.$ === 'LoggedIn') {
 		var key = session.a;
@@ -7170,6 +7229,9 @@ var $author$project$Main$toSession = function (model) {
 		case 'Clubs':
 			var clubs = model.a;
 			return $author$project$Page$Clubs$toSession(clubs);
+		case 'NewClub':
+			var club = model.a;
+			return $author$project$Page$Club$toSession(club);
 		case 'Club':
 			var club = model.a;
 			return $author$project$Page$Club$toSession(club);
@@ -7179,6 +7241,9 @@ var $author$project$Main$toSession = function (model) {
 		case 'Tournaments':
 			var tournaments = model.a;
 			return $author$project$Page$Tournaments$toSession(tournaments);
+		case 'NewTournament':
+			var tournament = model.a;
+			return $author$project$Page$Tournament$toSession(tournament);
 		case 'Tournament':
 			var tournament = model.a;
 			return $author$project$Page$Tournament$toSession(tournament);
@@ -7241,6 +7306,13 @@ var $author$project$Main$changeRouteTo = F2(
 						$author$project$Main$Clubs,
 						$author$project$Main$GotClubsMsg,
 						$author$project$Page$Clubs$init(session));
+				case 'NewClub':
+					var _v6 = maybeRoute.a;
+					return A3(
+						$author$project$Main$updateWith,
+						$author$project$Main$NewClub,
+						$author$project$Main$GotNewClubMsg,
+						$author$project$Page$Club$initNew(session));
 				case 'Club':
 					var clubId = maybeRoute.a.a;
 					return A3(
@@ -7249,21 +7321,28 @@ var $author$project$Main$changeRouteTo = F2(
 						$author$project$Main$GotClubMsg,
 						A2($author$project$Page$Club$init, session, clubId));
 				case 'Ruleset':
-					var _v6 = maybeRoute.a;
-					var clubId = _v6.a;
-					var rulesetId = _v6.b;
+					var _v7 = maybeRoute.a;
+					var clubId = _v7.a;
+					var rulesetId = _v7.b;
 					return A3(
 						$author$project$Main$updateWith,
 						$author$project$Main$Ruleset,
 						$author$project$Main$GotRulesetMsg,
 						A3($author$project$Page$Ruleset$initGet, session, clubId, rulesetId));
 				case 'Tournaments':
-					var _v7 = maybeRoute.a;
+					var _v8 = maybeRoute.a;
 					return A3(
 						$author$project$Main$updateWith,
 						$author$project$Main$Tournaments,
 						$author$project$Main$GotTournamentsMsg,
 						$author$project$Page$Tournaments$init(session));
+				case 'NewTournament':
+					var clubId = maybeRoute.a.a;
+					return A3(
+						$author$project$Main$updateWith,
+						$author$project$Main$NewTournament,
+						$author$project$Main$GotNewTournamentMsg,
+						A2($author$project$Page$Tournament$initNew, session, clubId));
 				case 'Tournament':
 					var tournamentId = maybeRoute.a.a;
 					return A3(
@@ -7407,6 +7486,7 @@ var $author$project$Route$Clubs = {$: 'Clubs'};
 var $author$project$Route$Home = {$: 'Home'};
 var $author$project$Route$Login = {$: 'Login'};
 var $author$project$Route$Logout = {$: 'Logout'};
+var $author$project$Route$NewClub = {$: 'NewClub'};
 var $author$project$Route$Ruleset = F2(
 	function (a, b) {
 		return {$: 'Ruleset', a: a, b: b};
@@ -7581,6 +7661,13 @@ var $author$project$Route$parser = $elm$url$Url$Parser$oneOf(
 			$elm$url$Url$Parser$s('clubs')),
 			A2(
 			$elm$url$Url$Parser$map,
+			$author$project$Route$NewClub,
+			A2(
+				$elm$url$Url$Parser$slash,
+				$elm$url$Url$Parser$s('clubs'),
+				$elm$url$Url$Parser$s('new'))),
+			A2(
+			$elm$url$Url$Parser$map,
 			$author$project$Route$Club,
 			A2(
 				$elm$url$Url$Parser$slash,
@@ -7603,6 +7690,16 @@ var $author$project$Route$parser = $elm$url$Url$Parser$oneOf(
 			$elm$url$Url$Parser$map,
 			$author$project$Route$Tournaments,
 			$elm$url$Url$Parser$s('tournaments')),
+			A2(
+			$elm$url$Url$Parser$map,
+			$author$project$Route$Tournament,
+			A2(
+				$elm$url$Url$Parser$slash,
+				$elm$url$Url$Parser$s('tournaments'),
+				A2(
+					$elm$url$Url$Parser$slash,
+					$elm$url$Url$Parser$s('new'),
+					$elm$url$Url$Parser$int))),
 			A2(
 			$elm$url$Url$Parser$map,
 			$author$project$Route$Tournament,
@@ -7683,10 +7780,9 @@ var $author$project$Page$Club$Edit = F2(
 	function (a, b) {
 		return {$: 'Edit', a: a, b: b};
 	});
-var $author$project$Page$Club$Form = F4(
-	function (name, website, contact, localization) {
-		return {contact: contact, localization: localization, name: name, website: website};
-	});
+var $author$project$Route$NewTournament = function (a) {
+	return {$: 'NewTournament', a: a};
+};
 var $author$project$Page$Club$Owner = {$: 'Owner'};
 var $author$project$Page$Club$View = F2(
 	function (a, b) {
@@ -7947,6 +8043,9 @@ var $author$project$Page$Club$requestPatch = F3(
 			},
 			viewer);
 	});
+var $author$project$Page$Club$GotPostClub = function (a) {
+	return {$: 'GotPostClub', a: a};
+};
 var $author$project$Page$Club$postEncoder = function (form) {
 	return $elm$json$Json$Encode$object(
 		_List_fromArray(
@@ -7972,7 +8071,7 @@ var $author$project$Page$Club$requestPost = F2(
 			{
 				body: $elm$http$Http$jsonBody(
 					$author$project$Page$Club$postEncoder(form)),
-				expect: A2($author$project$Api$expectJson, $author$project$Page$Club$GotClub, $author$project$Club$clubDecoder),
+				expect: A2($author$project$Api$expectJson, $author$project$Page$Club$GotPostClub, $author$project$Club$clubDecoder),
 				url: $author$project$Api$clubs
 			},
 			viewer);
@@ -7991,6 +8090,69 @@ var $author$project$Page$Club$requestRemoveMember = F3(
 			},
 			viewer);
 	});
+var $author$project$Route$routeToPieces = function (route) {
+	switch (route.$) {
+		case 'Home':
+			return _List_Nil;
+		case 'Login':
+			return _List_fromArray(
+				['login']);
+		case 'Logout':
+			return _List_fromArray(
+				['logout']);
+		case 'SignUp':
+			return _List_fromArray(
+				['signup']);
+		case 'Clubs':
+			return _List_fromArray(
+				['clubs']);
+		case 'NewClub':
+			return _List_fromArray(
+				['clubs', 'new']);
+		case 'Club':
+			var id = route.a;
+			return _List_fromArray(
+				[
+					'clubs',
+					$elm$core$String$fromInt(id)
+				]);
+		case 'Ruleset':
+			var clubId = route.a;
+			var rulesetId = route.b;
+			return _List_fromArray(
+				[
+					'clubs',
+					$elm$core$String$fromInt(clubId),
+					'rulesets',
+					$elm$core$String$fromInt(rulesetId)
+				]);
+		case 'Tournaments':
+			return _List_fromArray(
+				['tournaments']);
+		case 'NewTournament':
+			var clubId = route.a;
+			return _List_fromArray(
+				[
+					'tournaments',
+					'new',
+					$elm$core$String$fromInt(clubId)
+				]);
+		case 'Tournament':
+			var tournamentId = route.a;
+			return _List_fromArray(
+				[
+					'tournaments',
+					$elm$core$String$fromInt(tournamentId)
+				]);
+		default:
+			var id = route.a;
+			return _List_fromArray(
+				[
+					'users',
+					$elm$core$String$fromInt(id)
+				]);
+	}
+};
 var $author$project$Page$Club$updateEditForm = F4(
 	function (transform, club, form, model) {
 		return _Utils_Tuple2(
@@ -8004,9 +8166,6 @@ var $author$project$Page$Club$updateEditForm = F4(
 				}),
 			$elm$core$Platform$Cmd$none);
 	});
-var $author$project$Page$Club$New = function (a) {
-	return {$: 'New', a: a};
-};
 var $author$project$Page$Club$updateNewForm = F3(
 	function (transform, form, model) {
 		return _Utils_Tuple2(
@@ -8027,9 +8186,9 @@ var $author$project$Page$Club$validatePatch = function (form) {
 var $author$project$Page$Club$update = F2(
 	function (msg, model) {
 		var makeRequest = function (request) {
-			var _v30 = $author$project$Session$toViewer(model.session);
-			if (_v30.$ === 'Just') {
-				var viewer = _v30.a;
+			var _v34 = $author$project$Session$toViewer(model.session);
+			if (_v34.$ === 'Just') {
+				var viewer = _v34.a;
 				return _Utils_Tuple2(
 					model,
 					request(viewer));
@@ -8044,7 +8203,7 @@ var $author$project$Page$Club$update = F2(
 			}
 		};
 		var _v0 = _Utils_Tuple2(msg, model.state);
-		_v0$19:
+		_v0$21:
 		while (true) {
 			switch (_v0.a.$) {
 				case 'GotClub':
@@ -8070,12 +8229,37 @@ var $author$project$Page$Club$update = F2(
 								}),
 							$elm$core$Platform$Cmd$none);
 					}
+				case 'GotPostClub':
+					var result = _v0.a.a;
+					if (result.$ === 'Ok') {
+						var club = result.a;
+						return _Utils_Tuple2(
+							model,
+							A2(
+								$elm$browser$Browser$Navigation$pushUrl,
+								$author$project$Session$navKey(model.session),
+								A2(
+									$elm$url$Url$Builder$absolute,
+									$author$project$Route$routeToPieces(
+										$author$project$Route$Club(club.id)),
+									_List_Nil)));
+					} else {
+						var error = result.a;
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									error: $elm$core$Maybe$Just(
+										$author$project$Api$errorToString(error))
+								}),
+							$elm$core$Platform$Cmd$none);
+					}
 				case 'EditClub':
 					if ((_v0.b.$ === 'View') && (_v0.b.b.$ === 'Owner')) {
-						var _v2 = _v0.a;
-						var _v3 = _v0.b;
-						var club = _v3.a;
-						var _v4 = _v3.b;
+						var _v3 = _v0.a;
+						var _v4 = _v0.b;
+						var club = _v4.a;
+						var _v5 = _v4.b;
 						return _Utils_Tuple2(
 							_Utils_update(
 								model,
@@ -8088,13 +8272,13 @@ var $author$project$Page$Club$update = F2(
 								}),
 							$elm$core$Platform$Cmd$none);
 					} else {
-						break _v0$19;
+						break _v0$21;
 					}
 				case 'CancelEdit':
 					if (_v0.b.$ === 'Edit') {
-						var _v5 = _v0.a;
-						var _v6 = _v0.b;
-						var club = _v6.a;
+						var _v6 = _v0.a;
+						var _v7 = _v0.b;
+						var club = _v7.a;
 						return _Utils_Tuple2(
 							_Utils_update(
 								model,
@@ -8104,22 +8288,22 @@ var $author$project$Page$Club$update = F2(
 								}),
 							$elm$core$Platform$Cmd$none);
 					} else {
-						break _v0$19;
+						break _v0$21;
 					}
 				case 'ConfirmEdit':
 					if (_v0.b.$ === 'Edit') {
-						var _v7 = _v0.a;
-						var _v8 = _v0.b;
-						var club = _v8.a;
-						var form = _v8.b;
-						var _v9 = $author$project$Page$Club$validatePatch(form);
-						if (_v9.$ === 'Ok') {
+						var _v8 = _v0.a;
+						var _v9 = _v0.b;
+						var club = _v9.a;
+						var form = _v9.b;
+						var _v10 = $author$project$Page$Club$validatePatch(form);
+						if (_v10.$ === 'Ok') {
 							return makeRequest(
 								function (viewer) {
 									return A3($author$project$Page$Club$requestPatch, club, form, viewer);
 								});
 						} else {
-							var err = _v9.a;
+							var err = _v10.a;
 							return _Utils_Tuple2(
 								_Utils_update(
 									model,
@@ -8129,11 +8313,11 @@ var $author$project$Page$Club$update = F2(
 								$elm$core$Platform$Cmd$none);
 						}
 					} else {
-						break _v0$19;
+						break _v0$21;
 					}
 				case 'CancelNew':
 					if (_v0.b.$ === 'New') {
-						var _v10 = _v0.a;
+						var _v11 = _v0.a;
 						return _Utils_Tuple2(
 							model,
 							A2(
@@ -8141,20 +8325,20 @@ var $author$project$Page$Club$update = F2(
 								$author$project$Session$navKey(model.session),
 								1));
 					} else {
-						break _v0$19;
+						break _v0$21;
 					}
 				case 'ConfirmNew':
 					if (_v0.b.$ === 'New') {
-						var _v11 = _v0.a;
+						var _v12 = _v0.a;
 						var form = _v0.b.a;
-						var _v12 = $author$project$Page$Club$validateNew(form);
-						if (_v12.$ === 'Ok') {
+						var _v13 = $author$project$Page$Club$validateNew(form);
+						if (_v13.$ === 'Ok') {
 							return makeRequest(
 								function (viewer) {
 									return A2($author$project$Page$Club$requestPost, form, viewer);
 								});
 						} else {
-							var err = _v12.a;
+							var err = _v13.a;
 							return _Utils_Tuple2(
 								_Utils_update(
 									model,
@@ -8164,26 +8348,26 @@ var $author$project$Page$Club$update = F2(
 								$elm$core$Platform$Cmd$none);
 						}
 					} else {
-						break _v0$19;
+						break _v0$21;
 					}
 				case 'ConfirmDelete':
 					if ((_v0.b.$ === 'View') && (_v0.b.b.$ === 'Owner')) {
-						var _v13 = _v0.a;
-						var _v14 = _v0.b;
-						var club = _v14.a;
-						var _v15 = _v14.b;
+						var _v14 = _v0.a;
+						var _v15 = _v0.b;
+						var club = _v15.a;
+						var _v16 = _v15.b;
 						return makeRequest(
 							function (viewer) {
 								return A2($author$project$Page$Club$requestDelete, club, viewer);
 							});
 					} else {
-						break _v0$19;
+						break _v0$21;
 					}
 				case 'DeleteClub':
 					if ((_v0.b.$ === 'View') && (_v0.b.b.$ === 'Owner')) {
 						var result = _v0.a.a;
-						var _v16 = _v0.b;
-						var _v17 = _v16.b;
+						var _v17 = _v0.b;
+						var _v18 = _v17.b;
 						if (result.$ === 'Ok') {
 							return _Utils_Tuple2(
 								model,
@@ -8203,45 +8387,45 @@ var $author$project$Page$Club$update = F2(
 								$elm$core$Platform$Cmd$none);
 						}
 					} else {
-						break _v0$19;
+						break _v0$21;
 					}
 				case 'AskInvite':
 					if ((_v0.b.$ === 'View') && (_v0.b.b.$ === 'NonMember')) {
-						var _v19 = _v0.a;
-						var _v20 = _v0.b;
-						var club = _v20.a;
-						var _v21 = _v20.b;
+						var _v20 = _v0.a;
+						var _v21 = _v0.b;
+						var club = _v21.a;
+						var _v22 = _v21.b;
 						return makeRequest(
 							function (viewer) {
 								return A2($author$project$Page$Club$requestInvite, club, viewer);
 							});
 					} else {
-						break _v0$19;
+						break _v0$21;
 					}
 				case 'Leave':
 					if ((_v0.b.$ === 'View') && (_v0.b.b.$ === 'Member')) {
-						var _v22 = _v0.a;
-						var _v23 = _v0.b;
-						var club = _v23.a;
+						var _v23 = _v0.a;
+						var _v24 = _v0.b;
+						var club = _v24.a;
 						return makeRequest(
 							function (viewer) {
 								return A2($author$project$Page$Club$requestLeave, club, viewer);
 							});
 					} else {
-						break _v0$19;
+						break _v0$21;
 					}
 				case 'RemoveMember':
 					if ((_v0.b.$ === 'View') && (_v0.b.b.$ === 'Owner')) {
 						var membership = _v0.a.a;
-						var _v24 = _v0.b;
-						var club = _v24.a;
-						var _v25 = _v24.b;
+						var _v25 = _v0.b;
+						var club = _v25.a;
+						var _v26 = _v25.b;
 						return makeRequest(
 							function (viewer) {
 								return A3($author$project$Page$Club$requestRemoveMember, club, membership, viewer);
 							});
 					} else {
-						break _v0$19;
+						break _v0$21;
 					}
 				case 'InputName':
 					switch (_v0.b.$) {
@@ -8259,9 +8443,9 @@ var $author$project$Page$Club$update = F2(
 								model);
 						case 'Edit':
 							var name = _v0.a.a;
-							var _v26 = _v0.b;
-							var club = _v26.a;
-							var form = _v26.b;
+							var _v27 = _v0.b;
+							var club = _v27.a;
+							var form = _v27.b;
 							return A4(
 								$author$project$Page$Club$updateEditForm,
 								function (f) {
@@ -8273,7 +8457,7 @@ var $author$project$Page$Club$update = F2(
 								form,
 								model);
 						default:
-							break _v0$19;
+							break _v0$21;
 					}
 				case 'InputWebsite':
 					switch (_v0.b.$) {
@@ -8291,9 +8475,9 @@ var $author$project$Page$Club$update = F2(
 								model);
 						case 'Edit':
 							var website = _v0.a.a;
-							var _v27 = _v0.b;
-							var club = _v27.a;
-							var form = _v27.b;
+							var _v28 = _v0.b;
+							var club = _v28.a;
+							var form = _v28.b;
 							return A4(
 								$author$project$Page$Club$updateEditForm,
 								function (f) {
@@ -8305,7 +8489,7 @@ var $author$project$Page$Club$update = F2(
 								form,
 								model);
 						default:
-							break _v0$19;
+							break _v0$21;
 					}
 				case 'InputContact':
 					switch (_v0.b.$) {
@@ -8323,9 +8507,9 @@ var $author$project$Page$Club$update = F2(
 								model);
 						case 'Edit':
 							var contact = _v0.a.a;
-							var _v28 = _v0.b;
-							var club = _v28.a;
-							var form = _v28.b;
+							var _v29 = _v0.b;
+							var club = _v29.a;
+							var form = _v29.b;
 							return A4(
 								$author$project$Page$Club$updateEditForm,
 								function (f) {
@@ -8337,9 +8521,9 @@ var $author$project$Page$Club$update = F2(
 								form,
 								model);
 						default:
-							break _v0$19;
+							break _v0$21;
 					}
-				default:
+				case 'InputLocalization':
 					switch (_v0.b.$) {
 						case 'New':
 							var localization = _v0.a.a;
@@ -8355,9 +8539,9 @@ var $author$project$Page$Club$update = F2(
 								model);
 						case 'Edit':
 							var localization = _v0.a.a;
-							var _v29 = _v0.b;
-							var club = _v29.a;
-							var form = _v29.b;
+							var _v30 = _v0.b;
+							var club = _v30.a;
+							var form = _v30.b;
 							return A4(
 								$author$project$Page$Club$updateEditForm,
 								function (f) {
@@ -8369,7 +8553,26 @@ var $author$project$Page$Club$update = F2(
 								form,
 								model);
 						default:
-							break _v0$19;
+							break _v0$21;
+					}
+				default:
+					if ((_v0.b.$ === 'View') && (_v0.b.b.$ === 'Owner')) {
+						var _v31 = _v0.a;
+						var _v32 = _v0.b;
+						var club = _v32.a;
+						var _v33 = _v32.b;
+						return _Utils_Tuple2(
+							model,
+							A2(
+								$elm$browser$Browser$Navigation$pushUrl,
+								$author$project$Session$navKey(model.session),
+								A2(
+									$elm$url$Url$Builder$absolute,
+									$author$project$Route$routeToPieces(
+										$author$project$Route$NewTournament(club.id)),
+									_List_Nil)));
+					} else {
+						break _v0$21;
 					}
 			}
 		}
@@ -8805,7 +9008,7 @@ var $author$project$Page$User$validatePatch = function (form) {
 var $author$project$Page$User$update = F2(
 	function (msg, model) {
 		var _v0 = _Utils_Tuple2(msg, model.state);
-		_v0$11:
+		_v0$12:
 		while (true) {
 			switch (_v0.a.$) {
 				case 'GotUser':
@@ -8859,7 +9062,7 @@ var $author$project$Page$User$update = F2(
 								$elm$core$Platform$Cmd$none);
 						}
 					} else {
-						break _v0$11;
+						break _v0$12;
 					}
 				case 'EditUser':
 					if (_v0.b.$ === 'ViewProfile') {
@@ -8877,7 +9080,7 @@ var $author$project$Page$User$update = F2(
 								}),
 							$elm$core$Platform$Cmd$none);
 					} else {
-						break _v0$11;
+						break _v0$12;
 					}
 				case 'CancelEdit':
 					if (_v0.b.$ === 'EditProfile') {
@@ -8893,7 +9096,7 @@ var $author$project$Page$User$update = F2(
 								}),
 							$elm$core$Platform$Cmd$none);
 					} else {
-						break _v0$11;
+						break _v0$12;
 					}
 				case 'ConfirmEdit':
 					if (_v0.b.$ === 'EditProfile') {
@@ -8929,7 +9132,7 @@ var $author$project$Page$User$update = F2(
 								$elm$core$Platform$Cmd$none);
 						}
 					} else {
-						break _v0$11;
+						break _v0$12;
 					}
 				case 'PatchUser':
 					if (_v0.b.$ === 'EditProfile') {
@@ -8957,7 +9160,7 @@ var $author$project$Page$User$update = F2(
 								$elm$core$Platform$Cmd$none);
 						}
 					} else {
-						break _v0$11;
+						break _v0$12;
 					}
 				case 'InputUsername':
 					if (_v0.b.$ === 'EditProfile') {
@@ -8976,7 +9179,7 @@ var $author$project$Page$User$update = F2(
 							form,
 							model);
 					} else {
-						break _v0$11;
+						break _v0$12;
 					}
 				case 'InputEmail':
 					if (_v0.b.$ === 'EditProfile') {
@@ -8995,7 +9198,7 @@ var $author$project$Page$User$update = F2(
 							form,
 							model);
 					} else {
-						break _v0$11;
+						break _v0$12;
 					}
 				case 'InputPassword':
 					if (_v0.b.$ === 'EditProfile') {
@@ -9014,7 +9217,7 @@ var $author$project$Page$User$update = F2(
 							form,
 							model);
 					} else {
-						break _v0$11;
+						break _v0$12;
 					}
 				case 'InputPasswordAgain':
 					if (_v0.b.$ === 'EditProfile') {
@@ -9033,9 +9236,9 @@ var $author$project$Page$User$update = F2(
 							form,
 							model);
 					} else {
-						break _v0$11;
+						break _v0$12;
 					}
-				default:
+				case 'NotificationAction':
 					if (_v0.b.$ === 'ViewProfile') {
 						var url = _v0.a.a;
 						var _v16 = $author$project$Session$toViewer(model.session);
@@ -9061,8 +9264,19 @@ var $author$project$Page$User$update = F2(
 								$elm$core$Platform$Cmd$none);
 						}
 					} else {
-						break _v0$11;
+						break _v0$12;
 					}
+				default:
+					var _v17 = _v0.a;
+					return _Utils_Tuple2(
+						model,
+						A2(
+							$elm$browser$Browser$Navigation$pushUrl,
+							$author$project$Session$navKey(model.session),
+							A2(
+								$elm$url$Url$Builder$absolute,
+								$author$project$Route$routeToPieces($author$project$Route$NewClub),
+								_List_Nil)));
 			}
 		}
 		return _Utils_Tuple2(
@@ -9733,6 +9947,7 @@ var $author$project$Page$Club$viewOwner = function (club) {
 					]))
 			]));
 };
+var $author$project$Page$Club$NewTournament = {$: 'NewTournament'};
 var $author$project$Model$TournamentShort$getUrl = function (tournament) {
 	return A2(
 		$elm$url$Url$Builder$absolute,
@@ -9788,34 +10003,46 @@ var $author$project$Model$TournamentShort$view = function (tournament) {
 					]))
 			]));
 };
-var $author$project$Page$Club$viewTournaments = function (club) {
-	return A2(
-		$elm$html$Html$div,
-		_List_fromArray(
-			[
-				$elm$html$Html$Attributes$class('m-2')
-			]),
-		_List_fromArray(
-			[
-				A2(
-				$elm$html$Html$h1,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('list-heading')
-					]),
-				_List_fromArray(
-					[
-						$elm$html$Html$text('Torneios')
-					])),
-				A2(
-				$elm$html$Html$div,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('space-y-4')
-					]),
-				A2($elm$core$List$map, $author$project$Model$TournamentShort$view, club.tournaments))
-			]));
-};
+var $author$project$Page$Club$viewTournaments = F2(
+	function (club, isOwner) {
+		return A2(
+			$elm$html$Html$div,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class('m-2')
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$elm$html$Html$h1,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('list-heading')
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text('Torneios')
+						])),
+					A2(
+					$elm$html$Html$div,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('space-y-4')
+						]),
+					A2($elm$core$List$map, $author$project$Model$TournamentShort$view, club.tournaments)),
+					isOwner ? A2(
+					$elm$html$Html$button,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('border-transparent btn btn-indigo-500 mt-4'),
+							$elm$html$Html$Events$onClick($author$project$Page$Club$NewTournament)
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text('Novo')
+						])) : A2($elm$html$Html$div, _List_Nil, _List_Nil)
+				]));
+	});
 var $author$project$Page$Club$viewClub = function (model) {
 	var _v0 = model.state;
 	switch (_v0.$) {
@@ -9837,7 +10064,10 @@ var $author$project$Page$Club$viewClub = function (model) {
 					[
 						A2($author$project$Page$Club$viewClubCard, club, _switch),
 						$author$project$Page$Club$viewOwner(club),
-						$author$project$Page$Club$viewTournaments(club),
+						A2(
+						$author$project$Page$Club$viewTournaments,
+						club,
+						_Utils_eq(_switch, $author$project$Page$Club$Owner)),
 						A2(
 						$author$project$Page$Club$viewMembers,
 						club,
@@ -9852,7 +10082,7 @@ var $author$project$Page$Club$viewClub = function (model) {
 					[
 						$author$project$Page$Club$viewClubCardEdit(false),
 						$author$project$Page$Club$viewOwner(club),
-						$author$project$Page$Club$viewTournaments(club),
+						A2($author$project$Page$Club$viewTournaments, club, false),
 						A2($author$project$Page$Club$viewMembers, club, true)
 					]));
 		default:
@@ -10504,9 +10734,11 @@ var $author$project$Page$Tournament$stateToTitle = function (model) {
 		case 'View':
 			var tournament = _v0.b;
 			return 'Tournament - ' + tournament.name;
-		default:
+		case 'Edit':
 			var tournament = _v0.a;
 			return 'Tournament - ' + tournament.name;
+		default:
+			return 'Tournament - Novo';
 	}
 };
 var $author$project$Page$Tournament$Owner = {$: 'Owner'};
@@ -11169,7 +11401,9 @@ var $author$project$Page$Tournament$viewTournamentCard = F2(
 				]));
 	});
 var $author$project$Page$Tournament$CancelEdit = {$: 'CancelEdit'};
+var $author$project$Page$Tournament$CancelNew = {$: 'CancelNew'};
 var $author$project$Page$Tournament$ConfirmEdit = {$: 'ConfirmEdit'};
+var $author$project$Page$Tournament$ConfirmNew = {$: 'ConfirmNew'};
 var $author$project$Page$Tournament$InputAllow = function (a) {
 	return {$: 'InputAllow', a: a};
 };
@@ -11213,116 +11447,119 @@ var $author$project$Page$Tournament$viewRuleset = function (ruleset) {
 				$elm$html$Html$text(ruleset.name)
 			]));
 };
-var $author$project$Page$Tournament$viewTournamentEditCard = function (model) {
-	return A2(
-		$elm$html$Html$div,
-		_List_fromArray(
-			[
-				$elm$html$Html$Attributes$class('container bg-indigo-500 rounded-lg text-white p-6 my-4 max-w-lg')
-			]),
-		_List_fromArray(
-			[
-				A2(
-				$elm$html$Html$p,
-				_List_Nil,
-				_List_fromArray(
-					[
-						$elm$html$Html$text('Preencha os campos que deseja atualizar e pressione confirmar')
-					])),
-				A2(
-				$elm$html$Html$input,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$type_('text'),
-						$elm$html$Html$Attributes$placeholder('Nome'),
-						$elm$html$Html$Attributes$class('login-input'),
-						$elm$html$Html$Events$onInput($author$project$Page$Tournament$InputName)
-					]),
-				_List_Nil),
-				A2(
-				$elm$html$Html$input,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$type_('text'),
-						$elm$html$Html$Attributes$placeholder('Descrição'),
-						$elm$html$Html$Attributes$class('login-input'),
-						$elm$html$Html$Events$onInput($author$project$Page$Tournament$InputDescription)
-					]),
-				_List_Nil),
-				A2(
-				$elm$html$Html$input,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$type_('date'),
-						$elm$html$Html$Attributes$placeholder('Data de Início'),
-						$elm$html$Html$Attributes$class('login-input'),
-						$elm$html$Html$Events$onInput($author$project$Page$Tournament$InputStartDate)
-					]),
-				_List_Nil),
-				A2(
-				$elm$html$Html$select,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('login-input'),
-						$elm$html$Html$Events$onInput($author$project$Page$Tournament$InputRuleset)
-					]),
-				A2($elm$core$List$map, $author$project$Page$Tournament$viewRuleset, model.rulesets)),
-				A2($elm$html$Html$br, _List_Nil, _List_Nil),
-				A2(
-				$elm$html$Html$input,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$type_('checkbox'),
-						$elm$html$Html$Events$onCheck($author$project$Page$Tournament$InputAllow)
-					]),
-				_List_Nil),
-				A2(
-				$elm$html$Html$label,
-				_List_Nil,
-				_List_fromArray(
-					[
-						$elm$html$Html$text('Permitir a participação de não integrantes do clube?')
-					])),
-				A2($elm$html$Html$br, _List_Nil, _List_Nil),
-				A2(
-				$elm$html$Html$input,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$type_('checkbox'),
-						$elm$html$Html$Events$onCheck($author$project$Page$Tournament$InputPermission)
-					]),
-				_List_Nil),
-				A2(
-				$elm$html$Html$label,
-				_List_Nil,
-				_List_fromArray(
-					[
-						$elm$html$Html$text('Exigir permissão para participar?')
-					])),
-				A2(
-				$elm$html$Html$button,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('border-none btn btn-green-500'),
-						$elm$html$Html$Events$onClick($author$project$Page$Tournament$ConfirmEdit)
-					]),
-				_List_fromArray(
-					[
-						$elm$html$Html$text('Confirmar')
-					])),
-				A2(
-				$elm$html$Html$button,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('border-none btn btn-red-500'),
-						$elm$html$Html$Events$onClick($author$project$Page$Tournament$CancelEdit)
-					]),
-				_List_fromArray(
-					[
-						$elm$html$Html$text('Cancelar')
-					]))
-			]));
-};
+var $author$project$Page$Tournament$viewTournamentEditCard = F2(
+	function (model, isNew) {
+		return A2(
+			$elm$html$Html$div,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class('container bg-indigo-500 rounded-lg text-white p-6 my-4 max-w-lg')
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$elm$html$Html$p,
+					_List_Nil,
+					_List_fromArray(
+						[
+							$elm$html$Html$text('Preencha os campos que deseja atualizar e pressione confirmar')
+						])),
+					A2(
+					$elm$html$Html$input,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$type_('text'),
+							$elm$html$Html$Attributes$placeholder('Nome'),
+							$elm$html$Html$Attributes$class('login-input'),
+							$elm$html$Html$Events$onInput($author$project$Page$Tournament$InputName)
+						]),
+					_List_Nil),
+					A2(
+					$elm$html$Html$input,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$type_('text'),
+							$elm$html$Html$Attributes$placeholder('Descrição'),
+							$elm$html$Html$Attributes$class('login-input'),
+							$elm$html$Html$Events$onInput($author$project$Page$Tournament$InputDescription)
+						]),
+					_List_Nil),
+					A2(
+					$elm$html$Html$input,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$type_('date'),
+							$elm$html$Html$Attributes$placeholder('Data de Início'),
+							$elm$html$Html$Attributes$class('login-input'),
+							$elm$html$Html$Events$onInput($author$project$Page$Tournament$InputStartDate)
+						]),
+					_List_Nil),
+					A2(
+					$elm$html$Html$select,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('login-input'),
+							$elm$html$Html$Events$onInput($author$project$Page$Tournament$InputRuleset)
+						]),
+					A2($elm$core$List$map, $author$project$Page$Tournament$viewRuleset, model.rulesets)),
+					A2($elm$html$Html$br, _List_Nil, _List_Nil),
+					A2(
+					$elm$html$Html$input,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$type_('checkbox'),
+							$elm$html$Html$Events$onCheck($author$project$Page$Tournament$InputAllow)
+						]),
+					_List_Nil),
+					A2(
+					$elm$html$Html$label,
+					_List_Nil,
+					_List_fromArray(
+						[
+							$elm$html$Html$text('Permitir a participação de não integrantes do clube?')
+						])),
+					A2($elm$html$Html$br, _List_Nil, _List_Nil),
+					A2(
+					$elm$html$Html$input,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$type_('checkbox'),
+							$elm$html$Html$Events$onCheck($author$project$Page$Tournament$InputPermission)
+						]),
+					_List_Nil),
+					A2(
+					$elm$html$Html$label,
+					_List_Nil,
+					_List_fromArray(
+						[
+							$elm$html$Html$text('Exigir permissão para participar?')
+						])),
+					A2(
+					$elm$html$Html$button,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('border-none btn btn-green-500'),
+							$elm$html$Html$Events$onClick(
+							isNew ? $author$project$Page$Tournament$ConfirmNew : $author$project$Page$Tournament$ConfirmEdit)
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text('Confirmar')
+						])),
+					A2(
+					$elm$html$Html$button,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('border-none btn btn-red-500'),
+							$elm$html$Html$Events$onClick(
+							isNew ? $author$project$Page$Tournament$CancelNew : $author$project$Page$Tournament$CancelEdit)
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text('Cancelar')
+						]))
+				]));
+	});
 var $author$project$Page$Tournament$viewTournament = function (model) {
 	var _v0 = model.state;
 	switch (_v0.$) {
@@ -11349,14 +11586,24 @@ var $author$project$Page$Tournament$viewTournament = function (model) {
 						_Utils_eq(_switch, $author$project$Page$Tournament$Owner)),
 						$author$project$Page$Tournament$viewBrackets(tournament)
 					]));
-		default:
+		case 'Edit':
 			var form = _v0.b;
 			return A2(
 				$elm$html$Html$div,
 				_List_Nil,
 				_List_fromArray(
 					[
-						$author$project$Page$Tournament$viewTournamentEditCard(model),
+						A2($author$project$Page$Tournament$viewTournamentEditCard, model, false),
+						$author$project$Page$Tournament$viewBracketsEdit(form)
+					]));
+		default:
+			var form = _v0.a;
+			return A2(
+				$elm$html$Html$div,
+				_List_Nil,
+				_List_fromArray(
+					[
+						A2($author$project$Page$Tournament$viewTournamentEditCard, model, true),
 						$author$project$Page$Tournament$viewBracketsEdit(form)
 					]));
 	}
@@ -11703,6 +11950,7 @@ var $author$project$Page$User$viewNotifications = function (maybeUser) {
 			}()
 			]));
 };
+var $author$project$Page$User$NewClub = {$: 'NewClub'};
 var $author$project$Page$User$viewOwnedClubs = F2(
 	function (maybeUser, maybeViewer) {
 		return A2(
@@ -11747,7 +11995,8 @@ var $author$project$Page$User$viewOwnedClubs = F2(
 					$elm$html$Html$button,
 					_List_fromArray(
 						[
-							$elm$html$Html$Attributes$class('border-transparent btn btn-indigo-500 mt-4')
+							$elm$html$Html$Attributes$class('border-transparent btn btn-indigo-500 mt-4'),
+							$elm$html$Html$Events$onClick($author$project$Page$User$NewClub)
 						]),
 					_List_fromArray(
 						[
@@ -12706,6 +12955,16 @@ var $author$project$Main$view = function (model) {
 					page.body),
 				title: page.title
 			};
+		case 'NewClub':
+			var subModel = model.a;
+			var page = $author$project$Page$Club$view(subModel);
+			return {
+				body: A2(
+					$elm$core$List$map,
+					$elm$html$Html$map($author$project$Main$GotClubMsg),
+					page.body),
+				title: page.title
+			};
 		case 'Club':
 			var subModel = model.a;
 			var page = $author$project$Page$Club$view(subModel);
@@ -12733,6 +12992,16 @@ var $author$project$Main$view = function (model) {
 				body: A2(
 					$elm$core$List$map,
 					$elm$html$Html$map($author$project$Main$GotTournamentsMsg),
+					page.body),
+				title: page.title
+			};
+		case 'NewTournament':
+			var subModel = model.a;
+			var page = $author$project$Page$Tournament$view(subModel);
+			return {
+				body: A2(
+					$elm$core$List$map,
+					$elm$html$Html$map($author$project$Main$GotTournamentMsg),
 					page.body),
 				title: page.title
 			};
