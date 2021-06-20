@@ -62,6 +62,11 @@ tournamentPlayer tournamentId playerId = String.concat [tournamentPlayers tourna
 joinTournament : Int -> String
 joinTournament tournamentId = String.concat [tournamentPlayers tournamentId, "/invite"]
 
+tournamentBracket : Int -> Int -> String
+tournamentBracket tournamentId bracketId = String.concat [tournament tournamentId, "/brackets/", String.fromInt bracketId]
+
+series : Int -> Int -> Int -> String
+series tournamentId bracketId seriesId = String.concat [tournamentBracket tournamentId bracketId, "/series/", String.fromInt seriesId]
 
 -- Request Utils --
 

@@ -16,6 +16,7 @@ import Page.Ruleset
 import Page.SignUp as SignUp
 import Page.Tournaments
 import Page.Tournament
+import Page.Bracket
 import Page.User as User
 import Route exposing (Route)
 import Route exposing (Route(..))
@@ -41,10 +42,11 @@ type Model
   | Clubs ClubsPage.Model
   | NewClub ClubPage.Model
   | Club ClubPage.Model
-  | Ruleset Page.Ruleset.Model
   | Tournaments Page.Tournaments.Model
   | NewTournament Page.Tournament.Model
   | Tournament Page.Tournament.Model
+  | Ruleset Page.Ruleset.Model
+  | Bracket Page.Bracket.Model
   | User User.Model
 
 type Msg
@@ -59,6 +61,7 @@ type Msg
   | GotTournamentsMsg Page.Tournaments.Msg
   | GotNewTournamentMsg Page.Tournament.Msg
   | GotTournamentMsg Page.Tournament.Msg
+  | GotBracketMsg Page.Bracket.Msg
   | GotUserMsg User.Msg
 
 init : () -> Url.Url -> Nav.Key -> (Model, Cmd Msg)
@@ -119,6 +122,10 @@ changeRouteTo maybeRoute model =
         Page.Tournament.init session tournamentId
           |> updateWith Tournament GotTournamentMsg
 
+      Just (Route.Bracket tournamentId bracketId) ->
+        Page.Bracket.init session tournamentId bracketId
+          |> updateWith Bracket GotBracketMsg
+
       Just (Route.User userId) ->
         User.init session userId
           |> updateWith User GotUserMsg
@@ -159,6 +166,9 @@ toSession model =
     Tournament tournament ->
       Page.Tournament.toSession tournament
 
+    Bracket bracket ->
+      Page.Bracket.toSession bracket
+
     User user ->
       User.toSession user
 
@@ -180,23 +190,77 @@ update msg model =
       Login.update subMsg login
         |> updateWith Login GotLoginMsg
 
+    (GotLoginMsg _, _) ->
+      (model, Cmd.none)
+
     (GotSignUpMsg subMsg, SignUp signUp) ->
       SignUp.update subMsg signUp
         |> updateWith SignUp GotSignUpMsg
+
+    (GotSignUpMsg _, _) ->
+      (model, Cmd.none)
 
     (GotClubsMsg subMsg, Clubs clubs) ->
       ClubsPage.update subMsg clubs
         |> updateWith Clubs GotClubsMsg
 
+    (GotClubsMsg _, _) ->
+      (model, Cmd.none)
+
+    (GotNewClubMsg subMsg, NewClub club) ->
+      ClubPage.update subMsg club
+        |> updateWith NewClub GotNewClubMsg
+
+    (GotNewClubMsg _, _) ->
+      (model, Cmd.none)
+
     (GotClubMsg subMsg, Club club) ->
       ClubPage.update subMsg club
         |> updateWith Club GotClubMsg
+
+    (GotClubMsg _, _) ->
+      (model, Cmd.none)
+
+    (GotTournamentsMsg subMsg, Tournaments tournaments) ->
+      Page.Tournaments.update subMsg tournaments
+        |> updateWith Tournaments GotTournamentsMsg
+
+    (GotTournamentsMsg _, _) ->
+      (model, Cmd.none)
+
+    (GotNewTournamentMsg subMsg, NewTournament newTournament) ->
+      Page.Tournament.update subMsg newTournament
+        |> updateWith NewTournament GotNewTournamentMsg
+
+    (GotNewTournamentMsg _, _) ->
+      (model, Cmd.none)
+
+    (GotTournamentMsg subMsg, Tournament tournament) ->
+      Page.Tournament.update subMsg tournament
+        |> updateWith NewTournament GotNewTournamentMsg
+
+    (GotTournamentMsg _, _) ->
+      (model, Cmd.none)
+
+    (GotRulesetMsg subMsg, Ruleset ruleset) ->
+      Page.Ruleset.update subMsg ruleset
+        |> updateWith Ruleset GotRulesetMsg
+
+    (GotRulesetMsg _, _) ->
+      (model, Cmd.none)
+
+    (GotBracketMsg subMsg, Bracket bracket) ->
+      Page.Bracket.update subMsg bracket
+        |> updateWith Bracket GotBracketMsg
+
+    (GotBracketMsg _, _) ->
+      (model, Cmd.none)
 
     (GotUserMsg subMsg, User user) ->
       User.update subMsg user
         |> updateWith User GotUserMsg
 
-    (_, _) ->
+    (GotUserMsg _, _) ->
       (model, Cmd.none)
 
 updateWith : (subModel -> Model) -> (subMsg -> Msg) -> (subModel, Cmd subMsg) -> (Model, Cmd Msg)
@@ -288,6 +352,14 @@ view model =
       in
       { title = page.title
       , body = List.map (Html.map GotTournamentMsg) page.body
+      }
+
+    Bracket subModel ->
+      let
+        page = Page.Bracket.view subModel
+      in
+      { title = page.title
+      , body = List.map (Html.map GotBracketMsg) page.body
       }
 
     User subModel ->

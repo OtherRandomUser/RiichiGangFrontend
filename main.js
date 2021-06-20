@@ -5385,11 +5385,17 @@ var $author$project$Session$Anonymus = function (a) {
 var $author$project$Main$Home = function (a) {
 	return {$: 'Home', a: a};
 };
+var $author$project$Main$Bracket = function (a) {
+	return {$: 'Bracket', a: a};
+};
 var $author$project$Main$Club = function (a) {
 	return {$: 'Club', a: a};
 };
 var $author$project$Main$Clubs = function (a) {
 	return {$: 'Clubs', a: a};
+};
+var $author$project$Main$GotBracketMsg = function (a) {
+	return {$: 'GotBracketMsg', a: a};
 };
 var $author$project$Main$GotClubMsg = function (a) {
 	return {$: 'GotClubMsg', a: a};
@@ -5467,19 +5473,15 @@ var $elm$url$Url$Builder$absolute = F2(
 	function (pathSegments, parameters) {
 		return '/' + (A2($elm$core$String$join, '/', pathSegments) + $elm$url$Url$Builder$toQuery(parameters));
 	});
-var $author$project$Page$Club$Model = F3(
+var $author$project$Page$Bracket$Model = F3(
 	function (session, error, state) {
 		return {error: error, session: session, state: state};
 	});
-var $author$project$Page$Club$Uninitialized = {$: 'Uninitialized'};
-var $author$project$Page$Club$GotClub = function (a) {
-	return {$: 'GotClub', a: a};
+var $author$project$Page$Bracket$Uninitialized = {$: 'Uninitialized'};
+var $author$project$Page$Bracket$GotBracket = function (a) {
+	return {$: 'GotBracket', a: a};
 };
-var $author$project$Api$backendUrl = 'https://localhost:5001/api';
-var $author$project$Api$club = function (id) {
-	return $author$project$Api$backendUrl + ('/clubs/' + $elm$core$String$fromInt(id));
-};
-var $elm$json$Json$Decode$bool = _Json_decodeBool;
+var $elm$json$Json$Decode$float = _Json_decodeFloat;
 var $elm$json$Json$Decode$andThen = _Json_andThen;
 var $elm$json$Json$Decode$field = _Json_decodeField;
 var $webbhuset$elm_json_decode$Json$Decode$Field$require = F3(
@@ -5490,145 +5492,175 @@ var $webbhuset$elm_json_decode$Json$Decode$Field$require = F3(
 			A2($elm$json$Json$Decode$field, fieldName, valueDecoder));
 	});
 var $elm$json$Json$Decode$string = _Json_decodeString;
-var $elm$json$Json$Decode$int = _Json_decodeInt;
-var $author$project$UserShort$userShortDecoder = A3(
+var $author$project$Model$Player$decoder = A3(
 	$webbhuset$elm_json_decode$Json$Decode$Field$require,
-	'id',
-	$elm$json$Json$Decode$int,
-	function (id) {
+	'seat',
+	$elm$json$Json$Decode$string,
+	function (seat) {
 		return A3(
 			$webbhuset$elm_json_decode$Json$Decode$Field$require,
-			'createdAt',
-			$elm$json$Json$Decode$string,
-			function (createdAt) {
+			'gameScore',
+			$elm$json$Json$Decode$float,
+			function (gameScore) {
 				return A3(
 					$webbhuset$elm_json_decode$Json$Decode$Field$require,
-					'username',
-					$elm$json$Json$Decode$string,
-					function (username) {
-						return A3(
-							$webbhuset$elm_json_decode$Json$Decode$Field$require,
-							'totalTournaments',
-							$elm$json$Json$Decode$int,
-							function (totalTournaments) {
-								return $elm$json$Json$Decode$succeed(
-									{createdAt: createdAt, id: id, totalTournaments: totalTournaments, username: username});
-							});
+					'runningTotal',
+					$elm$json$Json$Decode$float,
+					function (runningTotal) {
+						return $elm$json$Json$Decode$succeed(
+							{gameScore: gameScore, runningTotal: runningTotal, seat: seat});
 					});
 			});
 	});
-var $author$project$Model$ClubMembership$decoder = A3(
+var $author$project$Model$Game$decoder = A3(
 	$webbhuset$elm_json_decode$Json$Decode$Field$require,
-	'user',
-	$author$project$UserShort$userShortDecoder,
-	function (user) {
+	'player1',
+	$author$project$Model$Player$decoder,
+	function (player1) {
 		return A3(
 			$webbhuset$elm_json_decode$Json$Decode$Field$require,
-			'createdAt',
-			$elm$json$Json$Decode$string,
-			function (createdAt) {
+			'player2',
+			$author$project$Model$Player$decoder,
+			function (player2) {
 				return A3(
 					$webbhuset$elm_json_decode$Json$Decode$Field$require,
-					'approved',
-					$elm$json$Json$Decode$bool,
-					function (approved) {
+					'player3',
+					$author$project$Model$Player$decoder,
+					function (player3) {
 						return A3(
 							$webbhuset$elm_json_decode$Json$Decode$Field$require,
-							'denied',
-							$elm$json$Json$Decode$bool,
-							function (denied) {
-								return $elm$json$Json$Decode$succeed(
-									{approved: approved, createdAt: createdAt, denied: denied, user: user});
-							});
-					});
-			});
-	});
-var $author$project$Model$TournamentShort$decoder = A3(
-	$webbhuset$elm_json_decode$Json$Decode$Field$require,
-	'id',
-	$elm$json$Json$Decode$int,
-	function (id) {
-		return A3(
-			$webbhuset$elm_json_decode$Json$Decode$Field$require,
-			'createdAt',
-			$elm$json$Json$Decode$string,
-			function (createdAt) {
-				return A3(
-					$webbhuset$elm_json_decode$Json$Decode$Field$require,
-					'name',
-					$elm$json$Json$Decode$string,
-					function (name) {
-						return A3(
-							$webbhuset$elm_json_decode$Json$Decode$Field$require,
-							'totalPlayers',
-							$elm$json$Json$Decode$int,
-							function (totalPlayers) {
+							'player4',
+							$author$project$Model$Player$decoder,
+							function (player4) {
 								return A3(
 									$webbhuset$elm_json_decode$Json$Decode$Field$require,
-									'startDate',
+									'playedAt',
 									$elm$json$Json$Decode$string,
-									function (startDate) {
+									function (playedAt) {
 										return A3(
 											$webbhuset$elm_json_decode$Json$Decode$Field$require,
-											'status',
+											'logLink',
 											$elm$json$Json$Decode$string,
-											function (status) {
+											function (logLink) {
 												return $elm$json$Json$Decode$succeed(
-													{createdAt: createdAt, id: id, name: name, startDate: startDate, status: status, totalPlayers: totalPlayers});
+													{logLink: logLink, playedAt: playedAt, player1: player1, player2: player2, player3: player3, player4: player4});
 											});
 									});
 							});
 					});
 			});
 	});
+var $elm$json$Json$Decode$int = _Json_decodeInt;
 var $elm$json$Json$Decode$list = _Json_decodeList;
-var $author$project$Club$clubDecoder = A3(
+var $author$project$Model$Series$decoder = A3(
 	$webbhuset$elm_json_decode$Json$Decode$Field$require,
 	'id',
 	$elm$json$Json$Decode$int,
 	function (id) {
 		return A3(
 			$webbhuset$elm_json_decode$Json$Decode$Field$require,
-			'createdAt',
+			'player1Name',
 			$elm$json$Json$Decode$string,
-			function (createdAt) {
+			function (player1Name) {
 				return A3(
 					$webbhuset$elm_json_decode$Json$Decode$Field$require,
-					'name',
+					'player2Name',
 					$elm$json$Json$Decode$string,
-					function (name) {
+					function (player2Name) {
 						return A3(
 							$webbhuset$elm_json_decode$Json$Decode$Field$require,
-							'website',
+							'player3Name',
 							$elm$json$Json$Decode$string,
-							function (website) {
+							function (player3Name) {
 								return A3(
 									$webbhuset$elm_json_decode$Json$Decode$Field$require,
-									'contact',
+									'player4Name',
 									$elm$json$Json$Decode$string,
-									function (contact) {
+									function (player4Name) {
 										return A3(
 											$webbhuset$elm_json_decode$Json$Decode$Field$require,
-											'localization',
+											'playedAt',
 											$elm$json$Json$Decode$string,
-											function (localization) {
+											function (playedAt) {
 												return A3(
 													$webbhuset$elm_json_decode$Json$Decode$Field$require,
-													'owner',
-													$author$project$UserShort$userShortDecoder,
-													function (owner) {
+													'finishedAt',
+													$elm$json$Json$Decode$string,
+													function (finishedAt) {
 														return A3(
 															$webbhuset$elm_json_decode$Json$Decode$Field$require,
-															'members',
-															$elm$json$Json$Decode$list($author$project$Model$ClubMembership$decoder),
-															function (members) {
+															'status',
+															$elm$json$Json$Decode$string,
+															function (status) {
 																return A3(
 																	$webbhuset$elm_json_decode$Json$Decode$Field$require,
-																	'tournaments',
-																	$elm$json$Json$Decode$list($author$project$Model$TournamentShort$decoder),
-																	function (tournaments) {
+																	'games',
+																	$elm$json$Json$Decode$list($author$project$Model$Game$decoder),
+																	function (games) {
 																		return $elm$json$Json$Decode$succeed(
-																			{contact: contact, createdAt: createdAt, id: id, localization: localization, members: members, name: name, owner: owner, tournaments: tournaments, website: website});
+																			{finishedAt: finishedAt, gameForm: $elm$core$Maybe$Nothing, games: games, id: id, isFolded: true, playedAt: playedAt, player1Name: player1Name, player2Name: player2Name, player3Name: player3Name, player4Name: player4Name, status: status});
+																	});
+															});
+													});
+											});
+									});
+							});
+					});
+			});
+	});
+var $author$project$Model$Bracket$decoder = A3(
+	$webbhuset$elm_json_decode$Json$Decode$Field$require,
+	'id',
+	$elm$json$Json$Decode$int,
+	function (id) {
+		return A3(
+			$webbhuset$elm_json_decode$Json$Decode$Field$require,
+			'tournamentId',
+			$elm$json$Json$Decode$int,
+			function (tournamentId) {
+				return A3(
+					$webbhuset$elm_json_decode$Json$Decode$Field$require,
+					'ownerId',
+					$elm$json$Json$Decode$int,
+					function (ownerId) {
+						return A3(
+							$webbhuset$elm_json_decode$Json$Decode$Field$require,
+							'name',
+							$elm$json$Json$Decode$string,
+							function (name) {
+								return A3(
+									$webbhuset$elm_json_decode$Json$Decode$Field$require,
+									'createdAt',
+									$elm$json$Json$Decode$string,
+									function (createdAt) {
+										return A3(
+											$webbhuset$elm_json_decode$Json$Decode$Field$require,
+											'startedAt',
+											$elm$json$Json$Decode$string,
+											function (startedAt) {
+												return A3(
+													$webbhuset$elm_json_decode$Json$Decode$Field$require,
+													'finishedAt',
+													$elm$json$Json$Decode$string,
+													function (finishedAt) {
+														return A3(
+															$webbhuset$elm_json_decode$Json$Decode$Field$require,
+															'sequence',
+															$elm$json$Json$Decode$int,
+															function (sequence) {
+																return A3(
+																	$webbhuset$elm_json_decode$Json$Decode$Field$require,
+																	'description',
+																	$elm$json$Json$Decode$string,
+																	function (description) {
+																		return A3(
+																			$webbhuset$elm_json_decode$Json$Decode$Field$require,
+																			'series',
+																			$elm$json$Json$Decode$list($author$project$Model$Series$decoder),
+																			function (series) {
+																				return $elm$json$Json$Decode$succeed(
+																					{createdAt: createdAt, description: description, finishedAt: finishedAt, id: id, name: name, ownerId: ownerId, sequence: sequence, series: series, startedAt: startedAt, tournamentId: tournamentId});
+																			});
 																	});
 															});
 													});
@@ -6414,6 +6446,202 @@ var $elm$http$Http$get = function (r) {
 	return $elm$http$Http$request(
 		{body: $elm$http$Http$emptyBody, expect: r.expect, headers: _List_Nil, method: 'GET', timeout: $elm$core$Maybe$Nothing, tracker: $elm$core$Maybe$Nothing, url: r.url});
 };
+var $elm$core$String$concat = function (strings) {
+	return A2($elm$core$String$join, '', strings);
+};
+var $author$project$Api$backendUrl = 'https://localhost:5001/api';
+var $author$project$Api$tournaments = $author$project$Api$backendUrl + '/tournaments';
+var $author$project$Api$tournament = function (id) {
+	return $elm$core$String$concat(
+		_List_fromArray(
+			[
+				$author$project$Api$tournaments,
+				'/',
+				$elm$core$String$fromInt(id)
+			]));
+};
+var $author$project$Api$tournamentBracket = F2(
+	function (tournamentId, bracketId) {
+		return $elm$core$String$concat(
+			_List_fromArray(
+				[
+					$author$project$Api$tournament(tournamentId),
+					'/brackets/',
+					$elm$core$String$fromInt(bracketId)
+				]));
+	});
+var $author$project$Page$Bracket$get = F2(
+	function (tournamentId, bracketId) {
+		return $elm$http$Http$get(
+			{
+				expect: A2($author$project$Api$expectJson, $author$project$Page$Bracket$GotBracket, $author$project$Model$Bracket$decoder),
+				url: A2($author$project$Api$tournamentBracket, tournamentId, bracketId)
+			});
+	});
+var $author$project$Page$Bracket$init = F3(
+	function (session, tournamentId, bracketId) {
+		return _Utils_Tuple2(
+			A3($author$project$Page$Bracket$Model, session, $elm$core$Maybe$Nothing, $author$project$Page$Bracket$Uninitialized),
+			A2($author$project$Page$Bracket$get, tournamentId, bracketId));
+	});
+var $author$project$Page$Club$Model = F3(
+	function (session, error, state) {
+		return {error: error, session: session, state: state};
+	});
+var $author$project$Page$Club$Uninitialized = {$: 'Uninitialized'};
+var $author$project$Page$Club$GotClub = function (a) {
+	return {$: 'GotClub', a: a};
+};
+var $author$project$Api$club = function (id) {
+	return $author$project$Api$backendUrl + ('/clubs/' + $elm$core$String$fromInt(id));
+};
+var $elm$json$Json$Decode$bool = _Json_decodeBool;
+var $author$project$UserShort$userShortDecoder = A3(
+	$webbhuset$elm_json_decode$Json$Decode$Field$require,
+	'id',
+	$elm$json$Json$Decode$int,
+	function (id) {
+		return A3(
+			$webbhuset$elm_json_decode$Json$Decode$Field$require,
+			'createdAt',
+			$elm$json$Json$Decode$string,
+			function (createdAt) {
+				return A3(
+					$webbhuset$elm_json_decode$Json$Decode$Field$require,
+					'username',
+					$elm$json$Json$Decode$string,
+					function (username) {
+						return A3(
+							$webbhuset$elm_json_decode$Json$Decode$Field$require,
+							'totalTournaments',
+							$elm$json$Json$Decode$int,
+							function (totalTournaments) {
+								return $elm$json$Json$Decode$succeed(
+									{createdAt: createdAt, id: id, totalTournaments: totalTournaments, username: username});
+							});
+					});
+			});
+	});
+var $author$project$Model$ClubMembership$decoder = A3(
+	$webbhuset$elm_json_decode$Json$Decode$Field$require,
+	'user',
+	$author$project$UserShort$userShortDecoder,
+	function (user) {
+		return A3(
+			$webbhuset$elm_json_decode$Json$Decode$Field$require,
+			'createdAt',
+			$elm$json$Json$Decode$string,
+			function (createdAt) {
+				return A3(
+					$webbhuset$elm_json_decode$Json$Decode$Field$require,
+					'approved',
+					$elm$json$Json$Decode$bool,
+					function (approved) {
+						return A3(
+							$webbhuset$elm_json_decode$Json$Decode$Field$require,
+							'denied',
+							$elm$json$Json$Decode$bool,
+							function (denied) {
+								return $elm$json$Json$Decode$succeed(
+									{approved: approved, createdAt: createdAt, denied: denied, user: user});
+							});
+					});
+			});
+	});
+var $author$project$Model$TournamentShort$decoder = A3(
+	$webbhuset$elm_json_decode$Json$Decode$Field$require,
+	'id',
+	$elm$json$Json$Decode$int,
+	function (id) {
+		return A3(
+			$webbhuset$elm_json_decode$Json$Decode$Field$require,
+			'createdAt',
+			$elm$json$Json$Decode$string,
+			function (createdAt) {
+				return A3(
+					$webbhuset$elm_json_decode$Json$Decode$Field$require,
+					'name',
+					$elm$json$Json$Decode$string,
+					function (name) {
+						return A3(
+							$webbhuset$elm_json_decode$Json$Decode$Field$require,
+							'totalPlayers',
+							$elm$json$Json$Decode$int,
+							function (totalPlayers) {
+								return A3(
+									$webbhuset$elm_json_decode$Json$Decode$Field$require,
+									'startDate',
+									$elm$json$Json$Decode$string,
+									function (startDate) {
+										return A3(
+											$webbhuset$elm_json_decode$Json$Decode$Field$require,
+											'status',
+											$elm$json$Json$Decode$string,
+											function (status) {
+												return $elm$json$Json$Decode$succeed(
+													{createdAt: createdAt, id: id, name: name, startDate: startDate, status: status, totalPlayers: totalPlayers});
+											});
+									});
+							});
+					});
+			});
+	});
+var $author$project$Club$clubDecoder = A3(
+	$webbhuset$elm_json_decode$Json$Decode$Field$require,
+	'id',
+	$elm$json$Json$Decode$int,
+	function (id) {
+		return A3(
+			$webbhuset$elm_json_decode$Json$Decode$Field$require,
+			'createdAt',
+			$elm$json$Json$Decode$string,
+			function (createdAt) {
+				return A3(
+					$webbhuset$elm_json_decode$Json$Decode$Field$require,
+					'name',
+					$elm$json$Json$Decode$string,
+					function (name) {
+						return A3(
+							$webbhuset$elm_json_decode$Json$Decode$Field$require,
+							'website',
+							$elm$json$Json$Decode$string,
+							function (website) {
+								return A3(
+									$webbhuset$elm_json_decode$Json$Decode$Field$require,
+									'contact',
+									$elm$json$Json$Decode$string,
+									function (contact) {
+										return A3(
+											$webbhuset$elm_json_decode$Json$Decode$Field$require,
+											'localization',
+											$elm$json$Json$Decode$string,
+											function (localization) {
+												return A3(
+													$webbhuset$elm_json_decode$Json$Decode$Field$require,
+													'owner',
+													$author$project$UserShort$userShortDecoder,
+													function (owner) {
+														return A3(
+															$webbhuset$elm_json_decode$Json$Decode$Field$require,
+															'members',
+															$elm$json$Json$Decode$list($author$project$Model$ClubMembership$decoder),
+															function (members) {
+																return A3(
+																	$webbhuset$elm_json_decode$Json$Decode$Field$require,
+																	'tournaments',
+																	$elm$json$Json$Decode$list($author$project$Model$TournamentShort$decoder),
+																	function (tournaments) {
+																		return $elm$json$Json$Decode$succeed(
+																			{contact: contact, createdAt: createdAt, id: id, localization: localization, members: members, name: name, owner: owner, tournaments: tournaments, website: website});
+																	});
+															});
+													});
+											});
+									});
+							});
+					});
+			});
+	});
 var $author$project$Page$Club$get = function (id) {
 	return $elm$http$Http$get(
 		{
@@ -6524,7 +6752,6 @@ var $author$project$Page$Tournament$Uninitialized = {$: 'Uninitialized'};
 var $author$project$Page$Tournament$GotTournament = function (a) {
 	return {$: 'GotTournament', a: a};
 };
-var $elm$json$Json$Decode$float = _Json_decodeFloat;
 var $author$project$Model$BracketPlayerShort$decoder = A3(
 	$webbhuset$elm_json_decode$Json$Decode$Field$require,
 	'userId',
@@ -6558,66 +6785,72 @@ var $author$project$Model$BracketShort$decoder = A3(
 	function (id) {
 		return A3(
 			$webbhuset$elm_json_decode$Json$Decode$Field$require,
-			'sequence',
+			'tournamentId',
 			$elm$json$Json$Decode$int,
-			function (sequence) {
+			function (tournamentId) {
 				return A3(
 					$webbhuset$elm_json_decode$Json$Decode$Field$require,
-					'name',
-					$elm$json$Json$Decode$string,
-					function (name) {
+					'sequence',
+					$elm$json$Json$Decode$int,
+					function (sequence) {
 						return A3(
 							$webbhuset$elm_json_decode$Json$Decode$Field$require,
-							'description',
+							'name',
 							$elm$json$Json$Decode$string,
-							function (description) {
+							function (name) {
 								return A3(
 									$webbhuset$elm_json_decode$Json$Decode$Field$require,
-									'createdAt',
+									'description',
 									$elm$json$Json$Decode$string,
-									function (createdAt) {
+									function (description) {
 										return A3(
 											$webbhuset$elm_json_decode$Json$Decode$Field$require,
-											'startedAt',
+											'createdAt',
 											$elm$json$Json$Decode$string,
-											function (startedAt) {
+											function (createdAt) {
 												return A3(
 													$webbhuset$elm_json_decode$Json$Decode$Field$require,
-													'finishedAt',
+													'startedAt',
 													$elm$json$Json$Decode$string,
-													function (finishedAt) {
+													function (startedAt) {
 														return A3(
 															$webbhuset$elm_json_decode$Json$Decode$Field$require,
-															'winCondition',
+															'finishedAt',
 															$elm$json$Json$Decode$string,
-															function (winCondition) {
+															function (finishedAt) {
 																return A3(
 																	$webbhuset$elm_json_decode$Json$Decode$Field$require,
-																	'numberOfAdvancing',
-																	$elm$json$Json$Decode$int,
-																	function (numberOfAdvancing) {
+																	'winCondition',
+																	$elm$json$Json$Decode$string,
+																	function (winCondition) {
 																		return A3(
 																			$webbhuset$elm_json_decode$Json$Decode$Field$require,
-																			'numberOfSeries',
+																			'numberOfAdvancing',
 																			$elm$json$Json$Decode$int,
-																			function (numberOfSeries) {
+																			function (numberOfAdvancing) {
 																				return A3(
 																					$webbhuset$elm_json_decode$Json$Decode$Field$require,
-																					'gamesPerSeries',
+																					'numberOfSeries',
 																					$elm$json$Json$Decode$int,
-																					function (gamesPerSeries) {
+																					function (numberOfSeries) {
 																						return A3(
 																							$webbhuset$elm_json_decode$Json$Decode$Field$require,
-																							'finalScoreMultiplier',
-																							$elm$json$Json$Decode$float,
-																							function (finalScoreMultiplier) {
+																							'gamesPerSeries',
+																							$elm$json$Json$Decode$int,
+																							function (gamesPerSeries) {
 																								return A3(
 																									$webbhuset$elm_json_decode$Json$Decode$Field$require,
-																									'players',
-																									$elm$json$Json$Decode$list($author$project$Model$BracketPlayerShort$decoder),
-																									function (players) {
-																										return $elm$json$Json$Decode$succeed(
-																											{createdAt: createdAt, description: description, finalScoreMultiplier: finalScoreMultiplier, finishedAt: finishedAt, gamesPerSeries: gamesPerSeries, id: id, name: name, numberOfAdvancing: numberOfAdvancing, numberOfSeries: numberOfSeries, players: players, sequence: sequence, startedAt: startedAt, winCondition: winCondition});
+																									'finalScoreMultiplier',
+																									$elm$json$Json$Decode$float,
+																									function (finalScoreMultiplier) {
+																										return A3(
+																											$webbhuset$elm_json_decode$Json$Decode$Field$require,
+																											'players',
+																											$elm$json$Json$Decode$list($author$project$Model$BracketPlayerShort$decoder),
+																											function (players) {
+																												return $elm$json$Json$Decode$succeed(
+																													{createdAt: createdAt, description: description, finalScoreMultiplier: finalScoreMultiplier, finishedAt: finishedAt, gamesPerSeries: gamesPerSeries, id: id, name: name, numberOfAdvancing: numberOfAdvancing, numberOfSeries: numberOfSeries, players: players, sequence: sequence, startedAt: startedAt, tournamentId: tournamentId, winCondition: winCondition});
+																											});
 																									});
 																							});
 																					});
@@ -6841,19 +7074,6 @@ var $author$project$Model$Tournament$decoder = A3(
 					});
 			});
 	});
-var $elm$core$String$concat = function (strings) {
-	return A2($elm$core$String$join, '', strings);
-};
-var $author$project$Api$tournaments = $author$project$Api$backendUrl + '/tournaments';
-var $author$project$Api$tournament = function (id) {
-	return $elm$core$String$concat(
-		_List_fromArray(
-			[
-				$author$project$Api$tournaments,
-				'/',
-				$elm$core$String$fromInt(id)
-			]));
-};
 var $author$project$Page$Tournament$get = function (id) {
 	return $elm$http$Http$get(
 		{
@@ -7188,6 +7408,9 @@ var $author$project$Session$navKey = function (session) {
 	}
 };
 var $elm$browser$Browser$Navigation$pushUrl = _Browser_pushUrl;
+var $author$project$Page$Bracket$toSession = function (model) {
+	return model.session;
+};
 var $author$project$Page$Club$toSession = function (model) {
 	return model.session;
 };
@@ -7247,6 +7470,9 @@ var $author$project$Main$toSession = function (model) {
 		case 'Tournament':
 			var tournament = model.a;
 			return $author$project$Page$Tournament$toSession(tournament);
+		case 'Bracket':
+			var bracket = model.a;
+			return $author$project$Page$Bracket$toSession(bracket);
 		default:
 			var user = model.a;
 			return $author$project$Page$User$toSession(user);
@@ -7350,6 +7576,15 @@ var $author$project$Main$changeRouteTo = F2(
 						$author$project$Main$Tournament,
 						$author$project$Main$GotTournamentMsg,
 						A2($author$project$Page$Tournament$init, session, tournamentId));
+				case 'Bracket':
+					var _v9 = maybeRoute.a;
+					var tournamentId = _v9.a;
+					var bracketId = _v9.b;
+					return A3(
+						$author$project$Main$updateWith,
+						$author$project$Main$Bracket,
+						$author$project$Main$GotBracketMsg,
+						A3($author$project$Page$Bracket$init, session, tournamentId, bracketId));
 				default:
 					var userId = maybeRoute.a.a;
 					return A3(
@@ -7478,6 +7713,10 @@ var $elm$url$Url$Parser$parse = F2(
 					$elm$url$Url$Parser$prepareQuery(url.query),
 					url.fragment,
 					$elm$core$Basics$identity)));
+	});
+var $author$project$Route$Bracket = F2(
+	function (a, b) {
+		return {$: 'Bracket', a: a, b: b};
 	});
 var $author$project$Route$Club = function (a) {
 	return {$: 'Club', a: a};
@@ -7709,6 +7948,19 @@ var $author$project$Route$parser = $elm$url$Url$Parser$oneOf(
 				$elm$url$Url$Parser$int)),
 			A2(
 			$elm$url$Url$Parser$map,
+			$author$project$Route$Bracket,
+			A2(
+				$elm$url$Url$Parser$slash,
+				$elm$url$Url$Parser$s('tournaments'),
+				A2(
+					$elm$url$Url$Parser$slash,
+					$elm$url$Url$Parser$int,
+					A2(
+						$elm$url$Url$Parser$slash,
+						$elm$url$Url$Parser$s('brackets'),
+						$elm$url$Url$Parser$int)))),
+			A2(
+			$elm$url$Url$Parser$map,
 			$author$project$Route$User,
 			A2(
 				$elm$url$Url$Parser$slash,
@@ -7776,6 +8028,593 @@ var $elm$url$Url$toString = function (url) {
 					_Utils_ap(http, url.host)),
 				url.path)));
 };
+var $author$project$Page$Bracket$Anonymus = {$: 'Anonymus'};
+var $author$project$Page$Bracket$Owner = {$: 'Owner'};
+var $author$project$Page$Bracket$View = F2(
+	function (a, b) {
+		return {$: 'View', a: a, b: b};
+	});
+var $author$project$Model$Series$GameForm = F5(
+	function (logLink, player1Seat, player2Seat, player3Seat, player4Seat) {
+		return {logLink: logLink, player1Seat: player1Seat, player2Seat: player2Seat, player3Seat: player3Seat, player4Seat: player4Seat};
+	});
+var $elm$core$List$filter = F2(
+	function (isGood, list) {
+		return A3(
+			$elm$core$List$foldr,
+			F2(
+				function (x, xs) {
+					return isGood(x) ? A2($elm$core$List$cons, x, xs) : xs;
+				}),
+			_List_Nil,
+			list);
+	});
+var $elm$core$Basics$neq = _Utils_notEqual;
+var $elm$core$List$sortBy = _List_sortBy;
+var $author$project$Page$Bracket$addGameForm = F2(
+	function (bracket, series) {
+		return _Utils_update(
+			bracket,
+			{
+				series: A2(
+					$elm$core$List$sortBy,
+					function ($) {
+						return $.id;
+					},
+					A2(
+						$elm$core$List$append,
+						_List_fromArray(
+							[
+								_Utils_update(
+								series,
+								{
+									gameForm: $elm$core$Maybe$Just(
+										A5($author$project$Model$Series$GameForm, '', '', '', '', ''))
+								})
+							]),
+						A2(
+							$elm$core$List$filter,
+							function (s) {
+								return !_Utils_eq(s.id, series.id);
+							},
+							bracket.series)))
+			});
+	});
+var $author$project$Api$errorToString = function (error) {
+	switch (error.$) {
+		case 'BadUrl':
+			var url = error.a;
+			return 'Url inválida: ' + url;
+		case 'Timeout':
+			return 'Erro de timeout, tente novamente';
+		case 'NetworkError':
+			return 'Erro de rede, verifique a sua conexão e tente novamente';
+		case 'BadStatus':
+			var body = error.b;
+			return body;
+		default:
+			var body = error.a;
+			return 'Falha interna: ' + body;
+	}
+};
+var $author$project$Page$Bracket$removeGameForm = F2(
+	function (bracket, series) {
+		return _Utils_update(
+			bracket,
+			{
+				series: A2(
+					$elm$core$List$sortBy,
+					function ($) {
+						return $.id;
+					},
+					A2(
+						$elm$core$List$append,
+						_List_fromArray(
+							[
+								_Utils_update(
+								series,
+								{gameForm: $elm$core$Maybe$Nothing})
+							]),
+						A2(
+							$elm$core$List$filter,
+							function (s) {
+								return !_Utils_eq(s.id, series.id);
+							},
+							bracket.series)))
+			});
+	});
+var $elm$json$Json$Encode$object = function (pairs) {
+	return _Json_wrap(
+		A3(
+			$elm$core$List$foldl,
+			F2(
+				function (_v0, obj) {
+					var k = _v0.a;
+					var v = _v0.b;
+					return A3(_Json_addField, k, v, obj);
+				}),
+			_Json_emptyObject(_Utils_Tuple0),
+			pairs));
+};
+var $elm$json$Json$Encode$string = _Json_wrap;
+var $author$project$Page$Bracket$gameFormEncoder = function (form) {
+	return $elm$json$Json$Encode$object(
+		_List_fromArray(
+			[
+				_Utils_Tuple2(
+				'logLink',
+				$elm$json$Json$Encode$string(form.logLink)),
+				_Utils_Tuple2(
+				'player1Seat',
+				$elm$json$Json$Encode$string(form.player1Seat)),
+				_Utils_Tuple2(
+				'player2Seat',
+				$elm$json$Json$Encode$string(form.player2Seat)),
+				_Utils_Tuple2(
+				'player3Seat',
+				$elm$json$Json$Encode$string(form.player3Seat)),
+				_Utils_Tuple2(
+				'player4Seat',
+				$elm$json$Json$Encode$string(form.player4Seat))
+			]));
+};
+var $elm$http$Http$jsonBody = function (value) {
+	return A2(
+		_Http_pair,
+		'application/json',
+		A2($elm$json$Json$Encode$encode, 0, value));
+};
+var $elm$http$Http$Header = F2(
+	function (a, b) {
+		return {$: 'Header', a: a, b: b};
+	});
+var $elm$http$Http$header = $elm$http$Http$Header;
+var $author$project$Api$privatePost = F2(
+	function (r, viewer) {
+		return $elm$http$Http$request(
+			{
+				body: r.body,
+				expect: r.expect,
+				headers: _List_fromArray(
+					[
+						A2($elm$http$Http$header, 'bearer', viewer.token)
+					]),
+				method: 'POST',
+				timeout: $elm$core$Maybe$Nothing,
+				tracker: $elm$core$Maybe$Nothing,
+				url: r.url
+			});
+	});
+var $author$project$Api$series = F3(
+	function (tournamentId, bracketId, seriesId) {
+		return $elm$core$String$concat(
+			_List_fromArray(
+				[
+					A2($author$project$Api$tournamentBracket, tournamentId, bracketId),
+					'/series/',
+					$elm$core$String$fromInt(seriesId)
+				]));
+	});
+var $author$project$Page$Bracket$requestPostGame = F4(
+	function (viewer, bracket, series, form) {
+		return A2(
+			$author$project$Api$privatePost,
+			{
+				body: $elm$http$Http$jsonBody(
+					$author$project$Page$Bracket$gameFormEncoder(form)),
+				expect: A2($author$project$Api$expectJson, $author$project$Page$Bracket$GotBracket, $author$project$Model$Bracket$decoder),
+				url: A3($author$project$Api$series, bracket.tournamentId, bracket.id, series.id)
+			},
+			viewer);
+	});
+var $author$project$Session$toViewer = function (session) {
+	if (session.$ === 'LoggedIn') {
+		var viewer = session.b;
+		return $elm$core$Maybe$Just(viewer);
+	} else {
+		return $elm$core$Maybe$Nothing;
+	}
+};
+var $elm$core$Basics$not = _Basics_not;
+var $author$project$Page$Bracket$toggleSeries = F2(
+	function (bracket, s) {
+		return _Utils_update(
+			bracket,
+			{
+				series: A2(
+					$elm$core$List$sortBy,
+					function ($) {
+						return $.id;
+					},
+					A2(
+						$elm$core$List$append,
+						_List_fromArray(
+							[
+								_Utils_update(
+								s,
+								{isFolded: !s.isFolded})
+							]),
+						A2(
+							$elm$core$List$filter,
+							function (i) {
+								return !_Utils_eq(i.id, s.id);
+							},
+							bracket.series)))
+			});
+	});
+var $author$project$Page$Bracket$updateSeriesForm = F3(
+	function (bracket, series, transform) {
+		var _v0 = series.gameForm;
+		if (_v0.$ === 'Just') {
+			var form = _v0.a;
+			return _Utils_Tuple2(
+				_Utils_update(
+					bracket,
+					{
+						series: A2(
+							$elm$core$List$sortBy,
+							function ($) {
+								return $.id;
+							},
+							A2(
+								$elm$core$List$append,
+								_List_fromArray(
+									[
+										_Utils_update(
+										series,
+										{
+											gameForm: $elm$core$Maybe$Just(
+												transform(form))
+										})
+									]),
+								A2(
+									$elm$core$List$filter,
+									function (s) {
+										return !_Utils_eq(s.id, series.id);
+									},
+									bracket.series)))
+					}),
+				$elm$core$Maybe$Nothing);
+		} else {
+			return _Utils_Tuple2(
+				bracket,
+				$elm$core$Maybe$Just(
+					'Tentativa de atualizar um form inexistente, série ' + $elm$core$String$fromInt(series.id)));
+		}
+	});
+var $elm$core$List$any = F2(
+	function (isOkay, list) {
+		any:
+		while (true) {
+			if (!list.b) {
+				return false;
+			} else {
+				var x = list.a;
+				var xs = list.b;
+				if (isOkay(x)) {
+					return true;
+				} else {
+					var $temp$isOkay = isOkay,
+						$temp$list = xs;
+					isOkay = $temp$isOkay;
+					list = $temp$list;
+					continue any;
+				}
+			}
+		}
+	});
+var $elm$core$List$member = F2(
+	function (x, xs) {
+		return A2(
+			$elm$core$List$any,
+			function (a) {
+				return _Utils_eq(a, x);
+			},
+			xs);
+	});
+var $author$project$Page$Bracket$validateGameForm = function (form) {
+	var seats = _List_fromArray(
+		['East', 'South', 'West', 'North']);
+	var formSeats = _List_fromArray(
+		[form.player1Seat, form.player2Seat, form.player3Seat, form.player4Seat]);
+	return $elm$core$String$isEmpty(form.logLink) ? $elm$core$Result$Err('Preencha o link para o log do jogo') : (A2($elm$core$List$member, form.player1Seat, seats) ? $elm$core$Result$Err('Preencha o acento do jogador 1') : (A2($elm$core$List$member, form.player2Seat, seats) ? $elm$core$Result$Err('Preencha o acento do jogador 2') : (A2($elm$core$List$member, form.player3Seat, seats) ? $elm$core$Result$Err('Preencha o acento do jogador 3') : (A2($elm$core$List$member, form.player4Seat, seats) ? $elm$core$Result$Err('Preencha o acento do jogador 4') : (A2($elm$core$List$member, 'East', formSeats) ? $elm$core$Result$Err('Um jogador precisa ser o acento leste') : (A2($elm$core$List$member, 'South', formSeats) ? $elm$core$Result$Err('Um jogador precisa ser o acento sul') : (A2($elm$core$List$member, 'West', formSeats) ? $elm$core$Result$Err('Um jogador precisa ser o acento oeste') : (A2($elm$core$List$member, 'North', formSeats) ? $elm$core$Result$Err('Um jogador precisa ser o acento norte') : $elm$core$Result$Ok(_Utils_Tuple0)))))))));
+};
+var $author$project$Page$Bracket$update = F2(
+	function (msg, model) {
+		var unwrapResult = F2(
+			function (result, act) {
+				if (result.$ === 'Ok') {
+					var val = result.a;
+					return act(val);
+				} else {
+					var error = result.a;
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								error: $elm$core$Maybe$Just(
+									$author$project$Api$errorToString(error))
+							}),
+						$elm$core$Platform$Cmd$none);
+				}
+			});
+		var _v0 = _Utils_Tuple2(msg, model.state);
+		_v0$0:
+		while (true) {
+			if (_v0.b.$ === 'Uninitialized') {
+				if (_v0.a.$ === 'GotBracket') {
+					break _v0$0;
+				} else {
+					var _v2 = _v0.b;
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								error: $elm$core$Maybe$Just('Estado inválido')
+							}),
+						$elm$core$Platform$Cmd$none);
+				}
+			} else {
+				switch (_v0.a.$) {
+					case 'GotBracket':
+						break _v0$0;
+					case 'ToggleFold':
+						var series = _v0.a.a;
+						var _v3 = _v0.b;
+						var _switch = _v3.a;
+						var bracket = _v3.b;
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									state: A2(
+										$author$project$Page$Bracket$View,
+										_switch,
+										A2($author$project$Page$Bracket$toggleSeries, bracket, series))
+								}),
+							$elm$core$Platform$Cmd$none);
+					case 'AddGame':
+						var series = _v0.a.a;
+						var _v4 = _v0.b;
+						var _switch = _v4.a;
+						var bracket = _v4.b;
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									state: A2(
+										$author$project$Page$Bracket$View,
+										_switch,
+										A2($author$project$Page$Bracket$addGameForm, bracket, series))
+								}),
+							$elm$core$Platform$Cmd$none);
+					case 'PostGame':
+						var series = _v0.a.a;
+						var _v5 = _v0.b;
+						var bracket = _v5.b;
+						var _v6 = series.gameForm;
+						if (_v6.$ === 'Just') {
+							var form = _v6.a;
+							var _v7 = $author$project$Page$Bracket$validateGameForm(form);
+							if (_v7.$ === 'Ok') {
+								var _v8 = $author$project$Session$toViewer(model.session);
+								if (_v8.$ === 'Just') {
+									var viewer = _v8.a;
+									return _Utils_Tuple2(
+										model,
+										A4($author$project$Page$Bracket$requestPostGame, viewer, bracket, series, form));
+								} else {
+									return _Utils_Tuple2(
+										_Utils_update(
+											model,
+											{
+												error: $elm$core$Maybe$Just('De alguma forma, você não está logado')
+											}),
+										$elm$core$Platform$Cmd$none);
+								}
+							} else {
+								var error = _v7.a;
+								return _Utils_Tuple2(
+									_Utils_update(
+										model,
+										{
+											error: $elm$core$Maybe$Just(error)
+										}),
+									$elm$core$Platform$Cmd$none);
+							}
+						} else {
+							return _Utils_Tuple2(
+								_Utils_update(
+									model,
+									{
+										error: $elm$core$Maybe$Just(
+											'Série ' + ($elm$core$String$fromInt(series.id) + ' não está em modo de edição'))
+									}),
+								$elm$core$Platform$Cmd$none);
+						}
+					case 'CancelAddGame':
+						var series = _v0.a.a;
+						var _v9 = _v0.b;
+						var _switch = _v9.a;
+						var bracket = _v9.b;
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									state: A2(
+										$author$project$Page$Bracket$View,
+										_switch,
+										A2($author$project$Page$Bracket$removeGameForm, bracket, series))
+								}),
+							$elm$core$Platform$Cmd$none);
+					case 'InputPlayer1Seat':
+						var _v10 = _v0.a;
+						var series = _v10.a;
+						var seat = _v10.b;
+						var _v11 = _v0.b;
+						var _switch = _v11.a;
+						var bracket = _v11.b;
+						var _v12 = A3(
+							$author$project$Page$Bracket$updateSeriesForm,
+							bracket,
+							series,
+							function (s) {
+								return _Utils_update(
+									s,
+									{player1Seat: seat});
+							});
+						var b = _v12.a;
+						var error = _v12.b;
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									error: error,
+									state: A2($author$project$Page$Bracket$View, _switch, b)
+								}),
+							$elm$core$Platform$Cmd$none);
+					case 'InputPlayer2Seat':
+						var _v13 = _v0.a;
+						var series = _v13.a;
+						var seat = _v13.b;
+						var _v14 = _v0.b;
+						var _switch = _v14.a;
+						var bracket = _v14.b;
+						var _v15 = A3(
+							$author$project$Page$Bracket$updateSeriesForm,
+							bracket,
+							series,
+							function (s) {
+								return _Utils_update(
+									s,
+									{player2Seat: seat});
+							});
+						var b = _v15.a;
+						var error = _v15.b;
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									error: error,
+									state: A2($author$project$Page$Bracket$View, _switch, b)
+								}),
+							$elm$core$Platform$Cmd$none);
+					case 'InputPlayer3Seat':
+						var _v16 = _v0.a;
+						var series = _v16.a;
+						var seat = _v16.b;
+						var _v17 = _v0.b;
+						var _switch = _v17.a;
+						var bracket = _v17.b;
+						var _v18 = A3(
+							$author$project$Page$Bracket$updateSeriesForm,
+							bracket,
+							series,
+							function (s) {
+								return _Utils_update(
+									s,
+									{player3Seat: seat});
+							});
+						var b = _v18.a;
+						var error = _v18.b;
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									error: error,
+									state: A2($author$project$Page$Bracket$View, _switch, b)
+								}),
+							$elm$core$Platform$Cmd$none);
+					case 'InputPlayer4Seat':
+						var _v19 = _v0.a;
+						var series = _v19.a;
+						var seat = _v19.b;
+						var _v20 = _v0.b;
+						var _switch = _v20.a;
+						var bracket = _v20.b;
+						var _v21 = A3(
+							$author$project$Page$Bracket$updateSeriesForm,
+							bracket,
+							series,
+							function (s) {
+								return _Utils_update(
+									s,
+									{player4Seat: seat});
+							});
+						var b = _v21.a;
+						var error = _v21.b;
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									error: error,
+									state: A2($author$project$Page$Bracket$View, _switch, b)
+								}),
+							$elm$core$Platform$Cmd$none);
+					default:
+						var _v22 = _v0.a;
+						var series = _v22.a;
+						var logLink = _v22.b;
+						var _v23 = _v0.b;
+						var _switch = _v23.a;
+						var bracket = _v23.b;
+						var _v24 = A3(
+							$author$project$Page$Bracket$updateSeriesForm,
+							bracket,
+							series,
+							function (s) {
+								return _Utils_update(
+									s,
+									{logLink: logLink});
+							});
+						var b = _v24.a;
+						var error = _v24.b;
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									error: error,
+									state: A2($author$project$Page$Bracket$View, _switch, b)
+								}),
+							$elm$core$Platform$Cmd$none);
+				}
+			}
+		}
+		var result = _v0.a.a;
+		return A2(
+			unwrapResult,
+			result,
+			function (bracket) {
+				var _switch = function () {
+					var _v1 = $author$project$Session$toViewer(model.session);
+					if (_v1.$ === 'Just') {
+						var viewer = _v1.a;
+						return _Utils_eq(bracket.ownerId, viewer.id) ? $author$project$Page$Bracket$Owner : $author$project$Page$Bracket$Anonymus;
+					} else {
+						return $author$project$Page$Bracket$Anonymus;
+					}
+				}();
+				var series = A2(
+					$elm$core$List$sortBy,
+					function ($) {
+						return $.id;
+					},
+					bracket.series);
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							error: $elm$core$Maybe$Nothing,
+							state: A2(
+								$author$project$Page$Bracket$View,
+								_switch,
+								_Utils_update(
+									bracket,
+									{series: series}))
+						}),
+					$elm$core$Platform$Cmd$none);
+			});
+	});
 var $author$project$Page$Club$Edit = F2(
 	function (a, b) {
 		return {$: 'Edit', a: a, b: b};
@@ -7795,23 +8634,6 @@ var $elm$browser$Browser$Navigation$back = F2(
 	function (key, n) {
 		return A2(_Browser_go, key, -n);
 	});
-var $author$project$Api$errorToString = function (error) {
-	switch (error.$) {
-		case 'BadUrl':
-			var url = error.a;
-			return 'Url inválida: ' + url;
-		case 'Timeout':
-			return 'Erro de timeout, tente novamente';
-		case 'NetworkError':
-			return 'Erro de rede, verifique a sua conexão e tente novamente';
-		case 'BadStatus':
-			var body = error.b;
-			return body;
-		default:
-			var body = error.a;
-			return 'Falha interna: ' + body;
-	}
-};
 var $author$project$Page$Club$Anonymus = {$: 'Anonymus'};
 var $author$project$Page$Club$Member = function (a) {
 	return {$: 'Member', a: a};
@@ -7838,14 +8660,6 @@ var $elm_community$list_extra$List$Extra$find = F2(
 			}
 		}
 	});
-var $author$project$Session$toViewer = function (session) {
-	if (session.$ === 'LoggedIn') {
-		var viewer = session.b;
-		return $elm$core$Maybe$Just(viewer);
-	} else {
-		return $elm$core$Maybe$Nothing;
-	}
-};
 var $author$project$Page$Club$initState = F2(
 	function (club, session) {
 		var _v0 = $author$project$Session$toViewer(session);
@@ -7899,11 +8713,6 @@ var $author$project$Api$expectWhatever = function (toMsg) {
 			}
 		});
 };
-var $elm$http$Http$Header = F2(
-	function (a, b) {
-		return {$: 'Header', a: a, b: b};
-	});
-var $elm$http$Http$header = $elm$http$Http$Header;
 var $author$project$Api$privateDelete = F2(
 	function (r, viewer) {
 		return $elm$http$Http$request(
@@ -7936,22 +8745,6 @@ var $author$project$Api$clubMembers = function (id) {
 var $author$project$Api$clubInvite = function (id) {
 	return $author$project$Api$clubMembers(id) + '/invite';
 };
-var $author$project$Api$privatePost = F2(
-	function (r, viewer) {
-		return $elm$http$Http$request(
-			{
-				body: r.body,
-				expect: r.expect,
-				headers: _List_fromArray(
-					[
-						A2($elm$http$Http$header, 'bearer', viewer.token)
-					]),
-				method: 'POST',
-				timeout: $elm$core$Maybe$Nothing,
-				tracker: $elm$core$Maybe$Nothing,
-				url: r.url
-			});
-	});
 var $author$project$Page$Club$requestInvite = F2(
 	function (club, viewer) {
 		return A2(
@@ -7973,27 +8766,7 @@ var $author$project$Page$Club$requestLeave = F2(
 			},
 			viewer);
 	});
-var $elm$http$Http$jsonBody = function (value) {
-	return A2(
-		_Http_pair,
-		'application/json',
-		A2($elm$json$Json$Encode$encode, 0, value));
-};
 var $elm$json$Json$Encode$null = _Json_encodeNull;
-var $elm$json$Json$Encode$object = function (pairs) {
-	return _Json_wrap(
-		A3(
-			$elm$core$List$foldl,
-			F2(
-				function (_v0, obj) {
-					var k = _v0.a;
-					var v = _v0.b;
-					return A3(_Json_addField, k, v, obj);
-				}),
-			_Json_emptyObject(_Utils_Tuple0),
-			pairs));
-};
-var $elm$json$Json$Encode$string = _Json_wrap;
 var $author$project$Page$Club$patchEncoder = function (form) {
 	var maybeNull = function (val) {
 		return $elm$core$String$isEmpty(val) ? $elm$json$Json$Encode$null : $elm$json$Json$Encode$string(val);
@@ -8143,6 +8916,16 @@ var $author$project$Route$routeToPieces = function (route) {
 				[
 					'tournaments',
 					$elm$core$String$fromInt(tournamentId)
+				]);
+		case 'Bracket':
+			var tournamentId = route.a;
+			var bracketId = route.b;
+			return _List_fromArray(
+				[
+					'tournaments',
+					$elm$core$String$fromInt(tournamentId),
+					'brackets',
+					$elm$core$String$fromInt(bracketId)
 				]);
 		default:
 			var id = route.a;
@@ -8777,6 +9560,33 @@ var $author$project$Page$Login$update = F2(
 					model);
 		}
 	});
+var $author$project$Page$Ruleset$View = function (a) {
+	return {$: 'View', a: a};
+};
+var $author$project$Page$Ruleset$update = F2(
+	function (msg, model) {
+		var result = msg.a;
+		if (result.$ === 'Ok') {
+			var ruleset = result.a;
+			return _Utils_Tuple2(
+				_Utils_update(
+					model,
+					{
+						state: $author$project$Page$Ruleset$View(ruleset)
+					}),
+				$elm$core$Platform$Cmd$none);
+		} else {
+			var error = result.a;
+			return _Utils_Tuple2(
+				_Utils_update(
+					model,
+					{
+						error: $elm$core$Maybe$Just(
+							$author$project$Api$errorToString(error))
+					}),
+				$elm$core$Platform$Cmd$none);
+		}
+	});
 var $author$project$Page$SignUp$redirectHome = function (session) {
 	return A2(
 		$elm$browser$Browser$Navigation$pushUrl,
@@ -8823,7 +9633,6 @@ var $author$project$Page$SignUp$updateForm = F2(
 				}),
 			$elm$core$Platform$Cmd$none);
 	});
-var $elm$core$Basics$neq = _Utils_notEqual;
 var $author$project$Page$SignUp$validateSignUp = function (form) {
 	return $elm$core$String$isEmpty(form.email) ? $elm$core$Result$Err('Preencha o Email') : ($elm$core$String$isEmpty(form.username) ? $elm$core$Result$Err('Preencha o Nome de Usuário') : ($elm$core$String$isEmpty(form.password) ? $elm$core$Result$Err('Preencha a Senha') : ($elm$core$String$isEmpty(form.passwordAgain) ? $elm$core$Result$Err('Repita a Senha') : ((!_Utils_eq(form.password, form.passwordAgain)) ? $elm$core$Result$Err('As senhas não são iguais') : $elm$core$Result$Ok(_Utils_Tuple0)))));
 };
@@ -8927,6 +9736,1359 @@ var $author$project$Page$SignUp$update = F2(
 					model);
 		}
 	});
+var $author$project$Page$Tournament$Edit = F2(
+	function (a, b) {
+		return {$: 'Edit', a: a, b: b};
+	});
+var $author$project$Page$Tournament$Owner = {$: 'Owner'};
+var $author$project$Page$Tournament$View = F2(
+	function (a, b) {
+		return {$: 'View', a: a, b: b};
+	});
+var $author$project$Page$Tournament$BracketForm = F7(
+	function (sequence, name, winCondition, numberOfAdvancing, numberOfSeries, gamesPerSeries, finalScoreMultiplier) {
+		return {finalScoreMultiplier: finalScoreMultiplier, gamesPerSeries: gamesPerSeries, name: name, numberOfAdvancing: numberOfAdvancing, numberOfSeries: numberOfSeries, sequence: sequence, winCondition: winCondition};
+	});
+var $elm$core$List$maximum = function (list) {
+	if (list.b) {
+		var x = list.a;
+		var xs = list.b;
+		return $elm$core$Maybe$Just(
+			A3($elm$core$List$foldl, $elm$core$Basics$max, x, xs));
+	} else {
+		return $elm$core$Maybe$Nothing;
+	}
+};
+var $author$project$Page$Tournament$addBracket = function (brackets) {
+	var nextSeq = function () {
+		var _v0 = $elm$core$List$maximum(
+			A2(
+				$elm$core$List$map,
+				function (b) {
+					return b.sequence;
+				},
+				brackets));
+		if (_v0.$ === 'Just') {
+			var seq = _v0.a;
+			return seq + 10;
+		} else {
+			return 0;
+		}
+	}();
+	return _Utils_ap(
+		brackets,
+		_List_fromArray(
+			[
+				A7($author$project$Page$Tournament$BracketForm, nextSeq, '', 'None', 0, 1, 1, 0)
+			]));
+};
+var $author$project$Page$Tournament$initForm = function (tournament) {
+	var mapBracket = function (b) {
+		return A7($author$project$Page$Tournament$BracketForm, b.sequence, b.name, b.winCondition, b.numberOfAdvancing, b.numberOfSeries, b.gamesPerSeries, b.finalScoreMultiplier);
+	};
+	return A7(
+		$author$project$Page$Tournament$Form,
+		$elm$core$Maybe$Just(tournament.ruleset),
+		'',
+		'',
+		'',
+		tournament.allowNonMembers,
+		tournament.requirePermission,
+		A2($elm$core$List$map, mapBracket, tournament.brackets));
+};
+var $author$project$Page$Tournament$NonParticipant = {$: 'NonParticipant'};
+var $author$project$Page$Tournament$Participant = {$: 'Participant'};
+var $author$project$Page$Tournament$initState = F2(
+	function (tournament, session) {
+		var _v0 = $author$project$Session$toViewer(session);
+		if (_v0.$ === 'Just') {
+			var viewer = _v0.a;
+			var isParticipant = function (p) {
+				return _Utils_eq(p.userId, viewer.id);
+			};
+			if (_Utils_eq(tournament.ownerId, viewer.id)) {
+				return A2($author$project$Page$Tournament$View, $author$project$Page$Tournament$Owner, tournament);
+			} else {
+				var _v1 = A2($elm_community$list_extra$List$Extra$find, isParticipant, tournament.players);
+				if (_v1.$ === 'Just') {
+					return A2($author$project$Page$Tournament$View, $author$project$Page$Tournament$Participant, tournament);
+				} else {
+					return A2($author$project$Page$Tournament$View, $author$project$Page$Tournament$NonParticipant, tournament);
+				}
+			}
+		} else {
+			return A2($author$project$Page$Tournament$View, $author$project$Page$Tournament$NonParticipant, tournament);
+		}
+	});
+var $author$project$Page$Tournament$removeBracket = F2(
+	function (seq, brackets) {
+		return A2(
+			$elm$core$List$sortBy,
+			function (b) {
+				return b.sequence;
+			},
+			A2(
+				$elm$core$List$filter,
+				function (b) {
+					return !_Utils_eq(b.sequence, seq);
+				},
+				brackets));
+	});
+var $author$project$Page$Tournament$GotDelete = function (a) {
+	return {$: 'GotDelete', a: a};
+};
+var $author$project$Page$Tournament$requestDelete = F2(
+	function (viewer, tournament) {
+		return A2(
+			$author$project$Api$privateDelete,
+			{
+				expect: $author$project$Api$expectWhatever($author$project$Page$Tournament$GotDelete),
+				url: $author$project$Api$tournament(tournament.id)
+			},
+			viewer);
+	});
+var $author$project$Api$tournamentInit = function (id) {
+	return $elm$core$String$concat(
+		_List_fromArray(
+			[
+				$author$project$Api$tournament(id),
+				'/init'
+			]));
+};
+var $author$project$Page$Tournament$requestInit = F2(
+	function (viewer, tournament) {
+		return A2(
+			$author$project$Api$privatePost,
+			{
+				body: $elm$http$Http$emptyBody,
+				expect: A2($author$project$Api$expectJson, $author$project$Page$Tournament$GotTournament, $author$project$Model$Tournament$decoder),
+				url: $author$project$Api$tournamentInit(tournament.id)
+			},
+			viewer);
+	});
+var $author$project$Api$tournamentPlayers = function (tournamentId) {
+	return $elm$core$String$concat(
+		_List_fromArray(
+			[
+				$author$project$Api$tournament(tournamentId),
+				'/players'
+			]));
+};
+var $author$project$Api$joinTournament = function (tournamentId) {
+	return $elm$core$String$concat(
+		_List_fromArray(
+			[
+				$author$project$Api$tournamentPlayers(tournamentId),
+				'/invite'
+			]));
+};
+var $author$project$Page$Tournament$requestJoin = F2(
+	function (viewer, tournament) {
+		return A2(
+			$author$project$Api$privatePost,
+			{
+				body: $elm$http$Http$emptyBody,
+				expect: A2($author$project$Api$expectJson, $author$project$Page$Tournament$GotTournament, $author$project$Model$Tournament$decoder),
+				url: $author$project$Api$joinTournament(tournament.id)
+			},
+			viewer);
+	});
+var $author$project$Page$Tournament$requestLeave = F2(
+	function (viewer, tournament) {
+		return A2(
+			$author$project$Api$privateDelete,
+			{
+				expect: A2($author$project$Api$expectJson, $author$project$Page$Tournament$GotTournament, $author$project$Model$Tournament$decoder),
+				url: $author$project$Api$tournamentPlayers(tournament.id)
+			},
+			viewer);
+	});
+var $elm$json$Json$Encode$bool = _Json_wrap;
+var $elm$json$Json$Encode$float = _Json_wrap;
+var $elm$json$Json$Encode$int = _Json_wrap;
+var $author$project$Page$Tournament$bracketEncoder = function (form) {
+	return $elm$json$Json$Encode$object(
+		_List_fromArray(
+			[
+				_Utils_Tuple2(
+				'sequence',
+				$elm$json$Json$Encode$int(form.sequence)),
+				_Utils_Tuple2(
+				'name',
+				$elm$json$Json$Encode$string(form.name)),
+				_Utils_Tuple2(
+				'winCondition',
+				$elm$json$Json$Encode$string(form.winCondition)),
+				_Utils_Tuple2(
+				'numberOfAdvancing',
+				$elm$json$Json$Encode$int(form.numberOfAdvancing)),
+				_Utils_Tuple2(
+				'numberOfSeries',
+				$elm$json$Json$Encode$int(form.numberOfSeries)),
+				_Utils_Tuple2(
+				'gamesPerSeries',
+				$elm$json$Json$Encode$int(form.gamesPerSeries)),
+				_Utils_Tuple2(
+				'finalScoreMultiplier',
+				$elm$json$Json$Encode$float(form.finalScoreMultiplier))
+			]));
+};
+var $elm$json$Json$Encode$list = F2(
+	function (func, entries) {
+		return _Json_wrap(
+			A3(
+				$elm$core$List$foldl,
+				_Json_addEntry(func),
+				_Json_emptyArray(_Utils_Tuple0),
+				entries));
+	});
+var $author$project$Page$Tournament$patchEncoder = function (form) {
+	var maybeNull = function (val) {
+		return $elm$core$String$isEmpty(val) ? $elm$json$Json$Encode$null : $elm$json$Json$Encode$string(val);
+	};
+	return $elm$json$Json$Encode$object(
+		_List_fromArray(
+			[
+				_Utils_Tuple2(
+				'rulesetId',
+				function () {
+					var _v0 = form.ruleset;
+					if (_v0.$ === 'Just') {
+						var ruleset = _v0.a;
+						return $elm$json$Json$Encode$int(ruleset.id);
+					} else {
+						return $elm$json$Json$Encode$null;
+					}
+				}()),
+				_Utils_Tuple2(
+				'name',
+				maybeNull(form.name)),
+				_Utils_Tuple2(
+				'description',
+				maybeNull(form.description)),
+				_Utils_Tuple2(
+				'startDate',
+				maybeNull(form.startDate)),
+				_Utils_Tuple2(
+				'allowNonMembers',
+				$elm$json$Json$Encode$bool(form.allowNonMembers)),
+				_Utils_Tuple2(
+				'RequirePermission',
+				$elm$json$Json$Encode$bool(form.requirePermission)),
+				_Utils_Tuple2(
+				'brackets',
+				A2($elm$json$Json$Encode$list, $author$project$Page$Tournament$bracketEncoder, form.brackets))
+			]));
+};
+var $author$project$Page$Tournament$requestPatch = F3(
+	function (viewer, tournament, form) {
+		return A2(
+			$author$project$Api$privatePut,
+			{
+				body: $elm$http$Http$jsonBody(
+					$author$project$Page$Tournament$patchEncoder(form)),
+				expect: A2($author$project$Api$expectJson, $author$project$Page$Tournament$GotTournament, $author$project$Model$Tournament$decoder),
+				url: $author$project$Api$tournament(tournament.id)
+			},
+			viewer);
+	});
+var $author$project$Page$Tournament$GotPostTournament = function (a) {
+	return {$: 'GotPostTournament', a: a};
+};
+var $author$project$Page$Tournament$requestPost = F2(
+	function (form, viewer) {
+		return A2(
+			$author$project$Api$privatePost,
+			{
+				body: $elm$http$Http$jsonBody(
+					$author$project$Page$Tournament$patchEncoder(form)),
+				expect: A2($author$project$Api$expectJson, $author$project$Page$Tournament$GotPostTournament, $author$project$Model$Tournament$decoder),
+				url: $author$project$Api$tournaments
+			},
+			viewer);
+	});
+var $author$project$Api$tournamentPlayer = F2(
+	function (tournamentId, playerId) {
+		return $elm$core$String$concat(
+			_List_fromArray(
+				[
+					$author$project$Api$tournamentPlayers(tournamentId),
+					'/',
+					$elm$core$String$fromInt(playerId)
+				]));
+	});
+var $author$project$Page$Tournament$requestRemovePlayer = F3(
+	function (viewer, tournament, player) {
+		return A2(
+			$author$project$Api$privateDelete,
+			{
+				expect: A2($author$project$Api$expectJson, $author$project$Page$Tournament$GotTournament, $author$project$Model$Tournament$decoder),
+				url: A2($author$project$Api$tournamentPlayer, tournament.id, player.userId)
+			},
+			viewer);
+	});
+var $elm$core$String$toFloat = _String_toFloat;
+var $author$project$Page$Tournament$updateBracket = F3(
+	function (transform, brackets, seq) {
+		var _v0 = A2(
+			$elm_community$list_extra$List$Extra$find,
+			function (b) {
+				return _Utils_eq(b.sequence, seq);
+			},
+			brackets);
+		if (_v0.$ === 'Nothing') {
+			return brackets;
+		} else {
+			var bracket = _v0.a;
+			var rem = A2(
+				$elm$core$List$filter,
+				function (b) {
+					return !_Utils_eq(b.sequence, seq);
+				},
+				brackets);
+			return A2(
+				$elm$core$List$sortBy,
+				function (b) {
+					return b.sequence;
+				},
+				A2(
+					$elm$core$List$cons,
+					transform(bracket),
+					rem));
+		}
+	});
+var $author$project$Page$Tournament$updateEditForm = F4(
+	function (transform, tournament, form, model) {
+		return _Utils_Tuple2(
+			_Utils_update(
+				model,
+				{
+					error: $elm$core$Maybe$Nothing,
+					state: A2(
+						$author$project$Page$Tournament$Edit,
+						tournament,
+						transform(form))
+				}),
+			$elm$core$Platform$Cmd$none);
+	});
+var $author$project$Page$Tournament$updateNewForm = F2(
+	function (form, model) {
+		return _Utils_Tuple2(
+			_Utils_update(
+				model,
+				{
+					state: $author$project$Page$Tournament$New(form)
+				}),
+			$elm$core$Platform$Cmd$none);
+	});
+var $elm$core$List$isEmpty = function (xs) {
+	if (!xs.b) {
+		return true;
+	} else {
+		return false;
+	}
+};
+var $author$project$Page$Tournament$validateNew = function (form) {
+	var validateBracket = function (b) {
+		return $elm$core$String$isEmpty(b.name) ? $elm$core$Result$Err('Preencha o nome da chave') : ($elm$core$String$isEmpty(b.winCondition) ? $elm$core$Result$Err('Preencha a condição de vitória da chave') : (((b.winCondition === 'TopX') && (b.numberOfAdvancing <= 0)) ? $elm$core$Result$Err('O número de jogadores a avançar para a próxima fase precisa ser maior que zero') : ((b.numberOfSeries <= 0) ? $elm$core$Result$Err('Cada chave precisa de ao menos uma série') : ((b.gamesPerSeries <= 0) ? $elm$core$Result$Err('Cada série precisa de ao menos um jogo') : ((b.finalScoreMultiplier < 0) ? $elm$core$Result$Err('O multiplicador de pontuação não pode ser negativo') : $elm$core$Result$Ok(_Utils_Tuple0))))));
+	};
+	if (_Utils_eq(form.ruleset, $elm$core$Maybe$Nothing)) {
+		return $elm$core$Result$Err('Preencha o conjunto de regras');
+	} else {
+		if ($elm$core$String$isEmpty(form.name)) {
+			return $elm$core$Result$Err('Preencha o nome do torneio');
+		} else {
+			if ($elm$core$String$isEmpty(form.description)) {
+				return $elm$core$Result$Err('Preencha a descrição do torneio');
+			} else {
+				if ($elm$core$String$isEmpty(form.startDate)) {
+					return $elm$core$Result$Err('Preencha a data de início do torneio');
+				} else {
+					if ($elm$core$List$isEmpty(form.brackets)) {
+						return $elm$core$Result$Err('Crie ao menos uma chave');
+					} else {
+						var res = A2(
+							$elm_community$list_extra$List$Extra$find,
+							function (r) {
+								return !_Utils_eq(
+									r,
+									$elm$core$Result$Ok(_Utils_Tuple0));
+							},
+							A2($elm$core$List$map, validateBracket, form.brackets));
+						if (res.$ === 'Just') {
+							var err = res.a;
+							return err;
+						} else {
+							return $elm$core$Result$Ok(_Utils_Tuple0);
+						}
+					}
+				}
+			}
+		}
+	}
+};
+var $author$project$Page$Tournament$update = F2(
+	function (msg, model) {
+		var makeRequest = function (request) {
+			var _v66 = $author$project$Session$toViewer(model.session);
+			if (_v66.$ === 'Just') {
+				var viewer = _v66.a;
+				return _Utils_Tuple2(
+					model,
+					request(viewer));
+			} else {
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							error: $elm$core$Maybe$Just('De alguma forma, você não está logado')
+						}),
+					$elm$core$Platform$Cmd$none);
+			}
+		};
+		var _v0 = _Utils_Tuple2(msg, model.state);
+		_v0$42:
+		while (true) {
+			switch (_v0.a.$) {
+				case 'GotTournament':
+					var result = _v0.a.a;
+					if (result.$ === 'Ok') {
+						var tournament = result.a;
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									error: $elm$core$Maybe$Nothing,
+									state: A2($author$project$Page$Tournament$initState, tournament, model.session)
+								}),
+							$elm$core$Platform$Cmd$none);
+					} else {
+						var error = result.a;
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									error: $elm$core$Maybe$Just(
+										$author$project$Api$errorToString(error))
+								}),
+							$elm$core$Platform$Cmd$none);
+					}
+				case 'GotPostTournament':
+					var result = _v0.a.a;
+					if (result.$ === 'Ok') {
+						var tournament = result.a;
+						return _Utils_Tuple2(
+							model,
+							A2(
+								$elm$browser$Browser$Navigation$pushUrl,
+								$author$project$Session$navKey(model.session),
+								A2(
+									$elm$url$Url$Builder$absolute,
+									$author$project$Route$routeToPieces(
+										$author$project$Route$Tournament(tournament.id)),
+									_List_Nil)));
+					} else {
+						var error = result.a;
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									error: $elm$core$Maybe$Just(
+										$author$project$Api$errorToString(error))
+								}),
+							$elm$core$Platform$Cmd$none);
+					}
+				case 'GotDelete':
+					if ((_v0.b.$ === 'View') && (_v0.b.a.$ === 'Owner')) {
+						var result = _v0.a.a;
+						var _v3 = _v0.b;
+						var _v4 = _v3.a;
+						if (result.$ === 'Ok') {
+							return _Utils_Tuple2(
+								model,
+								A2(
+									$elm$browser$Browser$Navigation$pushUrl,
+									$author$project$Session$navKey(model.session),
+									A2($elm$url$Url$Builder$absolute, _List_Nil, _List_Nil)));
+						} else {
+							var error = result.a;
+							return _Utils_Tuple2(
+								_Utils_update(
+									model,
+									{
+										error: $elm$core$Maybe$Just(
+											$author$project$Api$errorToString(error))
+									}),
+								$elm$core$Platform$Cmd$none);
+						}
+					} else {
+						break _v0$42;
+					}
+				case 'GotRulesets':
+					var result = _v0.a.a;
+					if (result.$ === 'Ok') {
+						var rulesets = result.a;
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{error: $elm$core$Maybe$Nothing, rulesets: rulesets}),
+							$elm$core$Platform$Cmd$none);
+					} else {
+						var error = result.a;
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									error: $elm$core$Maybe$Just(
+										$author$project$Api$errorToString(error))
+								}),
+							$elm$core$Platform$Cmd$none);
+					}
+				case 'RemovePlayer':
+					if (_v0.b.$ === 'View') {
+						var player = _v0.a.a;
+						var _v7 = _v0.b;
+						var tournament = _v7.b;
+						return makeRequest(
+							function (viewer) {
+								return A3($author$project$Page$Tournament$requestRemovePlayer, viewer, tournament, player);
+							});
+					} else {
+						break _v0$42;
+					}
+				case 'JoinTournament':
+					if ((_v0.b.$ === 'View') && (_v0.b.a.$ === 'NonParticipant')) {
+						var _v8 = _v0.a;
+						var _v9 = _v0.b;
+						var _v10 = _v9.a;
+						var tournament = _v9.b;
+						return makeRequest(
+							function (viewer) {
+								return A2($author$project$Page$Tournament$requestJoin, viewer, tournament);
+							});
+					} else {
+						break _v0$42;
+					}
+				case 'LeaveTournament':
+					if ((_v0.b.$ === 'View') && (_v0.b.a.$ === 'Participant')) {
+						var _v11 = _v0.a;
+						var _v12 = _v0.b;
+						var _v13 = _v12.a;
+						var tournament = _v12.b;
+						return makeRequest(
+							function (viewer) {
+								return A2($author$project$Page$Tournament$requestLeave, viewer, tournament);
+							});
+					} else {
+						break _v0$42;
+					}
+				case 'InitTournament':
+					if ((_v0.b.$ === 'View') && (_v0.b.a.$ === 'Owner')) {
+						var _v14 = _v0.a;
+						var _v15 = _v0.b;
+						var _v16 = _v15.a;
+						var tournament = _v15.b;
+						return makeRequest(
+							function (viewer) {
+								return A2($author$project$Page$Tournament$requestInit, viewer, tournament);
+							});
+					} else {
+						break _v0$42;
+					}
+				case 'ConfirmNew':
+					if (_v0.b.$ === 'New') {
+						var _v17 = _v0.a;
+						var form = _v0.b.a;
+						var _v18 = $author$project$Page$Tournament$validateNew(form);
+						if (_v18.$ === 'Ok') {
+							return makeRequest(
+								function (viewer) {
+									return A2($author$project$Page$Tournament$requestPost, form, viewer);
+								});
+						} else {
+							var error = _v18.a;
+							return _Utils_Tuple2(
+								_Utils_update(
+									model,
+									{
+										error: $elm$core$Maybe$Just(error)
+									}),
+								$elm$core$Platform$Cmd$none);
+						}
+					} else {
+						break _v0$42;
+					}
+				case 'CancelNew':
+					if (_v0.b.$ === 'New') {
+						var _v19 = _v0.a;
+						return _Utils_Tuple2(
+							model,
+							A2(
+								$elm$browser$Browser$Navigation$back,
+								$author$project$Session$navKey(model.session),
+								1));
+					} else {
+						break _v0$42;
+					}
+				case 'EditTournament':
+					if ((_v0.b.$ === 'View') && (_v0.b.a.$ === 'Owner')) {
+						var _v20 = _v0.a;
+						var _v21 = _v0.b;
+						var _v22 = _v21.a;
+						var tournament = _v21.b;
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									state: A2(
+										$author$project$Page$Tournament$Edit,
+										tournament,
+										$author$project$Page$Tournament$initForm(tournament))
+								}),
+							$author$project$Page$Tournament$requestRulesets(tournament.clubId));
+					} else {
+						break _v0$42;
+					}
+				case 'ConfirmEdit':
+					if (_v0.b.$ === 'Edit') {
+						var _v23 = _v0.a;
+						var _v24 = _v0.b;
+						var tournament = _v24.a;
+						var form = _v24.b;
+						return makeRequest(
+							function (viewer) {
+								return A3($author$project$Page$Tournament$requestPatch, viewer, tournament, form);
+							});
+					} else {
+						break _v0$42;
+					}
+				case 'CancelEdit':
+					if (_v0.b.$ === 'Edit') {
+						var _v25 = _v0.a;
+						var _v26 = _v0.b;
+						var tournament = _v26.a;
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									error: $elm$core$Maybe$Nothing,
+									state: A2($author$project$Page$Tournament$View, $author$project$Page$Tournament$Owner, tournament)
+								}),
+							$elm$core$Platform$Cmd$none);
+					} else {
+						break _v0$42;
+					}
+				case 'DeleteTournament':
+					if ((_v0.b.$ === 'View') && (_v0.b.a.$ === 'Owner')) {
+						var _v27 = _v0.a;
+						var _v28 = _v0.b;
+						var _v29 = _v28.a;
+						var tournament = _v28.b;
+						return makeRequest(
+							function (viewer) {
+								return A2($author$project$Page$Tournament$requestDelete, viewer, tournament);
+							});
+					} else {
+						break _v0$42;
+					}
+				case 'InputName':
+					switch (_v0.b.$) {
+						case 'New':
+							var name = _v0.a.a;
+							var form = _v0.b.a;
+							return A2(
+								$author$project$Page$Tournament$updateNewForm,
+								_Utils_update(
+									form,
+									{name: name}),
+								model);
+						case 'Edit':
+							var name = _v0.a.a;
+							var _v30 = _v0.b;
+							var tournament = _v30.a;
+							var form = _v30.b;
+							return A4(
+								$author$project$Page$Tournament$updateEditForm,
+								function (f) {
+									return _Utils_update(
+										f,
+										{name: name});
+								},
+								tournament,
+								form,
+								model);
+						default:
+							break _v0$42;
+					}
+				case 'InputDescription':
+					switch (_v0.b.$) {
+						case 'New':
+							var description = _v0.a.a;
+							var form = _v0.b.a;
+							return A2(
+								$author$project$Page$Tournament$updateNewForm,
+								_Utils_update(
+									form,
+									{description: description}),
+								model);
+						case 'Edit':
+							var description = _v0.a.a;
+							var _v31 = _v0.b;
+							var tournament = _v31.a;
+							var form = _v31.b;
+							return A4(
+								$author$project$Page$Tournament$updateEditForm,
+								function (f) {
+									return _Utils_update(
+										f,
+										{description: description});
+								},
+								tournament,
+								form,
+								model);
+						default:
+							break _v0$42;
+					}
+				case 'InputStartDate':
+					switch (_v0.b.$) {
+						case 'New':
+							var startDate = _v0.a.a;
+							var form = _v0.b.a;
+							return A2(
+								$author$project$Page$Tournament$updateNewForm,
+								_Utils_update(
+									form,
+									{startDate: startDate}),
+								model);
+						case 'Edit':
+							var startDate = _v0.a.a;
+							var _v32 = _v0.b;
+							var tournament = _v32.a;
+							var form = _v32.b;
+							return A4(
+								$author$project$Page$Tournament$updateEditForm,
+								function (f) {
+									return _Utils_update(
+										f,
+										{startDate: startDate});
+								},
+								tournament,
+								form,
+								model);
+						default:
+							break _v0$42;
+					}
+				case 'InputRuleset':
+					switch (_v0.b.$) {
+						case 'New':
+							var name = _v0.a.a;
+							var form = _v0.b.a;
+							var ruleset = A2(
+								$elm_community$list_extra$List$Extra$find,
+								function (r) {
+									return _Utils_eq(r.name, name);
+								},
+								model.rulesets);
+							return A2(
+								$author$project$Page$Tournament$updateNewForm,
+								_Utils_update(
+									form,
+									{ruleset: ruleset}),
+								model);
+						case 'Edit':
+							var name = _v0.a.a;
+							var _v33 = _v0.b;
+							var tournament = _v33.a;
+							var form = _v33.b;
+							var ruleset = A2(
+								$elm_community$list_extra$List$Extra$find,
+								function (r) {
+									return _Utils_eq(r.name, name);
+								},
+								model.rulesets);
+							return A4(
+								$author$project$Page$Tournament$updateEditForm,
+								function (f) {
+									return _Utils_update(
+										f,
+										{ruleset: ruleset});
+								},
+								tournament,
+								form,
+								model);
+						default:
+							break _v0$42;
+					}
+				case 'InputAllow':
+					switch (_v0.b.$) {
+						case 'New':
+							var allow = _v0.a.a;
+							var form = _v0.b.a;
+							return A2(
+								$author$project$Page$Tournament$updateNewForm,
+								_Utils_update(
+									form,
+									{allowNonMembers: allow}),
+								model);
+						case 'Edit':
+							var allow = _v0.a.a;
+							var _v34 = _v0.b;
+							var tournament = _v34.a;
+							var form = _v34.b;
+							return A4(
+								$author$project$Page$Tournament$updateEditForm,
+								function (f) {
+									return _Utils_update(
+										f,
+										{allowNonMembers: allow});
+								},
+								tournament,
+								form,
+								model);
+						default:
+							break _v0$42;
+					}
+				case 'InputPermission':
+					switch (_v0.b.$) {
+						case 'New':
+							var permission = _v0.a.a;
+							var form = _v0.b.a;
+							return A2(
+								$author$project$Page$Tournament$updateNewForm,
+								_Utils_update(
+									form,
+									{requirePermission: permission}),
+								model);
+						case 'Edit':
+							var permission = _v0.a.a;
+							var _v35 = _v0.b;
+							var tournament = _v35.a;
+							var form = _v35.b;
+							return A4(
+								$author$project$Page$Tournament$updateEditForm,
+								function (f) {
+									return _Utils_update(
+										f,
+										{requirePermission: permission});
+								},
+								tournament,
+								form,
+								model);
+						default:
+							break _v0$42;
+					}
+				case 'AddBracket':
+					switch (_v0.b.$) {
+						case 'New':
+							var _v36 = _v0.a;
+							var form = _v0.b.a;
+							return A2(
+								$author$project$Page$Tournament$updateNewForm,
+								_Utils_update(
+									form,
+									{
+										brackets: $author$project$Page$Tournament$addBracket(form.brackets)
+									}),
+								model);
+						case 'Edit':
+							var _v37 = _v0.a;
+							var _v38 = _v0.b;
+							var tournament = _v38.a;
+							var form = _v38.b;
+							return A4(
+								$author$project$Page$Tournament$updateEditForm,
+								function (f) {
+									return _Utils_update(
+										f,
+										{
+											brackets: $author$project$Page$Tournament$addBracket(f.brackets)
+										});
+								},
+								tournament,
+								form,
+								model);
+						default:
+							break _v0$42;
+					}
+				case 'RemoveBracket':
+					switch (_v0.b.$) {
+						case 'New':
+							var seq = _v0.a.a;
+							var form = _v0.b.a;
+							return A2(
+								$author$project$Page$Tournament$updateNewForm,
+								_Utils_update(
+									form,
+									{
+										brackets: A2($author$project$Page$Tournament$removeBracket, seq, form.brackets)
+									}),
+								model);
+						case 'Edit':
+							var seq = _v0.a.a;
+							var _v39 = _v0.b;
+							var tournament = _v39.a;
+							var form = _v39.b;
+							return A4(
+								$author$project$Page$Tournament$updateEditForm,
+								function (f) {
+									return _Utils_update(
+										f,
+										{
+											brackets: A2($author$project$Page$Tournament$removeBracket, seq, f.brackets)
+										});
+								},
+								tournament,
+								form,
+								model);
+						default:
+							break _v0$42;
+					}
+				case 'InputBracketName':
+					switch (_v0.b.$) {
+						case 'New':
+							var _v40 = _v0.a;
+							var seq = _v40.a;
+							var name = _v40.b;
+							var form = _v0.b.a;
+							return A2(
+								$author$project$Page$Tournament$updateNewForm,
+								_Utils_update(
+									form,
+									{
+										brackets: A3(
+											$author$project$Page$Tournament$updateBracket,
+											function (b) {
+												return _Utils_update(
+													b,
+													{name: name});
+											},
+											form.brackets,
+											seq)
+									}),
+								model);
+						case 'Edit':
+							var _v41 = _v0.a;
+							var seq = _v41.a;
+							var name = _v41.b;
+							var _v42 = _v0.b;
+							var tournament = _v42.a;
+							var form = _v42.b;
+							return A4(
+								$author$project$Page$Tournament$updateEditForm,
+								function (f) {
+									return _Utils_update(
+										f,
+										{
+											brackets: A3(
+												$author$project$Page$Tournament$updateBracket,
+												function (b) {
+													return _Utils_update(
+														b,
+														{name: name});
+												},
+												f.brackets,
+												seq)
+										});
+								},
+								tournament,
+								form,
+								model);
+						default:
+							break _v0$42;
+					}
+				case 'InputBracketWinCon':
+					switch (_v0.b.$) {
+						case 'New':
+							var _v43 = _v0.a;
+							var seq = _v43.a;
+							var winCon = _v43.b;
+							var form = _v0.b.a;
+							return A2(
+								$author$project$Page$Tournament$updateNewForm,
+								_Utils_update(
+									form,
+									{
+										brackets: A3(
+											$author$project$Page$Tournament$updateBracket,
+											function (b) {
+												return _Utils_update(
+													b,
+													{winCondition: winCon});
+											},
+											form.brackets,
+											seq)
+									}),
+								model);
+						case 'Edit':
+							var _v44 = _v0.a;
+							var seq = _v44.a;
+							var winCon = _v44.b;
+							var _v45 = _v0.b;
+							var tournament = _v45.a;
+							var form = _v45.b;
+							return A4(
+								$author$project$Page$Tournament$updateEditForm,
+								function (f) {
+									return _Utils_update(
+										f,
+										{
+											brackets: A3(
+												$author$project$Page$Tournament$updateBracket,
+												function (b) {
+													return _Utils_update(
+														b,
+														{winCondition: winCon});
+												},
+												f.brackets,
+												seq)
+										});
+								},
+								tournament,
+								form,
+								model);
+						default:
+							break _v0$42;
+					}
+				case 'InputBracketNAdv':
+					switch (_v0.b.$) {
+						case 'New':
+							var _v46 = _v0.a;
+							var seq = _v46.a;
+							var nadv = _v46.b;
+							var form = _v0.b.a;
+							var _v47 = $elm$core$String$toInt(nadv);
+							if (_v47.$ === 'Just') {
+								var i = _v47.a;
+								return A2(
+									$author$project$Page$Tournament$updateNewForm,
+									_Utils_update(
+										form,
+										{
+											brackets: A3(
+												$author$project$Page$Tournament$updateBracket,
+												function (b) {
+													return _Utils_update(
+														b,
+														{numberOfAdvancing: i});
+												},
+												form.brackets,
+												seq)
+										}),
+									model);
+							} else {
+								return _Utils_Tuple2(
+									_Utils_update(
+										model,
+										{
+											error: $elm$core$Maybe$Just('Falha na conversão de number of advancing players para inteiro')
+										}),
+									$elm$core$Platform$Cmd$none);
+							}
+						case 'Edit':
+							var _v48 = _v0.a;
+							var seq = _v48.a;
+							var nadv = _v48.b;
+							var _v49 = _v0.b;
+							var tournament = _v49.a;
+							var form = _v49.b;
+							var _v50 = $elm$core$String$toInt(nadv);
+							if (_v50.$ === 'Just') {
+								var i = _v50.a;
+								return A4(
+									$author$project$Page$Tournament$updateEditForm,
+									function (f) {
+										return _Utils_update(
+											f,
+											{
+												brackets: A3(
+													$author$project$Page$Tournament$updateBracket,
+													function (b) {
+														return _Utils_update(
+															b,
+															{numberOfAdvancing: i});
+													},
+													f.brackets,
+													seq)
+											});
+									},
+									tournament,
+									form,
+									model);
+							} else {
+								return _Utils_Tuple2(
+									_Utils_update(
+										model,
+										{
+											error: $elm$core$Maybe$Just('Falha na conversão de number of advancing players para inteiro')
+										}),
+									$elm$core$Platform$Cmd$none);
+							}
+						default:
+							break _v0$42;
+					}
+				case 'InputBracketNSeries':
+					switch (_v0.b.$) {
+						case 'New':
+							var _v51 = _v0.a;
+							var seq = _v51.a;
+							var nseries = _v51.b;
+							var form = _v0.b.a;
+							var _v52 = $elm$core$String$toInt(nseries);
+							if (_v52.$ === 'Just') {
+								var i = _v52.a;
+								return A2(
+									$author$project$Page$Tournament$updateNewForm,
+									_Utils_update(
+										form,
+										{
+											brackets: A3(
+												$author$project$Page$Tournament$updateBracket,
+												function (b) {
+													return _Utils_update(
+														b,
+														{numberOfSeries: i});
+												},
+												form.brackets,
+												seq)
+										}),
+									model);
+							} else {
+								return _Utils_Tuple2(
+									_Utils_update(
+										model,
+										{
+											error: $elm$core$Maybe$Just('Falha na conversão de número de séries para inteiro')
+										}),
+									$elm$core$Platform$Cmd$none);
+							}
+						case 'Edit':
+							var _v53 = _v0.a;
+							var seq = _v53.a;
+							var nseries = _v53.b;
+							var _v54 = _v0.b;
+							var tournament = _v54.a;
+							var form = _v54.b;
+							var _v55 = $elm$core$String$toInt(nseries);
+							if (_v55.$ === 'Just') {
+								var i = _v55.a;
+								return A4(
+									$author$project$Page$Tournament$updateEditForm,
+									function (f) {
+										return _Utils_update(
+											f,
+											{
+												brackets: A3(
+													$author$project$Page$Tournament$updateBracket,
+													function (b) {
+														return _Utils_update(
+															b,
+															{numberOfSeries: i});
+													},
+													f.brackets,
+													seq)
+											});
+									},
+									tournament,
+									form,
+									model);
+							} else {
+								return _Utils_Tuple2(
+									_Utils_update(
+										model,
+										{
+											error: $elm$core$Maybe$Just('Falha na conversão de número de séries para inteiro')
+										}),
+									$elm$core$Platform$Cmd$none);
+							}
+						default:
+							break _v0$42;
+					}
+				case 'InputBracketNGames':
+					switch (_v0.b.$) {
+						case 'New':
+							var _v56 = _v0.a;
+							var seq = _v56.a;
+							var ngames = _v56.b;
+							var form = _v0.b.a;
+							var _v57 = $elm$core$String$toInt(ngames);
+							if (_v57.$ === 'Just') {
+								var i = _v57.a;
+								return A2(
+									$author$project$Page$Tournament$updateNewForm,
+									_Utils_update(
+										form,
+										{
+											brackets: A3(
+												$author$project$Page$Tournament$updateBracket,
+												function (b) {
+													return _Utils_update(
+														b,
+														{gamesPerSeries: i});
+												},
+												form.brackets,
+												seq)
+										}),
+									model);
+							} else {
+								return _Utils_Tuple2(
+									_Utils_update(
+										model,
+										{
+											error: $elm$core$Maybe$Just('Falha na conversão de número de séries para ponto flutuante')
+										}),
+									$elm$core$Platform$Cmd$none);
+							}
+						case 'Edit':
+							var _v58 = _v0.a;
+							var seq = _v58.a;
+							var ngames = _v58.b;
+							var _v59 = _v0.b;
+							var tournament = _v59.a;
+							var form = _v59.b;
+							var _v60 = $elm$core$String$toInt(ngames);
+							if (_v60.$ === 'Just') {
+								var i = _v60.a;
+								return A4(
+									$author$project$Page$Tournament$updateEditForm,
+									function (f) {
+										return _Utils_update(
+											f,
+											{
+												brackets: A3(
+													$author$project$Page$Tournament$updateBracket,
+													function (b) {
+														return _Utils_update(
+															b,
+															{gamesPerSeries: i});
+													},
+													f.brackets,
+													seq)
+											});
+									},
+									tournament,
+									form,
+									model);
+							} else {
+								return _Utils_Tuple2(
+									_Utils_update(
+										model,
+										{
+											error: $elm$core$Maybe$Just('Falha na conversão de número de séries para ponto flutuante')
+										}),
+									$elm$core$Platform$Cmd$none);
+							}
+						default:
+							break _v0$42;
+					}
+				default:
+					switch (_v0.b.$) {
+						case 'New':
+							var _v61 = _v0.a;
+							var seq = _v61.a;
+							var mul = _v61.b;
+							var form = _v0.b.a;
+							var _v62 = $elm$core$String$toFloat(mul);
+							if (_v62.$ === 'Just') {
+								var fl = _v62.a;
+								return A2(
+									$author$project$Page$Tournament$updateNewForm,
+									_Utils_update(
+										form,
+										{
+											brackets: A3(
+												$author$project$Page$Tournament$updateBracket,
+												function (b) {
+													return _Utils_update(
+														b,
+														{finalScoreMultiplier: fl});
+												},
+												form.brackets,
+												seq)
+										}),
+									model);
+							} else {
+								return _Utils_Tuple2(
+									_Utils_update(
+										model,
+										{
+											error: $elm$core$Maybe$Just('Falha na conversão de número de séries para inteiro')
+										}),
+									$elm$core$Platform$Cmd$none);
+							}
+						case 'Edit':
+							var _v63 = _v0.a;
+							var seq = _v63.a;
+							var mul = _v63.b;
+							var _v64 = _v0.b;
+							var tournament = _v64.a;
+							var form = _v64.b;
+							var _v65 = $elm$core$String$toFloat(mul);
+							if (_v65.$ === 'Just') {
+								var fl = _v65.a;
+								return A4(
+									$author$project$Page$Tournament$updateEditForm,
+									function (f) {
+										return _Utils_update(
+											f,
+											{
+												brackets: A3(
+													$author$project$Page$Tournament$updateBracket,
+													function (b) {
+														return _Utils_update(
+															b,
+															{finalScoreMultiplier: fl});
+													},
+													f.brackets,
+													seq)
+											});
+									},
+									tournament,
+									form,
+									model);
+							} else {
+								return _Utils_Tuple2(
+									_Utils_update(
+										model,
+										{
+											error: $elm$core$Maybe$Just('Falha na conversão de número de séries para inteiro')
+										}),
+									$elm$core$Platform$Cmd$none);
+							}
+						default:
+							break _v0$42;
+					}
+			}
+		}
+		return _Utils_Tuple2(
+			_Utils_update(
+				model,
+				{
+					error: $elm$core$Maybe$Just('Estado inválido')
+				}),
+			$elm$core$Platform$Cmd$none);
+	});
+var $author$project$Page$Tournaments$update = F2(
+	function (msg, model) {
+		var result = msg.a;
+		if (result.$ === 'Ok') {
+			var tournaments = result.a;
+			return _Utils_Tuple2(
+				_Utils_update(
+					model,
+					{error: $elm$core$Maybe$Nothing, tournaments: tournaments}),
+				$elm$core$Platform$Cmd$none);
+		} else {
+			var error = result.a;
+			return _Utils_Tuple2(
+				_Utils_update(
+					model,
+					{
+						error: $elm$core$Maybe$Just(
+							$author$project$Api$errorToString(error))
+					}),
+				$elm$core$Platform$Cmd$none);
+		}
+	});
 var $author$project$Page$User$EditProfile = F2(
 	function (a, b) {
 		return {$: 'EditProfile', a: a, b: b};
@@ -9001,7 +11163,6 @@ var $author$project$Page$User$updateForm = F4(
 				}),
 			$elm$core$Platform$Cmd$none);
 	});
-var $elm$core$Basics$not = _Basics_not;
 var $author$project$Page$User$validatePatch = function (form) {
 	return ($elm$core$String$isEmpty(form.email) && ($elm$core$String$isEmpty(form.username) && $elm$core$String$isEmpty(form.password))) ? $elm$core$Result$Err('Preencha ao menos um campo para ser atualizado') : (((!$elm$core$String$isEmpty(form.password)) && $elm$core$String$isEmpty(form.passwordAgain)) ? $elm$core$Result$Err('Preencha a confirmação da senha') : ((!_Utils_eq(form.password, form.passwordAgain)) ? $elm$core$Result$Err('As senhas não são iguais') : $elm$core$Result$Ok(_Utils_Tuple0)));
 };
@@ -9290,97 +11451,163 @@ var $author$project$Page$User$update = F2(
 var $author$project$Main$update = F2(
 	function (msg, model) {
 		var _v0 = _Utils_Tuple2(msg, model);
-		_v0$7:
-		while (true) {
-			switch (_v0.a.$) {
-				case 'LinkClicked':
-					var urlRequest = _v0.a.a;
-					if (urlRequest.$ === 'Internal') {
-						var url = urlRequest.a;
-						return _Utils_Tuple2(
-							model,
-							A2(
-								$elm$browser$Browser$Navigation$pushUrl,
-								$author$project$Session$navKey(
-									$author$project$Main$toSession(model)),
-								$elm$url$Url$toString(url)));
-					} else {
-						var href = urlRequest.a;
-						return _Utils_Tuple2(
-							model,
-							$elm$browser$Browser$Navigation$load(href));
-					}
-				case 'UrlChanged':
-					var url = _v0.a.a;
-					return A2(
-						$author$project$Main$changeRouteTo,
-						$author$project$Route$fromUrl(url),
-						model);
-				case 'GotLoginMsg':
-					if (_v0.b.$ === 'Login') {
-						var subMsg = _v0.a.a;
-						var login = _v0.b.a;
-						return A3(
-							$author$project$Main$updateWith,
-							$author$project$Main$Login,
-							$author$project$Main$GotLoginMsg,
-							A2($author$project$Page$Login$update, subMsg, login));
-					} else {
-						break _v0$7;
-					}
-				case 'GotSignUpMsg':
-					if (_v0.b.$ === 'SignUp') {
-						var subMsg = _v0.a.a;
-						var signUp = _v0.b.a;
-						return A3(
-							$author$project$Main$updateWith,
-							$author$project$Main$SignUp,
-							$author$project$Main$GotSignUpMsg,
-							A2($author$project$Page$SignUp$update, subMsg, signUp));
-					} else {
-						break _v0$7;
-					}
-				case 'GotClubsMsg':
-					if (_v0.b.$ === 'Clubs') {
-						var subMsg = _v0.a.a;
-						var clubs = _v0.b.a;
-						return A3(
-							$author$project$Main$updateWith,
-							$author$project$Main$Clubs,
-							$author$project$Main$GotClubsMsg,
-							A2($author$project$Page$Clubs$update, subMsg, clubs));
-					} else {
-						break _v0$7;
-					}
-				case 'GotClubMsg':
-					if (_v0.b.$ === 'Club') {
-						var subMsg = _v0.a.a;
-						var club = _v0.b.a;
-						return A3(
-							$author$project$Main$updateWith,
-							$author$project$Main$Club,
-							$author$project$Main$GotClubMsg,
-							A2($author$project$Page$Club$update, subMsg, club));
-					} else {
-						break _v0$7;
-					}
-				case 'GotUserMsg':
-					if (_v0.b.$ === 'User') {
-						var subMsg = _v0.a.a;
-						var user = _v0.b.a;
-						return A3(
-							$author$project$Main$updateWith,
-							$author$project$Main$User,
-							$author$project$Main$GotUserMsg,
-							A2($author$project$Page$User$update, subMsg, user));
-					} else {
-						break _v0$7;
-					}
-				default:
-					break _v0$7;
-			}
+		switch (_v0.a.$) {
+			case 'LinkClicked':
+				var urlRequest = _v0.a.a;
+				if (urlRequest.$ === 'Internal') {
+					var url = urlRequest.a;
+					return _Utils_Tuple2(
+						model,
+						A2(
+							$elm$browser$Browser$Navigation$pushUrl,
+							$author$project$Session$navKey(
+								$author$project$Main$toSession(model)),
+							$elm$url$Url$toString(url)));
+				} else {
+					var href = urlRequest.a;
+					return _Utils_Tuple2(
+						model,
+						$elm$browser$Browser$Navigation$load(href));
+				}
+			case 'UrlChanged':
+				var url = _v0.a.a;
+				return A2(
+					$author$project$Main$changeRouteTo,
+					$author$project$Route$fromUrl(url),
+					model);
+			case 'GotLoginMsg':
+				if (_v0.b.$ === 'Login') {
+					var subMsg = _v0.a.a;
+					var login = _v0.b.a;
+					return A3(
+						$author$project$Main$updateWith,
+						$author$project$Main$Login,
+						$author$project$Main$GotLoginMsg,
+						A2($author$project$Page$Login$update, subMsg, login));
+				} else {
+					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+				}
+			case 'GotSignUpMsg':
+				if (_v0.b.$ === 'SignUp') {
+					var subMsg = _v0.a.a;
+					var signUp = _v0.b.a;
+					return A3(
+						$author$project$Main$updateWith,
+						$author$project$Main$SignUp,
+						$author$project$Main$GotSignUpMsg,
+						A2($author$project$Page$SignUp$update, subMsg, signUp));
+				} else {
+					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+				}
+			case 'GotClubsMsg':
+				if (_v0.b.$ === 'Clubs') {
+					var subMsg = _v0.a.a;
+					var clubs = _v0.b.a;
+					return A3(
+						$author$project$Main$updateWith,
+						$author$project$Main$Clubs,
+						$author$project$Main$GotClubsMsg,
+						A2($author$project$Page$Clubs$update, subMsg, clubs));
+				} else {
+					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+				}
+			case 'GotNewClubMsg':
+				if (_v0.b.$ === 'NewClub') {
+					var subMsg = _v0.a.a;
+					var club = _v0.b.a;
+					return A3(
+						$author$project$Main$updateWith,
+						$author$project$Main$NewClub,
+						$author$project$Main$GotNewClubMsg,
+						A2($author$project$Page$Club$update, subMsg, club));
+				} else {
+					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+				}
+			case 'GotClubMsg':
+				if (_v0.b.$ === 'Club') {
+					var subMsg = _v0.a.a;
+					var club = _v0.b.a;
+					return A3(
+						$author$project$Main$updateWith,
+						$author$project$Main$Club,
+						$author$project$Main$GotClubMsg,
+						A2($author$project$Page$Club$update, subMsg, club));
+				} else {
+					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+				}
+			case 'GotTournamentsMsg':
+				if (_v0.b.$ === 'Tournaments') {
+					var subMsg = _v0.a.a;
+					var tournaments = _v0.b.a;
+					return A3(
+						$author$project$Main$updateWith,
+						$author$project$Main$Tournaments,
+						$author$project$Main$GotTournamentsMsg,
+						A2($author$project$Page$Tournaments$update, subMsg, tournaments));
+				} else {
+					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+				}
+			case 'GotNewTournamentMsg':
+				if (_v0.b.$ === 'NewTournament') {
+					var subMsg = _v0.a.a;
+					var newTournament = _v0.b.a;
+					return A3(
+						$author$project$Main$updateWith,
+						$author$project$Main$NewTournament,
+						$author$project$Main$GotNewTournamentMsg,
+						A2($author$project$Page$Tournament$update, subMsg, newTournament));
+				} else {
+					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+				}
+			case 'GotTournamentMsg':
+				if (_v0.b.$ === 'Tournament') {
+					var subMsg = _v0.a.a;
+					var tournament = _v0.b.a;
+					return A3(
+						$author$project$Main$updateWith,
+						$author$project$Main$NewTournament,
+						$author$project$Main$GotNewTournamentMsg,
+						A2($author$project$Page$Tournament$update, subMsg, tournament));
+				} else {
+					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+				}
+			case 'GotRulesetMsg':
+				if (_v0.b.$ === 'Ruleset') {
+					var subMsg = _v0.a.a;
+					var ruleset = _v0.b.a;
+					return A3(
+						$author$project$Main$updateWith,
+						$author$project$Main$Ruleset,
+						$author$project$Main$GotRulesetMsg,
+						A2($author$project$Page$Ruleset$update, subMsg, ruleset));
+				} else {
+					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+				}
+			case 'GotBracketMsg':
+				if (_v0.b.$ === 'Bracket') {
+					var subMsg = _v0.a.a;
+					var bracket = _v0.b.a;
+					return A3(
+						$author$project$Main$updateWith,
+						$author$project$Main$Bracket,
+						$author$project$Main$GotBracketMsg,
+						A2($author$project$Page$Bracket$update, subMsg, bracket));
+				} else {
+					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+				}
+			default:
+				if (_v0.b.$ === 'User') {
+					var subMsg = _v0.a.a;
+					var user = _v0.b.a;
+					return A3(
+						$author$project$Main$updateWith,
+						$author$project$Main$User,
+						$author$project$Main$GotUserMsg,
+						A2($author$project$Page$User$update, subMsg, user));
+				} else {
+					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+				}
 		}
-		return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 	});
 var $elm$virtual_dom$VirtualDom$map = _VirtualDom_map;
 var $elm$html$Html$map = $elm$virtual_dom$VirtualDom$map;
@@ -9428,6 +11655,853 @@ var $author$project$CommonHtml$errorCard = function (msg) {
 					]))
 			]));
 };
+var $author$project$Page$Bracket$stateToTitle = function (state) {
+	if (state.$ === 'Uninitialized') {
+		return 'Chave';
+	} else {
+		var bracket = state.b;
+		return 'Chave - ' + bracket.name;
+	}
+};
+var $elm$html$Html$p = _VirtualDom_node('p');
+var $elm$html$Html$h1 = _VirtualDom_node('h1');
+var $author$project$Page$Bracket$viewBracketCard = function (bracket) {
+	var cardElement = F2(
+		function (title, value) {
+			return $elm$core$String$isEmpty(value) ? $elm$html$Html$text('') : A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('block')
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$strong,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('inline-block font-bold')
+							]),
+						_List_fromArray(
+							[
+								$elm$html$Html$text(title)
+							])),
+						A2(
+						$elm$html$Html$span,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('inline-block')
+							]),
+						_List_fromArray(
+							[
+								$elm$html$Html$text(value)
+							]))
+					]));
+		});
+	return A2(
+		$elm$html$Html$div,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('container bg-indigo-500 rounded-lg text-white p-6 my-4 max-w-lg')
+			]),
+		_List_fromArray(
+			[
+				A2(
+				$elm$html$Html$h1,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('font-bold text-xl')
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text(bracket.name)
+					])),
+				A2(
+				$elm$html$Html$p,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text(bracket.description)
+					])),
+				A2(cardElement, 'Data de Início', bracket.startedAt),
+				A2(cardElement, 'Data de Término', bracket.finishedAt)
+			]));
+};
+var $author$project$Page$Bracket$AddGame = function (a) {
+	return {$: 'AddGame', a: a};
+};
+var $author$project$Page$Bracket$CancelAddGame = function (a) {
+	return {$: 'CancelAddGame', a: a};
+};
+var $author$project$Page$Bracket$InputLogLink = F2(
+	function (a, b) {
+		return {$: 'InputLogLink', a: a, b: b};
+	});
+var $author$project$Page$Bracket$InputPlayer1Seat = F2(
+	function (a, b) {
+		return {$: 'InputPlayer1Seat', a: a, b: b};
+	});
+var $author$project$Page$Bracket$InputPlayer2Seat = F2(
+	function (a, b) {
+		return {$: 'InputPlayer2Seat', a: a, b: b};
+	});
+var $author$project$Page$Bracket$InputPlayer3Seat = F2(
+	function (a, b) {
+		return {$: 'InputPlayer3Seat', a: a, b: b};
+	});
+var $author$project$Page$Bracket$InputPlayer4Seat = F2(
+	function (a, b) {
+		return {$: 'InputPlayer4Seat', a: a, b: b};
+	});
+var $author$project$Page$Bracket$PostGame = function (a) {
+	return {$: 'PostGame', a: a};
+};
+var $author$project$Page$Bracket$ToggleFold = function (a) {
+	return {$: 'ToggleFold', a: a};
+};
+var $elm$html$Html$button = _VirtualDom_node('button');
+var $elm$html$Html$input = _VirtualDom_node('input');
+var $elm$virtual_dom$VirtualDom$Normal = function (a) {
+	return {$: 'Normal', a: a};
+};
+var $elm$virtual_dom$VirtualDom$on = _VirtualDom_on;
+var $elm$html$Html$Events$on = F2(
+	function (event, decoder) {
+		return A2(
+			$elm$virtual_dom$VirtualDom$on,
+			event,
+			$elm$virtual_dom$VirtualDom$Normal(decoder));
+	});
+var $elm$html$Html$Events$onClick = function (msg) {
+	return A2(
+		$elm$html$Html$Events$on,
+		'click',
+		$elm$json$Json$Decode$succeed(msg));
+};
+var $elm$html$Html$Events$alwaysStop = function (x) {
+	return _Utils_Tuple2(x, true);
+};
+var $elm$virtual_dom$VirtualDom$MayStopPropagation = function (a) {
+	return {$: 'MayStopPropagation', a: a};
+};
+var $elm$html$Html$Events$stopPropagationOn = F2(
+	function (event, decoder) {
+		return A2(
+			$elm$virtual_dom$VirtualDom$on,
+			event,
+			$elm$virtual_dom$VirtualDom$MayStopPropagation(decoder));
+	});
+var $elm$html$Html$Events$targetValue = A2(
+	$elm$json$Json$Decode$at,
+	_List_fromArray(
+		['target', 'value']),
+	$elm$json$Json$Decode$string);
+var $elm$html$Html$Events$onInput = function (tagger) {
+	return A2(
+		$elm$html$Html$Events$stopPropagationOn,
+		'input',
+		A2(
+			$elm$json$Json$Decode$map,
+			$elm$html$Html$Events$alwaysStop,
+			A2($elm$json$Json$Decode$map, tagger, $elm$html$Html$Events$targetValue)));
+};
+var $elm$html$Html$option = _VirtualDom_node('option');
+var $elm$html$Html$Attributes$placeholder = $elm$html$Html$Attributes$stringProperty('placeholder');
+var $elm$html$Html$select = _VirtualDom_node('select');
+var $elm$core$String$trim = _String_trim;
+var $elm$html$Html$Attributes$type_ = $elm$html$Html$Attributes$stringProperty('type');
+var $elm$html$Html$Attributes$value = $elm$html$Html$Attributes$stringProperty('value');
+var $elm$html$Html$a = _VirtualDom_node('a');
+var $elm$core$String$fromFloat = _String_fromNumber;
+var $author$project$Model$Game$viewPlayer = F2(
+	function (player, playerClass) {
+		var valueClass = 'text-right';
+		var seatClass = 'font-semibold text-right pr-1';
+		return A2(
+			$elm$html$Html$div,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class(playerClass)
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$elm$html$Html$p,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class(seatClass)
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text(player.seat)
+						])),
+					A2(
+					$elm$html$Html$p,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class(valueClass)
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text(
+							$elm$core$String$fromFloat(player.gameScore))
+						])),
+					A2(
+					$elm$html$Html$p,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class(valueClass)
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text(
+							$elm$core$String$fromFloat(player.runningTotal))
+						]))
+				]));
+	});
+var $author$project$Model$Game$view = function (game) {
+	var playerClass = 'flex-1';
+	var labelClass = 'font-semibold';
+	return A2(
+		$elm$html$Html$div,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('flex bg-indigo-500 text-white rounded-xl px-5 py-2')
+			]),
+		_List_fromArray(
+			[
+				A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('flex-1 align-middle pt-6')
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('#1')
+					])),
+				A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class(playerClass)
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$p,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class(labelClass)
+							]),
+						_List_fromArray(
+							[
+								$elm$html$Html$text('Acento')
+							])),
+						A2(
+						$elm$html$Html$p,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class(labelClass)
+							]),
+						_List_fromArray(
+							[
+								$elm$html$Html$text('Pontuação Final')
+							])),
+						A2(
+						$elm$html$Html$p,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class(labelClass)
+							]),
+						_List_fromArray(
+							[
+								$elm$html$Html$text('Total')
+							]))
+					])),
+				A2($author$project$Model$Game$viewPlayer, game.player1, playerClass),
+				A2($author$project$Model$Game$viewPlayer, game.player2, playerClass),
+				A2($author$project$Model$Game$viewPlayer, game.player3, playerClass),
+				A2($author$project$Model$Game$viewPlayer, game.player4, playerClass),
+				A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('flex-1 pt-6')
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$a,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('pl-8 hover:underline')
+							]),
+						_List_fromArray(
+							[
+								$elm$html$Html$text('Log')
+							]))
+					]))
+			]));
+};
+var $author$project$Page$Bracket$viewSingleSeries = F2(
+	function (_switch, series) {
+		var visibleHeadingClass = 'flex-1 font-bold text-right invisible';
+		var invisibleHeadingClass = 'flex-1 font-bold text-right';
+		var heading = A2(
+			$elm$html$Html$div,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class('flex px-5')
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$elm$html$Html$p,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class(invisibleHeadingClass)
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text('batata')
+						])),
+					A2(
+					$elm$html$Html$p,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class(invisibleHeadingClass)
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text('batata')
+						])),
+					A2(
+					$elm$html$Html$p,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class(visibleHeadingClass)
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text(series.player1Name)
+						])),
+					A2(
+					$elm$html$Html$p,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class(visibleHeadingClass)
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text(series.player2Name)
+						])),
+					A2(
+					$elm$html$Html$p,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class(visibleHeadingClass)
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text(series.player3Name)
+						])),
+					A2(
+					$elm$html$Html$p,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class(visibleHeadingClass)
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text(series.player4Name)
+						])),
+					A2(
+					$elm$html$Html$p,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class(invisibleHeadingClass)
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text('batata')
+						]))
+				]));
+		var header = A2(
+			$elm$html$Html$div,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class('list-item')
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$elm$html$Html$button,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('inline-btn btn-indigo-500 px-2'),
+							$elm$html$Html$Events$onClick(
+							$author$project$Page$Bracket$ToggleFold(series))
+						]),
+					_List_fromArray(
+						[
+							series.isFolded ? $elm$html$Html$text('>') : $elm$html$Html$text('V')
+						])),
+					A2(
+					$elm$html$Html$p,
+					_List_Nil,
+					_List_fromArray(
+						[
+							$elm$html$Html$text(
+							$elm$core$String$concat(
+								_List_fromArray(
+									[series.player1Name, ' vs ', series.player2Name, ' vs ', series.player3Name, ' vs ', series.player4Name])))
+						])),
+					A2(
+					$elm$html$Html$span,
+					_List_Nil,
+					_List_fromArray(
+						[
+							$elm$html$Html$text(
+							_Utils_ap(
+								series.playedAt,
+								$elm$core$String$isEmpty(
+									$elm$core$String$trim(series.finishedAt)) ? (' - ' + series.finishedAt) : ''))
+						]))
+				]));
+		var seriesHtml = A2(
+			$elm$core$List$cons,
+			header,
+			series.isFolded ? _List_Nil : A2(
+				$elm$core$List$cons,
+				heading,
+				A2($elm$core$List$map, $author$project$Model$Game$view, series.games)));
+		var formHtml = function () {
+			if (_Utils_eq(_switch, $author$project$Page$Bracket$Owner)) {
+				var _v0 = series.gameForm;
+				if (_v0.$ === 'Nothing') {
+					return (series.status !== 'Encerrada') ? _List_fromArray(
+						[
+							A2(
+							$elm$html$Html$button,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$class('border-transparent btn btn-indigo-500 mt-4'),
+									$elm$html$Html$Events$onClick(
+									$author$project$Page$Bracket$AddGame(series))
+								]),
+							_List_fromArray(
+								[
+									$elm$html$Html$text('Adicionar Jogo')
+								]))
+						]) : _List_Nil;
+				} else {
+					var selectSeat = function (onInputMsg) {
+						return A2(
+							$elm$html$Html$select,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$placeholder('Acento'),
+									$elm$html$Html$Attributes$class('flex-1 border-none rounded-sm bg-gray-100 text-gray-400'),
+									$elm$html$Html$Events$onInput(onInputMsg)
+								]),
+							_List_fromArray(
+								[
+									A2(
+									$elm$html$Html$option,
+									_List_fromArray(
+										[
+											$elm$html$Html$Attributes$value('East')
+										]),
+									_List_fromArray(
+										[
+											$elm$html$Html$text('東')
+										])),
+									A2(
+									$elm$html$Html$option,
+									_List_fromArray(
+										[
+											$elm$html$Html$Attributes$value('South')
+										]),
+									_List_fromArray(
+										[
+											$elm$html$Html$text('南')
+										])),
+									A2(
+									$elm$html$Html$option,
+									_List_fromArray(
+										[
+											$elm$html$Html$Attributes$value('West')
+										]),
+									_List_fromArray(
+										[
+											$elm$html$Html$text('西')
+										])),
+									A2(
+									$elm$html$Html$option,
+									_List_fromArray(
+										[
+											$elm$html$Html$Attributes$value('North')
+										]),
+									_List_fromArray(
+										[
+											$elm$html$Html$text('北')
+										]))
+								]));
+					};
+					return _List_fromArray(
+						[
+							A2(
+							$elm$html$Html$div,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$class('space-y-2')
+								]),
+							_List_fromArray(
+								[
+									A2(
+									$elm$html$Html$div,
+									_List_fromArray(
+										[
+											$elm$html$Html$Attributes$class('list-item')
+										]),
+									_List_fromArray(
+										[
+											A2(
+											$elm$html$Html$p,
+											_List_fromArray(
+												[
+													$elm$html$Html$Attributes$class('flex-1 font-bold text-right invisible')
+												]),
+											_List_fromArray(
+												[
+													$elm$html$Html$text('batata')
+												])),
+											A2(
+											$elm$html$Html$p,
+											_List_fromArray(
+												[
+													$elm$html$Html$Attributes$class('flex-1 font-bold text-right invisible')
+												]),
+											_List_fromArray(
+												[
+													$elm$html$Html$text('batata')
+												])),
+											selectSeat(
+											$author$project$Page$Bracket$InputPlayer1Seat(series)),
+											selectSeat(
+											$author$project$Page$Bracket$InputPlayer2Seat(series)),
+											selectSeat(
+											$author$project$Page$Bracket$InputPlayer3Seat(series)),
+											selectSeat(
+											$author$project$Page$Bracket$InputPlayer4Seat(series)),
+											A2(
+											$elm$html$Html$input,
+											_List_fromArray(
+												[
+													$elm$html$Html$Attributes$type_('text'),
+													$elm$html$Html$Attributes$placeholder('Log Link'),
+													$elm$html$Html$Attributes$class('flex-1 w-36 border-none rounded-sm bg-gray-100 text-gray-400 placeholder-gray-400'),
+													$elm$html$Html$Events$onInput(
+													$author$project$Page$Bracket$InputLogLink(series))
+												]),
+											_List_Nil)
+										]))
+								])),
+							A2(
+							$elm$html$Html$div,
+							_List_Nil,
+							_List_fromArray(
+								[
+									A2(
+									$elm$html$Html$button,
+									_List_fromArray(
+										[
+											$elm$html$Html$Attributes$class('border-none btn btn-green-500'),
+											$elm$html$Html$Events$onClick(
+											$author$project$Page$Bracket$PostGame(series))
+										]),
+									_List_fromArray(
+										[
+											$elm$html$Html$text('Confirmar')
+										])),
+									A2(
+									$elm$html$Html$button,
+									_List_fromArray(
+										[
+											$elm$html$Html$Attributes$class('border-none btn btn-red-500'),
+											$elm$html$Html$Events$onClick(
+											$author$project$Page$Bracket$CancelAddGame(series))
+										]),
+									_List_fromArray(
+										[
+											$elm$html$Html$text('Cancelar')
+										]))
+								]))
+						]);
+				}
+			} else {
+				return _List_Nil;
+			}
+		}();
+		return A2(
+			$elm$html$Html$div,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class('m-2')
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$elm$html$Html$div,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('container space-y-2 w-2/4')
+						]),
+					A2($elm$core$List$append, seriesHtml, formHtml))
+				]));
+	});
+var $author$project$Page$Bracket$viewSeries = F2(
+	function (bracket, _switch) {
+		return A2(
+			$elm$html$Html$div,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class('m-2')
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$elm$html$Html$h1,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('list-heading')
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text('Séries')
+						])),
+					A2(
+					$elm$html$Html$div,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('space-y-4')
+						]),
+					A2(
+						$elm$core$List$map,
+						$author$project$Page$Bracket$viewSingleSeries(_switch),
+						bracket.series))
+				]));
+	});
+var $author$project$Page$Bracket$viewBracket = function (model) {
+	var _v0 = model.state;
+	if (_v0.$ === 'Uninitialized') {
+		return A2(
+			$elm$html$Html$p,
+			_List_Nil,
+			_List_fromArray(
+				[
+					$elm$html$Html$text('Carregando...')
+				]));
+	} else {
+		var _switch = _v0.a;
+		var bracket = _v0.b;
+		return A2(
+			$elm$html$Html$div,
+			_List_Nil,
+			_List_fromArray(
+				[
+					$author$project$Page$Bracket$viewBracketCard(bracket),
+					A2($author$project$Page$Bracket$viewSeries, bracket, _switch)
+				]));
+	}
+};
+var $author$project$Viewer$getUrl = function (viewer) {
+	return A2(
+		$elm$url$Url$Builder$absolute,
+		_List_fromArray(
+			[
+				'users',
+				$elm$core$String$fromInt(viewer.id)
+			]),
+		_List_Nil);
+};
+var $elm$html$Html$Attributes$href = function (url) {
+	return A2(
+		$elm$html$Html$Attributes$stringProperty,
+		'href',
+		_VirtualDom_noJavaScriptUri(url));
+};
+var $elm$html$Html$img = _VirtualDom_node('img');
+var $elm$html$Html$nav = _VirtualDom_node('nav');
+var $elm$html$Html$Attributes$src = function (url) {
+	return A2(
+		$elm$html$Html$Attributes$stringProperty,
+		'src',
+		_VirtualDom_noJavaScriptOrHtmlUri(url));
+};
+var $author$project$CommonHtml$viewNav = function (session) {
+	return A2(
+		$elm$html$Html$nav,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('bg-indigo-700 flex flex-wrap items-center p-3')
+			]),
+		_List_fromArray(
+			[
+				A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('flex items-center flex-shrink-0 mr-2')
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$img,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$src('img/Nan2.svg'),
+								$elm$html$Html$Attributes$class('h-12 w-12')
+							]),
+						_List_Nil),
+						A2(
+						$elm$html$Html$span,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('text-white text-xl font-bold')
+							]),
+						_List_fromArray(
+							[
+								$elm$html$Html$text('Riichi Gang')
+							]))
+					])),
+				A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('flex-grow inline-flex justify-end mr-4')
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$a,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$href('/clubs'),
+								$elm$html$Html$Attributes$class('link-white')
+							]),
+						_List_fromArray(
+							[
+								$elm$html$Html$text('Clubes')
+							])),
+						A2(
+						$elm$html$Html$a,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$href('/torneios'),
+								$elm$html$Html$Attributes$class('link-white')
+							]),
+						_List_fromArray(
+							[
+								$elm$html$Html$text('Torneios')
+							]))
+					])),
+				function () {
+				if (session.$ === 'LoggedIn') {
+					var viewer = session.b;
+					var userUrl = $author$project$Viewer$getUrl(viewer);
+					var logoutUrl = A2(
+						$elm$url$Url$Builder$absolute,
+						_List_fromArray(
+							['logout']),
+						_List_Nil);
+					return A2(
+						$elm$html$Html$div,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('inline-flex')
+							]),
+						_List_fromArray(
+							[
+								A2(
+								$elm$html$Html$a,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$href(userUrl),
+										$elm$html$Html$Attributes$class('btn btn-indigo-800')
+									]),
+								_List_fromArray(
+									[
+										$elm$html$Html$text('Perfil')
+									])),
+								A2(
+								$elm$html$Html$a,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$href(logoutUrl),
+										$elm$html$Html$Attributes$class('btn btn-indigo-800')
+									]),
+								_List_fromArray(
+									[
+										$elm$html$Html$text('Logout')
+									]))
+							]));
+				} else {
+					return A2(
+						$elm$html$Html$div,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('inline-flex')
+							]),
+						_List_fromArray(
+							[
+								A2(
+								$elm$html$Html$a,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$href('/login'),
+										$elm$html$Html$Attributes$class('btn btn-indigo-800')
+									]),
+								_List_fromArray(
+									[
+										$elm$html$Html$text('Login')
+									])),
+								A2(
+								$elm$html$Html$a,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$href('/signup'),
+										$elm$html$Html$Attributes$class('btn btn-indigo-800')
+									]),
+								_List_fromArray(
+									[
+										$elm$html$Html$text('Sign Up')
+									]))
+							]));
+				}
+			}()
+			]));
+};
+var $author$project$Page$Bracket$view = function (model) {
+	return {
+		body: _List_fromArray(
+			[
+				$author$project$CommonHtml$viewNav(model.session),
+				function () {
+				var _v0 = model.error;
+				if (_v0.$ === 'Just') {
+					var error = _v0.a;
+					return $author$project$CommonHtml$errorCard(error);
+				} else {
+					return $elm$html$Html$text('');
+				}
+			}(),
+				$author$project$Page$Bracket$viewBracket(model)
+			]),
+		title: $author$project$Page$Bracket$stateToTitle(model.state)
+	};
+};
 var $author$project$Page$Club$stateToTitle = function (state) {
 	switch (state.$) {
 		case 'Uninitialized':
@@ -9442,12 +12516,10 @@ var $author$project$Page$Club$stateToTitle = function (state) {
 			return 'Clube - Novo';
 	}
 };
-var $elm$html$Html$p = _VirtualDom_node('p');
 var $author$project$Page$Club$AskInvite = {$: 'AskInvite'};
 var $author$project$Page$Club$ConfirmDelete = {$: 'ConfirmDelete'};
 var $author$project$Page$Club$EditClub = {$: 'EditClub'};
 var $author$project$Page$Club$Leave = {$: 'Leave'};
-var $elm$html$Html$button = _VirtualDom_node('button');
 var $author$project$Page$Club$clubCardElement = F2(
 	function (title, value) {
 		return A2(
@@ -9480,24 +12552,6 @@ var $author$project$Page$Club$clubCardElement = F2(
 						]))
 				]));
 	});
-var $elm$html$Html$h1 = _VirtualDom_node('h1');
-var $elm$virtual_dom$VirtualDom$Normal = function (a) {
-	return {$: 'Normal', a: a};
-};
-var $elm$virtual_dom$VirtualDom$on = _VirtualDom_on;
-var $elm$html$Html$Events$on = F2(
-	function (event, decoder) {
-		return A2(
-			$elm$virtual_dom$VirtualDom$on,
-			event,
-			$elm$virtual_dom$VirtualDom$Normal(decoder));
-	});
-var $elm$html$Html$Events$onClick = function (msg) {
-	return A2(
-		$elm$html$Html$Events$on,
-		'click',
-		$elm$json$Json$Decode$succeed(msg));
-};
 var $author$project$Model$ClubMembership$statusText = function (membership) {
 	return membership.approved ? 'Aprovada' : (membership.denied ? 'Negada' : 'Pendente');
 };
@@ -9614,36 +12668,6 @@ var $author$project$Page$Club$InputName = function (a) {
 var $author$project$Page$Club$InputWebsite = function (a) {
 	return {$: 'InputWebsite', a: a};
 };
-var $elm$html$Html$input = _VirtualDom_node('input');
-var $elm$html$Html$Events$alwaysStop = function (x) {
-	return _Utils_Tuple2(x, true);
-};
-var $elm$virtual_dom$VirtualDom$MayStopPropagation = function (a) {
-	return {$: 'MayStopPropagation', a: a};
-};
-var $elm$html$Html$Events$stopPropagationOn = F2(
-	function (event, decoder) {
-		return A2(
-			$elm$virtual_dom$VirtualDom$on,
-			event,
-			$elm$virtual_dom$VirtualDom$MayStopPropagation(decoder));
-	});
-var $elm$html$Html$Events$targetValue = A2(
-	$elm$json$Json$Decode$at,
-	_List_fromArray(
-		['target', 'value']),
-	$elm$json$Json$Decode$string);
-var $elm$html$Html$Events$onInput = function (tagger) {
-	return A2(
-		$elm$html$Html$Events$stopPropagationOn,
-		'input',
-		A2(
-			$elm$json$Json$Decode$map,
-			$elm$html$Html$Events$alwaysStop,
-			A2($elm$json$Json$Decode$map, tagger, $elm$html$Html$Events$targetValue)));
-};
-var $elm$html$Html$Attributes$placeholder = $elm$html$Html$Attributes$stringProperty('placeholder');
-var $elm$html$Html$Attributes$type_ = $elm$html$Html$Attributes$stringProperty('type');
 var $author$project$Page$Club$viewClubCardEdit = function (newClub) {
 	var divClass = 'container bg-indigo-500 rounded-lg text-white p-6 my-4 max-w-lg space-y-4';
 	var confirmMsg = newClub ? $author$project$Page$Club$ConfirmNew : $author$project$Page$Club$ConfirmEdit;
@@ -9730,18 +12754,6 @@ var $author$project$Page$Club$viewClubCardEdit = function (newClub) {
 var $author$project$Page$Club$RemoveMember = function (a) {
 	return {$: 'RemoveMember', a: a};
 };
-var $elm$core$List$filter = F2(
-	function (isGood, list) {
-		return A3(
-			$elm$core$List$foldr,
-			F2(
-				function (x, xs) {
-					return isGood(x) ? A2($elm$core$List$cons, x, xs) : xs;
-				}),
-			_List_Nil,
-			list);
-	});
-var $elm$html$Html$a = _VirtualDom_node('a');
 var $author$project$UserShort$getUrl = function (user) {
 	return A2(
 		$elm$url$Url$Builder$absolute,
@@ -9751,12 +12763,6 @@ var $author$project$UserShort$getUrl = function (user) {
 				$elm$core$String$fromInt(user.id)
 			]),
 		_List_Nil);
-};
-var $elm$html$Html$Attributes$href = function (url) {
-	return A2(
-		$elm$html$Html$Attributes$stringProperty,
-		'href',
-		_VirtualDom_noJavaScriptUri(url));
 };
 var $author$project$Model$ClubMembership$view = F2(
 	function (membership, removeMsg) {
@@ -10095,167 +13101,6 @@ var $author$project$Page$Club$viewClub = function (model) {
 					]));
 	}
 };
-var $author$project$Viewer$getUrl = function (viewer) {
-	return A2(
-		$elm$url$Url$Builder$absolute,
-		_List_fromArray(
-			[
-				'users',
-				$elm$core$String$fromInt(viewer.id)
-			]),
-		_List_Nil);
-};
-var $elm$html$Html$img = _VirtualDom_node('img');
-var $elm$html$Html$nav = _VirtualDom_node('nav');
-var $elm$html$Html$Attributes$src = function (url) {
-	return A2(
-		$elm$html$Html$Attributes$stringProperty,
-		'src',
-		_VirtualDom_noJavaScriptOrHtmlUri(url));
-};
-var $author$project$CommonHtml$viewNav = function (session) {
-	return A2(
-		$elm$html$Html$nav,
-		_List_fromArray(
-			[
-				$elm$html$Html$Attributes$class('bg-indigo-700 flex flex-wrap items-center p-3')
-			]),
-		_List_fromArray(
-			[
-				A2(
-				$elm$html$Html$div,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('flex items-center flex-shrink-0 mr-2')
-					]),
-				_List_fromArray(
-					[
-						A2(
-						$elm$html$Html$img,
-						_List_fromArray(
-							[
-								$elm$html$Html$Attributes$src('img/Nan2.svg'),
-								$elm$html$Html$Attributes$class('h-12 w-12')
-							]),
-						_List_Nil),
-						A2(
-						$elm$html$Html$span,
-						_List_fromArray(
-							[
-								$elm$html$Html$Attributes$class('text-white text-xl font-bold')
-							]),
-						_List_fromArray(
-							[
-								$elm$html$Html$text('Riichi Gang')
-							]))
-					])),
-				A2(
-				$elm$html$Html$div,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('flex-grow inline-flex justify-end mr-4')
-					]),
-				_List_fromArray(
-					[
-						A2(
-						$elm$html$Html$a,
-						_List_fromArray(
-							[
-								$elm$html$Html$Attributes$href('/clubs'),
-								$elm$html$Html$Attributes$class('link-white')
-							]),
-						_List_fromArray(
-							[
-								$elm$html$Html$text('Clubes')
-							])),
-						A2(
-						$elm$html$Html$a,
-						_List_fromArray(
-							[
-								$elm$html$Html$Attributes$href('/torneios'),
-								$elm$html$Html$Attributes$class('link-white')
-							]),
-						_List_fromArray(
-							[
-								$elm$html$Html$text('Torneios')
-							]))
-					])),
-				function () {
-				if (session.$ === 'LoggedIn') {
-					var viewer = session.b;
-					var userUrl = $author$project$Viewer$getUrl(viewer);
-					var logoutUrl = A2(
-						$elm$url$Url$Builder$absolute,
-						_List_fromArray(
-							['logout']),
-						_List_Nil);
-					return A2(
-						$elm$html$Html$div,
-						_List_fromArray(
-							[
-								$elm$html$Html$Attributes$class('inline-flex')
-							]),
-						_List_fromArray(
-							[
-								A2(
-								$elm$html$Html$a,
-								_List_fromArray(
-									[
-										$elm$html$Html$Attributes$href(userUrl),
-										$elm$html$Html$Attributes$class('btn btn-indigo-800')
-									]),
-								_List_fromArray(
-									[
-										$elm$html$Html$text('Perfil')
-									])),
-								A2(
-								$elm$html$Html$a,
-								_List_fromArray(
-									[
-										$elm$html$Html$Attributes$href(logoutUrl),
-										$elm$html$Html$Attributes$class('btn btn-indigo-800')
-									]),
-								_List_fromArray(
-									[
-										$elm$html$Html$text('Logout')
-									]))
-							]));
-				} else {
-					return A2(
-						$elm$html$Html$div,
-						_List_fromArray(
-							[
-								$elm$html$Html$Attributes$class('inline-flex')
-							]),
-						_List_fromArray(
-							[
-								A2(
-								$elm$html$Html$a,
-								_List_fromArray(
-									[
-										$elm$html$Html$Attributes$href('/login'),
-										$elm$html$Html$Attributes$class('btn btn-indigo-800')
-									]),
-								_List_fromArray(
-									[
-										$elm$html$Html$text('Login')
-									])),
-								A2(
-								$elm$html$Html$a,
-								_List_fromArray(
-									[
-										$elm$html$Html$Attributes$href('/signup'),
-										$elm$html$Html$Attributes$class('btn btn-indigo-800')
-									]),
-								_List_fromArray(
-									[
-										$elm$html$Html$text('Sign Up')
-									]))
-							]));
-				}
-			}()
-			]));
-};
 var $author$project$Page$Club$view = function (model) {
 	return {
 		body: _List_fromArray(
@@ -10274,13 +13119,6 @@ var $author$project$Page$Club$view = function (model) {
 			]),
 		title: $author$project$Page$Club$stateToTitle(model.state)
 	};
-};
-var $elm$core$List$isEmpty = function (xs) {
-	if (!xs.b) {
-		return true;
-	} else {
-		return false;
-	}
 };
 var $author$project$ClubShort$getUrl = function (club) {
 	return A2(
@@ -10741,8 +13579,6 @@ var $author$project$Page$Tournament$stateToTitle = function (model) {
 			return 'Tournament - Novo';
 	}
 };
-var $author$project$Page$Tournament$Owner = {$: 'Owner'};
-var $elm$core$String$fromFloat = _String_fromNumber;
 var $author$project$UserShort$getUrlId = function (id) {
 	return A2(
 		$elm$url$Url$Builder$absolute,
@@ -10814,9 +13650,15 @@ var $author$project$Model$BracketShort$view = function (bracket) {
 				_List_fromArray(
 					[
 						A2(
-						$elm$html$Html$h1,
+						$elm$html$Html$a,
 						_List_fromArray(
 							[
+								$elm$html$Html$Attributes$href(
+								A2(
+									$elm$url$Url$Builder$absolute,
+									$author$project$Route$routeToPieces(
+										A2($author$project$Route$Bracket, bracket.tournamentId, bracket.id)),
+									_List_Nil)),
 								$elm$html$Html$Attributes$class('list-heading')
 							]),
 						_List_fromArray(
@@ -10890,12 +13732,9 @@ var $author$project$Page$Tournament$RemoveBracket = function (a) {
 	return {$: 'RemoveBracket', a: a};
 };
 var $elm$html$Html$Attributes$min = $elm$html$Html$Attributes$stringProperty('min');
-var $elm$html$Html$option = _VirtualDom_node('option');
-var $elm$html$Html$select = _VirtualDom_node('select');
 var $elm$html$Html$Attributes$step = function (n) {
 	return A2($elm$html$Html$Attributes$stringProperty, 'step', n);
 };
-var $elm$html$Html$Attributes$value = $elm$html$Html$Attributes$stringProperty('value');
 var $author$project$Page$Tournament$viewBracketEdit = function (form) {
 	return A2(
 		$elm$html$Html$div,
@@ -12008,27 +14847,6 @@ var $elm$core$Basics$ge = _Utils_ge;
 var $elm$core$Basics$abs = function (n) {
 	return (n < 0) ? (-n) : n;
 };
-var $elm$core$List$any = F2(
-	function (isOkay, list) {
-		any:
-		while (true) {
-			if (!list.b) {
-				return false;
-			} else {
-				var x = list.a;
-				var xs = list.b;
-				if (isOkay(x)) {
-					return true;
-				} else {
-					var $temp$isOkay = isOkay,
-						$temp$list = xs;
-					isOkay = $temp$isOkay;
-					list = $temp$list;
-					continue any;
-				}
-			}
-		}
-	});
 var $elm$core$String$foldr = _String_foldr;
 var $elm$core$String$toList = function (string) {
 	return A3($elm$core$String$foldr, $elm$core$List$cons, _List_Nil, string);
@@ -13012,6 +15830,16 @@ var $author$project$Main$view = function (model) {
 				body: A2(
 					$elm$core$List$map,
 					$elm$html$Html$map($author$project$Main$GotTournamentMsg),
+					page.body),
+				title: page.title
+			};
+		case 'Bracket':
+			var subModel = model.a;
+			var page = $author$project$Page$Bracket$view(subModel);
+			return {
+				body: A2(
+					$elm$core$List$map,
+					$elm$html$Html$map($author$project$Main$GotBracketMsg),
 					page.body),
 				title: page.title
 			};

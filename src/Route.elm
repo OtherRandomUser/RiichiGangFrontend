@@ -18,6 +18,7 @@ type Route
   | Tournaments
   | NewTournament Int
   | Tournament Int
+  | Bracket Int Int
   | User Int
 
 parser : Parser (Route -> c) c
@@ -34,6 +35,7 @@ parser =
     , Parser.map Tournaments (s "tournaments")
     , Parser.map Tournament (s "tournaments" </> s "new" </> int)
     , Parser.map Tournament (s "tournaments" </> int)
+    , Parser.map Bracket (s "tournaments" </> int </> s "brackets" </> int)
     , Parser.map User (s "users" </> int)
     ]
 
@@ -93,6 +95,9 @@ routeToPieces route =
 
     Tournament tournamentId ->
       [ "tournaments", (String.fromInt tournamentId) ]
+
+    Bracket tournamentId bracketId ->
+      [ "tournaments", (String.fromInt tournamentId), "brackets", (String.fromInt bracketId) ]
 
     User id ->
       [ "users", String.fromInt id ]
