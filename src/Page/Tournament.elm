@@ -37,7 +37,7 @@ type State
 
 type ViewSwitch
   = Anonymus
-  | Owner
+  | Owner Bool
   | Participant
   | NonParticipant
 
@@ -133,7 +133,7 @@ update msg model =
         Err error ->
           ({ model | error = Just (Api.errorToString error) }, Cmd.none)
 
-    (GotDelete result, View Owner _) ->
+    (GotDelete result, View (Owner _) _) ->
       case result of
         Ok _ ->
           (model, Nav.pushUrl (Session.navKey model.session) (Url.Builder.absolute [] []))
@@ -155,10 +155,16 @@ update msg model =
     (JoinTournament, View NonParticipant tournament) ->
       makeRequest (\viewer -> requestJoin viewer tournament)
 
+    (JoinTournament, View (Owner False) tournament) ->
+      makeRequest (\viewer -> requestJoin viewer tournament)
+
     (LeaveTournament, View Participant tournament) ->
       makeRequest (\viewer -> requestLeave viewer tournament)
 
-    (InitTournament, View Owner tournament) ->
+    (LeaveTournament, View (Owner True) tournament) ->
+      makeRequest (\viewer -> requestLeave viewer tournament)
+
+    (InitTournament, View (Owner _) tournament) ->
       makeRequest (\viewer -> requestInit viewer tournament)
 
     (ConfirmNew, New form) ->
@@ -172,16 +178,16 @@ update msg model =
     (CancelNew, New _) ->
       (model, Nav.back (Session.navKey model.session) 1)
 
-    (EditTournament, View Owner tournament) ->
+    (EditTournament, View (Owner _) tournament) ->
       ({ model | state = Edit tournament (initForm tournament) }, requestRulesets tournament.clubId)
 
     (ConfirmEdit, Edit tournament form) ->
       makeRequest (\viewer -> requestPatch viewer tournament form)
 
     (CancelEdit, Edit tournament _) ->
-      ({ model | state = View Owner tournament, error = Nothing }, Cmd.none)
+      ({ model | state = View (Owner False) tournament, error = Nothing }, Cmd.none)
 
-    (DeleteTournament, View Owner tournament) ->
+    (DeleteTournament, View (Owner _) tournament) ->
       makeRequest (\viewer -> requestDelete viewer tournament)
 
     (InputName name, New form) ->
@@ -346,17 +352,30 @@ initState tournament session =
       let
         isParticipant = \p -> p.userId == viewer.id
       in
-      if tournament.ownerId == viewer.id then
-        View Owner tournament
-      else case List.Extra.find isParticipant tournament.players of
+      case List.Extra.find isParticipant tournament.players of
         Just _ ->
-          View Participant tournament
+          if tournament.ownerId == viewer.id then
+            View (Owner True) tournament
+          else
+            View Participant tournament
 
         Nothing ->
-          View NonParticipant tournament
+          if tournament.ownerId == viewer.id then
+            View (Owner False) tournament
+          else
+            View NonParticipant tournament
+
+      -- if tournament.ownerId == viewer.id then
+      --   View Owner tournament
+      -- else case List.Extra.find isParticipant tournament.players of
+      --   Just _ ->
+      --     View Participant tournament
+
+      --   Nothing ->
+      --     View NonParticipant tournament
 
     Nothing ->
-      View NonParticipant tournament
+      View Anonymus tournament
 
 initForm : Tournament -> Form
 initForm tournament =
@@ -546,9 +565,17 @@ viewTournament model =
       p [] [ text "Carregando..." ]
 
     View switch tournament ->
+      let
+        isOwner = case switch of
+          Owner _ ->
+            True
+
+          _ ->
+            False
+      in
       div []
         [ viewTournamentCard tournament switch
-        , viewPlayers tournament (switch == Owner)
+        , viewPlayers tournament isOwner
         , viewBrackets tournament
         ]
 
@@ -572,16 +599,16 @@ viewTournamentCard tournament switch =
     , cardElement "Data de Inicio" tournament.startDate
 
     , if tournament.allowNonMembers then
-        cardElement "" "Qualquer usuário poderá participar"
+        cardElement "Participação" "Qualquer usuário poderá participar"
       else
-        cardElement "" "Somente membros do clube poderão participar"
+        cardElement "Participação" "Somente membros do clube poderão participar"
 
     , if tournament.requirePermission then
-        cardElement "" "Será necessária a confirmação pelo dono do clube para a participação no torneio"
+        cardElement "Permissão" "Será necessária a confirmação pelo dono do clube para a participação no torneio"
       else
-        text ""
+        cardElement "Permissão" "Não é necessário nenhum tipo de permissão para participar"
 
-    , a [ href (Ruleset.getUrl tournament.clubId tournament.ruleset), class "hover:underline" ] [ text "Regras" ]
+    , a [ href (Ruleset.getUrl tournament.clubId tournament.ruleset), class "hover:underline" ] [ text ("Regras - " ++ tournament.ruleset.name) ]
 
     , cardElement "Status" tournament.status
 
@@ -596,12 +623,19 @@ viewTournamentCard tournament switch =
         Anonymus ->
           text ""
 
-        Owner ->
+        Owner isParticipant ->
           div []
             [ button [ class "btn btn-indigo-500 mt-4", onClick EditTournament ] [ text "Editar" ]
             , button [ class "border-none btn btn-green-500 mt-4", onClick InitTournament ] [ text "Iniciar" ]
             , button [ class "border-none btn btn-red-500 mt-4", onClick DeleteTournament ] [ text "Excluir" ]
-            -- TODO join/leave
+            , if isParticipant then
+                button [ class "border-none btn btn-red-500 mt-4", onClick LeaveTournament ]
+                  [ text "Sair"
+                  ]
+              else
+                button [ class "btn btn-indigo-500 mt-4", onClick JoinTournament ]
+                  [ text "Participar"
+                  ]
             ]
 
         Participant ->
@@ -617,7 +651,7 @@ viewTournamentCard tournament switch =
 
 viewTournamentEditCard : Model -> Bool -> Html Msg
 viewTournamentEditCard model isNew =
-  div [ class "container bg-indigo-500 rounded-lg text-white p-6 my-4 max-w-lg" ]
+  div [ class "container bg-indigo-500 rounded-lg text-white p-6 my-4 max-w-lg space-y-4" ]
     [ p [] [ text "Preencha os campos que deseja atualizar e pressione confirmar" ]
     , input [ type_ "text", placeholder "Nome", class "login-input", onInput InputName ] []
     , input [ type_ "text", placeholder "Descrição", class "login-input", onInput InputDescription ] []
@@ -677,10 +711,20 @@ viewPlayers tournament isOwner =
   else
     let
       transform = \p -> Model.TournamentPlayer.view p isOwner (RemovePlayer p)
+
+      filter =
+        if isOwner then
+          \_ -> True
+        else
+          \m -> m.status == "Confirmado"
     in
     div [ class "m-2" ]
       [ h1 [ class "list-heading" ] [ text "Jogadores" ]
-      , div [ class "space-y-4" ] (List.map transform tournament.players)
+      , div [ class "space-y-4" ]
+        ( tournament.players
+          |> List.filter filter
+          |> List.map transform
+        )
       ]
 
 viewBrackets : Tournament -> Html Msg

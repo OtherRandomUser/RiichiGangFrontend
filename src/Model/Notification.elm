@@ -5,8 +5,8 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Json.Decode as Decode
 import Json.Decode.Field as Field
-import Url.Builder
 
+import Api
 import UserShort exposing (UserShort)
 
 
@@ -36,12 +36,10 @@ listDecoder =
   Decode.list decoder
 
 getConfirmUrl : Notification -> String
-getConfirmUrl notification =
-  Url.Builder.absolute ["users", "notifications", String.fromInt notification.id, "confirm"] []
+getConfirmUrl notification = Api.confirmNotification notification.id
 
 getDenyUrl : Notification -> String
-getDenyUrl notification =
-  Url.Builder.absolute ["users", "notifications", String.fromInt notification.id, "deny"] []
+getDenyUrl notification = Api.denyNotification notification.id
 
 view : Notification -> msg -> msg -> Html msg
 view notification confirm deny =

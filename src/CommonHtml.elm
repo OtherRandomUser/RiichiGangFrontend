@@ -18,7 +18,7 @@ viewNav session =
 
     , div [ class "flex-grow inline-flex justify-end mr-4"]
       [ a [ href "/clubs", class "link-white" ] [ text "Clubes" ]
-      , a [ href "/torneios", class "link-white" ] [ text "Torneios" ]
+      , a [ href "/tournaments", class "link-white" ] [ text "Torneios" ]
       ]
 
     , case session of
@@ -47,8 +47,8 @@ errorCard msg =
     ]
 
 cardElement : String -> String -> Html msg
-cardElement title value = 
+cardElement title value =
   div [ class "block" ]
     [ strong [ class "inline-block font-bold" ] [ text title ]
-    , span [ class "inline-block" ] [ text value ]
+    , span [ class "inline-block pl-2" ] [ text value ]
     ]

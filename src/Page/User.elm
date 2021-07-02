@@ -269,7 +269,7 @@ userCardElement : String -> String -> Html msg
 userCardElement title value = 
   div [ class "block" ]
     [ strong [ class "inline-block font-bold space-x-2" ] [ text title ]
-    , span [ class "inline-block" ] [ text value ]
+    , span [ class "inline-block pl-2" ] [ text value ]
     ]
 
 viewOwnedClubs : Maybe User -> Maybe Viewer -> Html Msg

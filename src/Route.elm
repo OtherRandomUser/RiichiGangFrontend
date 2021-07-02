@@ -33,7 +33,7 @@ parser =
     , Parser.map Club (s "clubs" </> int)
     , Parser.map Ruleset (s "clubs" </> int </> s "rulesets" </> int)
     , Parser.map Tournaments (s "tournaments")
-    , Parser.map Tournament (s "tournaments" </> s "new" </> int)
+    , Parser.map NewTournament (s "tournaments" </> s "new" </> int)
     , Parser.map Tournament (s "tournaments" </> int)
     , Parser.map Bracket (s "tournaments" </> int </> s "brackets" </> int)
     , Parser.map User (s "users" </> int)

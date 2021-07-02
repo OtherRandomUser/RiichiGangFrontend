@@ -40,12 +40,12 @@ decoder =
   Field.require "atozuke" Decode.string <| \atozuke ->
   Field.require "kuitan" Decode.string <| \kuitan ->
   Field.require "kuikae" Decode.string <| \kuikae ->
-  Field.require "uradora" Decode.string <| \uradora ->
-  Field.require "kandora" Decode.string <| \kandora ->
-  Field.require "kanuradora" Decode.string <| \kanuradora ->
-  Field.require "akadora" Decode.string <| \akadora ->
-  Field.require "agariyame" Decode.string <| \agariyame ->
-  Field.require "tenpaiyame" Decode.string <| \tenpaiyame ->
+  Field.require "uraDora" Decode.string <| \uradora ->
+  Field.require "kanDora" Decode.string <| \kandora ->
+  Field.require "kanUraDora" Decode.string <| \kanuradora ->
+  Field.require "akaDora" Decode.string <| \akadora ->
+  Field.require "agariYame" Decode.string <| \agariyame ->
+  Field.require "tenpaiYame" Decode.string <| \tenpaiyame ->
   Field.require "tobi" Decode.string <| \tobi ->
 
   Decode.succeed

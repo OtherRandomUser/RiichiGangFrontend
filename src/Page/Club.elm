@@ -452,7 +452,7 @@ clubCardElement : String -> String -> Html msg
 clubCardElement title value = 
   div [ class "block" ]
     [ strong [ class "inline-block font-bold" ] [ text title ]
-    , span [ class "inline-block" ] [ text value ]
+    , span [ class "inline-block pl-2" ] [ text value ]
     ]
 
 stateToTitle : State -> String

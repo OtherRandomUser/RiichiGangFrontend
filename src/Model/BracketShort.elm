@@ -15,7 +15,6 @@ type alias BracketShort =
   , tournamentId : Int
   , sequence : Int
   , name : String
-  , description : String
   , createdAt : String
   , startedAt : String
   , finishedAt : String
@@ -34,7 +33,6 @@ decoder =
   Field.require "tournamentId" Decode.int <| \tournamentId ->
   Field.require "sequence" Decode.int <| \sequence ->
   Field.require "name" Decode.string <| \name ->
-  Field.require "description" Decode.string <| \description ->
   Field.require "createdAt" Decode.string <| \createdAt ->
   Field.require "startedAt" Decode.string <| \startedAt ->
   Field.require "finishedAt" Decode.string <| \finishedAt ->
@@ -50,7 +48,6 @@ decoder =
     , tournamentId = tournamentId
     , sequence = sequence
     , name = name
-    , description = description
     , createdAt = createdAt
     , startedAt = startedAt
     , finishedAt = finishedAt

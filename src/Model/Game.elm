@@ -25,7 +25,7 @@ decoder =
   Field.require "player3" Player.decoder <| \player3 ->
   Field.require "player4" Player.decoder <| \player4 ->
   Field.require "playedAt" Decode.string <| \playedAt ->
-  Field.require "logLink" Decode.string <| \logLink ->
+  Field.require "log" Decode.string <| \logLink ->
 
   Decode.succeed
     { player1 = player1
@@ -54,7 +54,7 @@ view game =
     , viewPlayer game.player3 playerClass
     , viewPlayer game.player4 playerClass
     , div [ class "flex-1 pt-6" ]
-      [ a [ class "pl-8 hover:underline" ] [ text "Log" ]
+      [ a [ class "pl-8 hover:underline", href game.logLink ] [ text "Log" ]
       ]
     ]
 

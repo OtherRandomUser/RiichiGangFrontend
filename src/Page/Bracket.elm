@@ -339,20 +339,23 @@ viewBracketCard bracket =
 
 viewSeries : Bracket -> ViewSwitch -> Html Msg
 viewSeries bracket switch =
-  -- let
-  --   addGameMsg = if switch == Owner then Just AddGame else Nothing
-  -- in
-  div [ class "m-2" ]
-    [ h1 [ class "list-heading" ] [ text "Séries" ]
-    , div [ class "space-y-4" ]
-      (List.map (viewSingleSeries switch) bracket.series)
-    ]
+  let
+    seriesHtml =
+      if List.isEmpty bracket.series then
+        [ h1 [ class "list-heading" ] [ text "Chave ainda não inicializada" ] ]
+      else
+        [ h1 [ class "list-heading" ] [ text "Séries" ]
+        , div [ class "space-y-4" ]
+          (List.map (viewSingleSeries switch) bracket.series)
+        ]
+  in
+  div [ class "m-2" ] seriesHtml
 
 viewSingleSeries : ViewSwitch -> Series -> Html Msg
 viewSingleSeries switch series =
   let
-    visibleHeadingClass = "flex-1 font-bold text-right invisible"
-    invisibleHeadingClass = "flex-1 font-bold text-right"
+    visibleHeadingClass = "flex-1 font-bold text-right"
+    invisibleHeadingClass = "flex-1 font-bold text-right invisible"
     heading = div [ class "flex px-5" ]
       [ p [ class invisibleHeadingClass ] [ text "batata" ]
       , p [ class invisibleHeadingClass ] [ text "batata" ]
@@ -391,15 +394,17 @@ viewSingleSeries switch series =
       ( header ::
           if series.isFolded then
             []
+          else if List.isEmpty series.games then
+            [ p [] [ text "Nenhum jogo adicionado até o momento" ] ]
           else
             heading :: (List.map Game.view series.games)
       )
 
     formHtml =
-      if switch == Owner then
-        case series.gameForm of
+      if Debug.log "current switch" switch == Owner then
+        case Debug.log "current form" series.gameForm of
           Nothing ->
-            if series.status /= "Encerrada" then
+            if Debug.log "current status" series.status /= "Encerrada" then
               [ button [ class "border-transparent btn btn-indigo-500 mt-4", onClick (AddGame series) ]
                 [ text "Adicionar Jogo"
                 ]

@@ -23,6 +23,12 @@ users = backendUrl ++ "/users"
 user : Int -> String
 user id = backendUrl ++ "/users/" ++ (String.fromInt id)
 
+confirmNotification : Int -> String
+confirmNotification notificationId = String.concat [users, "/notifications/", String.fromInt notificationId, "/confirm"]
+
+denyNotification : Int -> String
+denyNotification notificationId = String.concat [users, "/notifications/", String.fromInt notificationId, "/deny"]
+
 clubs : String
 clubs = backendUrl ++ "/clubs"
 
@@ -135,7 +141,7 @@ privatePost : { url : String, body : Http.Body, expect : Http.Expect msg } -> Vi
 privatePost r viewer =
   Http.request
     { method = "POST"
-    , headers = [ Http.header "bearer" viewer.token ]
+    , headers = [ Http.header "Authorization" ("bearer " ++ viewer.token) ]
     , url = r.url
     , body = r.body
     , expect = r.expect

@@ -237,7 +237,7 @@ update msg model =
 
     (GotTournamentMsg subMsg, Tournament tournament) ->
       Page.Tournament.update subMsg tournament
-        |> updateWith NewTournament GotNewTournamentMsg
+        |> updateWith Tournament GotTournamentMsg
 
     (GotTournamentMsg _, _) ->
       (model, Cmd.none)
@@ -311,7 +311,7 @@ view model =
         page = ClubPage.view subModel
       in
       { title = page.title
-      , body = List.map (Html.map GotClubMsg) page.body
+      , body = List.map (Html.map GotNewClubMsg) page.body
       }
 
     Club subModel ->
@@ -343,7 +343,7 @@ view model =
         page = Page.Tournament.view subModel
       in
       { title = page.title
-      , body = List.map (Html.map GotTournamentMsg) page.body
+      , body = List.map (Html.map GotNewTournamentMsg) page.body
       }
 
     Tournament subModel ->
