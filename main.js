@@ -12857,7 +12857,7 @@ var $author$project$Page$Bracket$addGameForm = F2(
 								series,
 								{
 									gameForm: $elm$core$Maybe$Just(
-										A5($author$project$Model$Series$GameForm, '', '', '', '', ''))
+										A5($author$project$Model$Series$GameForm, '', 'East', 'East', 'East', 'East'))
 								})
 							]),
 						A2(
@@ -13090,7 +13090,7 @@ var $author$project$Page$Bracket$validateGameForm = function (form) {
 		['East', 'South', 'West', 'North']);
 	var formSeats = _List_fromArray(
 		[form.player1Seat, form.player2Seat, form.player3Seat, form.player4Seat]);
-	return $elm$core$String$isEmpty(form.logLink) ? $elm$core$Result$Err('Preencha o link para o log do jogo') : (A2($elm$core$List$member, form.player1Seat, seats) ? $elm$core$Result$Err('Preencha o acento do jogador 1') : (A2($elm$core$List$member, form.player2Seat, seats) ? $elm$core$Result$Err('Preencha o acento do jogador 2') : (A2($elm$core$List$member, form.player3Seat, seats) ? $elm$core$Result$Err('Preencha o acento do jogador 3') : (A2($elm$core$List$member, form.player4Seat, seats) ? $elm$core$Result$Err('Preencha o acento do jogador 4') : (A2($elm$core$List$member, 'East', formSeats) ? $elm$core$Result$Err('Um jogador precisa ser o acento leste') : (A2($elm$core$List$member, 'South', formSeats) ? $elm$core$Result$Err('Um jogador precisa ser o acento sul') : (A2($elm$core$List$member, 'West', formSeats) ? $elm$core$Result$Err('Um jogador precisa ser o acento oeste') : (A2($elm$core$List$member, 'North', formSeats) ? $elm$core$Result$Err('Um jogador precisa ser o acento norte') : $elm$core$Result$Ok(_Utils_Tuple0)))))))));
+	return $elm$core$String$isEmpty(form.logLink) ? $elm$core$Result$Err('Preencha o link para o log do jogo') : ((!A2($elm$core$List$member, form.player1Seat, seats)) ? $elm$core$Result$Err('Preencha o acento do jogador 1') : ((!A2($elm$core$List$member, form.player2Seat, seats)) ? $elm$core$Result$Err('Preencha o acento do jogador 2') : ((!A2($elm$core$List$member, form.player3Seat, seats)) ? $elm$core$Result$Err('Preencha o acento do jogador 3') : ((!A2($elm$core$List$member, form.player4Seat, seats)) ? $elm$core$Result$Err('Preencha o acento do jogador 4') : ((!A2($elm$core$List$member, 'East', formSeats)) ? $elm$core$Result$Err('Um jogador precisa ser o acento leste') : ((!A2($elm$core$List$member, 'South', formSeats)) ? $elm$core$Result$Err('Um jogador precisa ser o acento sul') : ((!A2($elm$core$List$member, 'West', formSeats)) ? $elm$core$Result$Err('Um jogador precisa ser o acento oeste') : ((!A2($elm$core$List$member, 'North', formSeats)) ? $elm$core$Result$Err('Um jogador precisa ser o acento norte') : $elm$core$Result$Ok(_Utils_Tuple0)))))))));
 };
 var $author$project$Page$Bracket$update = F2(
 	function (msg, model) {
@@ -16460,7 +16460,7 @@ var $author$project$Page$Bracket$viewBracketCard = function (bracket) {
 						$elm$html$Html$span,
 						_List_fromArray(
 							[
-								$elm$html$Html$Attributes$class('inline-block')
+								$elm$html$Html$Attributes$class('inline-block pl-2')
 							]),
 						_List_fromArray(
 							[

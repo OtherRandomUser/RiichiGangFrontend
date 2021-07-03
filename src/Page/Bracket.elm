@@ -159,7 +159,7 @@ addGameForm bracket series =
   { bracket | series =
     bracket.series
     |> List.filter (\s -> s.id /= series.id)
-    |> List.append [ { series | gameForm = Just (GameForm "" "" "" "" "") } ]
+    |> List.append [ { series | gameForm = Just (GameForm "" "East" "East" "East" "East") } ]
     |> List.sortBy .id
   }
 
@@ -202,28 +202,28 @@ validateGameForm form =
   in if String.isEmpty form.logLink then
     Err "Preencha o link para o log do jogo"
 
-  else if List.member form.player1Seat seats then
+  else if not (List.member form.player1Seat seats) then
     Err "Preencha o acento do jogador 1"
 
-  else if List.member form.player2Seat seats then
+  else if not (List.member form.player2Seat seats) then
     Err "Preencha o acento do jogador 2"
 
-  else if List.member form.player3Seat seats then
+  else if not (List.member form.player3Seat seats) then
     Err "Preencha o acento do jogador 3"
 
-  else if List.member form.player4Seat seats then
+  else if not (List.member form.player4Seat seats) then
     Err "Preencha o acento do jogador 4"
 
-  else if List.member "East" formSeats then
+  else if not (List.member "East" formSeats) then
     Err "Um jogador precisa ser o acento leste"
 
-  else if List.member "South" formSeats then
+  else if not (List.member "South" formSeats) then
     Err "Um jogador precisa ser o acento sul"
 
-  else if List.member "West" formSeats then
+  else if not (List.member "West" formSeats) then
     Err "Um jogador precisa ser o acento oeste"
 
-  else if List.member "North" formSeats then
+  else if not (List.member "North" formSeats) then
     Err "Um jogador precisa ser o acento norte"
 
   else
@@ -284,7 +284,7 @@ viewBracketCard bracket =
       else
         div [ class "block" ]
           [ strong [ class "inline-block font-bold" ] [ text title ]
-          , span [ class "inline-block" ] [ text value ]
+          , span [ class "inline-block pl-2" ] [ text value ]
           ]
   in
   div [ class "container bg-indigo-500 rounded-lg text-white p-6 my-4 max-w-lg" ]
